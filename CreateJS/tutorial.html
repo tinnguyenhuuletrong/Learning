@@ -39,6 +39,12 @@
 
             test(stage, 2, 10, 10);
 
+            var text = new createjs.Text("Hello World", "20px Arial", "red");
+            text.x = 100;
+            text.y = 100;
+            text.textBaseline = "alphabetic";
+            stage.addChild(text);
+
             //Setting FPS
             createjs.Ticker.addEventListener("tick", stage);
             createjs.Ticker.useRAF = true;
