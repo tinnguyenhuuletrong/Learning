@@ -32,6 +32,7 @@ CharacterController.prototype.update = function(dt) {
 
 	if (this.AnimHashPos != tmp) {
 		this.AnimHashPos = tmp;
+		console.log(tmp);
 		createjs.Tween.get(this.Display, {
 			override: true
 		}).to({

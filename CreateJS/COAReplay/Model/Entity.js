@@ -1,36 +1,28 @@
 //---------------------------------------------------------------------------//
-//	Entity
+//	Character
 //---------------------------------------------------------------------------//
-Entity = function() {
+Character = function() {
 	this.UDID = 1;
-	this.Type = EntityType.ENTITY
 
 	this.Position = new Vector2(0, 0);
 	this.Rotation = 0;
 
 	this.Active = false;
-}
 
-Entity.prototype.setPosition = function(x, y) {
-	this.Position.x = x;
-	this.Position.y = y;
-};
-
-Entity.prototype.update = function(dt) {
-
-};
-
-//---------------------------------------------------------------------------//
-//	Character
-//---------------------------------------------------------------------------//
-Character = function() {
 	this.Type = EntityType.CHARACTER
 
 	this.HP = 0;
 	this.MaxHP = 0;
 }
 
-Character.prototype = new Entity;
+Character.prototype.setPosition = function(x, y) {
+	this.Position.x = x;
+	this.Position.y = y;
+};
+
+Character.prototype.update = function(dt) {
+
+};
 
 //---------------------------------------------------------------------------//
 //	Entity Manager

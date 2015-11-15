@@ -21,10 +21,10 @@
             stage.canvas.height = window.innerHeight;
         }
 
-        function test (stage) {
+        function test (stage, udid, posx, posy) {
             var char = new Character();
-            char.UDID = 1;
-            char.setPosition(100, 100);
+            char.UDID = udid;
+            char.setPosition(posx, posy);
 
             var charController = new CharacterController(stage, char)
 
@@ -35,7 +35,9 @@
             var stage = new createjs.Stage("demoCanvas");
             setFullWindow(stage);
             
-            test(stage);
+            test(stage, 1, 100, 100);
+
+            test(stage, 2, 10, 10);
 
             //Setting FPS
             createjs.Ticker.addEventListener("tick", stage);
