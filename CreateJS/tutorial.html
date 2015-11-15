@@ -4,28 +4,39 @@
             Document: http://www.createjs.com/docs/easeljs/classes/Stage.html-->
     <script src="https://code.createjs.com/createjs-2015.05.21.min.js"></script>
     
+    
     <!-- 3D Math
             http://threejs.org/docs/index.html#Reference/Math/Vector2 -->
     <script src="http://threejs.org/build/three.min.js"></script>
+      
+    <script src="COAReplay/Utils/Define.js"></script>
+      
+    <script src="COAReplay/Model/Entity.js"></script>
+      
+    <script src="COAReplay/Controller/Controller.js"></script>
     
     <script>
         function setFullWindow(stage) {
             stage.canvas.width  = window.innerWidth;
             stage.canvas.height = window.innerHeight;
         }
+
+        function test (stage) {
+            var char = new Character();
+            char.UDID = 1;
+            char.setPosition(100, 100);
+
+            var charController = new CharacterController(stage, char)
+
+            EntityManager.addEntity(char);
+        }
         
         function init() {
             var stage = new createjs.Stage("demoCanvas");
             setFullWindow(stage);
             
-            //Create Circle
-            var circle = new createjs.Shape();
-            circle.name = "c1";
-            circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
-            circle.x = 100;
-            circle.y = 100;
-            stage.addChild(circle);
-            
+            test(stage);
+
             //Setting FPS
             createjs.Ticker.addEventListener("tick", stage);
             createjs.Ticker.useRAF = true;
@@ -41,22 +52,13 @@
             var y = arg.stageY;
             
             console.log(x, y);
-            
-            var circle = this.getChildByName ("c1");
-            circle.x = x;
-            circle.y = y;
+
+            var entity = EntityManager.getEntity(1);
+            entity.setPosition(x,y);
         }
     
         function tick(a) {
-            var circle = this.getChildByName ("c1");
-            
-            var pos = new THREE.Vector2(circle.x, circle.y);
-            var dir = new THREE.Vector2(1, 0);
-            
-            pos.add(dir);
-            
-            circle.x = pos.x;
-            circle.y = pos.y;
+           EntityManager.update(1/60);
             
         }
     </script>
