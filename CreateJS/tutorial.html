@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <!-- Canvas Library
+            Document: http://www.createjs.com/docs/easeljs/classes/Stage.html-->
+    <script src="https://code.createjs.com/createjs-2015.05.21.min.js"></script>
+    
+    <!-- 3D Math
+            http://threejs.org/docs/index.html#Reference/Math/Vector2 -->
+    <script src="http://threejs.org/build/three.min.js"></script>
+    
+    <script>
+        function setFullWindow(stage) {
+            stage.canvas.width  = window.innerWidth;
+            stage.canvas.height = window.innerHeight;
+        }
+        
+        function init() {
+            var stage = new createjs.Stage("demoCanvas");
+            setFullWindow(stage);
+            
+            //Create Circle
+            var circle = new createjs.Shape();
+            circle.name = "c1";
+            circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
+            circle.x = 100;
+            circle.y = 100;
+            stage.addChild(circle);
+            
+            //Setting FPS
+            createjs.Ticker.addEventListener("tick", stage);
+            createjs.Ticker.useRAF = true;
+            createjs.Ticker.setFPS(60);
+            
+            //Event Listenner
+            stage.on("tick", tick);
+            stage.on("stagemousedown", onClick);
+        }
+        
+        function onClick(arg) {
+            var x = arg.stageX;
+            var y = arg.stageY;
+            
+            console.log(x, y);
+            
+            var circle = this.getChildByName ("c1");
+            circle.x = x;
+            circle.y = y;
+        }
+    
+        function tick(a) {
+            var circle = this.getChildByName ("c1");
+            
+            var pos = new THREE.Vector2(circle.x, circle.y);
+            var dir = new THREE.Vector2(1, 0);
+            
+            pos.add(dir);
+            
+            circle.x = pos.x;
+            circle.y = pos.y;
+            
+        }
+    </script>
+  </head>
+  <body onload="init();">
+    <canvas id="demoCanvas" width="100%" height="100%"></canvas>
+  </body>
+</html>
