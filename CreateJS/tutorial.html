@@ -27,23 +27,21 @@
             char.setPosition(posx, posy);
 
             var charController = new CharacterController(stage, char)
-
+            charController.Text.text = "aA";
             EntityManager.addEntity(char);
         }
         
         function init() {
             var stage = new createjs.Stage("demoCanvas");
             setFullWindow(stage);
-            
-            test(stage, 1, 100, 100);
 
-            test(stage, 2, 10, 10);
+            test(stage, 1, 10,10);
 
-            var text = new createjs.Text("Hello World", "20px Arial", "red");
-            text.x = 100;
-            text.y = 100;
-            text.textBaseline = "alphabetic";
-            stage.addChild(text);
+            loadJSON("COAReplay/replay1.json", function (data) {
+                console.log(data);
+            }, function (err) {
+                alert(err);
+            })
 
             //Setting FPS
             createjs.Ticker.addEventListener("tick", stage);

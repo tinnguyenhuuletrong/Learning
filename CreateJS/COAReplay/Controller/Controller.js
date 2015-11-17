@@ -16,13 +16,25 @@ CharacterController.prototype.forceSync = function() {
 };
 
 CharacterController.prototype.initGfx = function(stage) {
-	this.Display = new createjs.Shape();
+	this.Display = new createjs.Container()
 	this.Display.name = this.Entity.UDID;
 
 	var width = 25;
-	var heigh = 25;
-	this.Display.graphics.beginFill("DeepSkyBlue").drawRect(-width / 2, -heigh / 2, width, heigh);
+	var height = 25;
+	var shape = new createjs.Shape()
+	shape.graphics.beginFill("DeepSkyBlue").drawRect(-width / 2, -height / 2, width, height);
 
+	this.Shape = shape;
+
+	var text = new createjs.Text(this.Entity.UDID, "10px Arial", "black");
+	text.x = 0;
+	text.y = 0;
+	
+
+	this.Text = text;
+
+	this.Display.addChild(shape);
+	this.Display.addChild(text);
 
 	stage.addChild(this.Display);
 }
