@@ -11,7 +11,10 @@
     <!--    Core-->
       
     <script src="entity.js"></script>
-    
+    <script src="simulate-network.js"></script>
+    <script src="simulate-client.js"></script>
+    <script src="simulate-server.js"></script>
+
     <script>
         
         //--------------------------------------------------------//
@@ -40,11 +43,12 @@
         //--------------------------------------------------------//
         //  Client Side init
         //--------------------------------------------------------//
-        var ClientEntity = [];
+        var Client = null;
         var ClientStage = null;
         function initClientCanvas() {
             var stage = new createjs.Stage("clientCanvas");
             ClientStage = stage;
+            Client = new SimulatedClient();
 
             //Setting FPS
             createjs.Ticker.addEventListener("tick", stage);
@@ -54,9 +58,7 @@
             var dt = 1000 / client_fps;
 
             var onUpdateClient = function (obj) {
-                for (var i = 0; i < ClientEntity.length; i++) {
-                    ClientEntity[i].update(dt);
-                };
+                Client.update(dt);
             }
 
             var client_interval = setInterval(onUpdateClient, dt);
@@ -66,11 +68,12 @@
         //--------------------------------------------------------//
         //  Server side init
         //--------------------------------------------------------//
-        var ServerEntity = []
+        var Server = []
         var ServerStage = null;
         function initServerCanvas() {
             var stage = new createjs.Stage("serverCanvas");
             ServerStage = stage;
+            Server = new SimulatedServer();
           
             //Setting FPS
             createjs.Ticker.addEventListener("tick", stage);
@@ -80,9 +83,7 @@
             var dt = 1000 / server_fps;
 
             var onUpdateServer = function (obj) {
-                for (var i = 0; i < ServerEntity.length; i++) {
-                    ServerEntity[i].update(dt);
-                };
+                Server.update(dt)
             }
             var server_interval = setInterval(onUpdateServer, dt);
         }
@@ -90,6 +91,14 @@
         //--------------------------------------------------------//
         //  Fake connection function
         //--------------------------------------------------------//
+        var Network = null;
+        function initNetwork () {
+            Network = new LagNetwork()
+
+            Client.connect(Network)
+            Server.connect(Network)
+        }
+
         function addEntity (x, y) {
             var UDID = 1
 
@@ -100,7 +109,7 @@
             clientEntity.pos.y = y;
             clientEntity.initDisplay(ClientStage);
             clientEntity.update();
-            ClientEntity.push(clientEntity);
+            Client.addEntity(clientEntity);
 
             //Server
             var serverEntity = new Entity()
@@ -109,10 +118,21 @@
             serverEntity.pos.y = y;
             serverEntity.initDisplay(ServerStage);
             serverEntity.update();
-            ServerEntity.push(serverEntity);
+            Server.addEntity(serverEntity);
 
         }
         
+        //--------------------------------------------------------//
+        //  Input function
+        //--------------------------------------------------------//
+        // When the player presses the right or left arrow keys, set the corresponding
+        // flag in the Client.
+        KEY_STATUS = {}
+        var keyHandler = function(e) {
+          e = e || window.event;
+          KEY_STATUS[e.keyCode] = (e.type == "keydown");
+        }
+
         //--------------------------------------------------------//
         //  Startingup funcion
         //--------------------------------------------------------//
@@ -126,10 +146,14 @@
             initServerCanvas();
 
             //Connect
+            initNetwork();
 
             //Init Entity
             addEntity(50, 100);
 
+            //Input Reciver
+            document.body.onkeydown = keyHandler;
+            document.body.onkeyup = keyHandler;
         }
         
         
