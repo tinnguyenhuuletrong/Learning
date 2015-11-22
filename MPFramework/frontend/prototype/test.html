@@ -1,0 +1,143 @@
+<html>
+  <head>
+    <!-- Canvas Library
+            Document: http://www.createjs.com/docs/easeljs/classes/Stage.html-->
+    <script src="../lib/createjs-2015.05.21.min.js"></script>
+    
+    <!-- 3D Math
+            http://threejs.org/docs/index.html#Reference/Math/Vector2 -->
+    <script src="../lib/three.min.js"></script>
+    
+    <!--    Core-->
+      
+    <script src="entity.js"></script>
+    
+    <script>
+        
+        //--------------------------------------------------------//
+        //  Warper Display Prototypes
+        //--------------------------------------------------------//
+        function expandEntityPrototypes() {
+            Entity.prototype.initDisplay = function(stage) {
+                var circle = new createjs.Shape();
+                circle.graphics.setStrokeStyle(1);
+                circle.graphics.beginStroke("#000000");
+                circle.graphics.beginFill("red");
+                circle.graphics.drawCircle(0,0,30);
+                this.Display = circle
+
+                stage.addChild(circle);
+
+                
+            }
+
+            Entity.prototype.update = function (dt) {
+                this.Display.x = this.pos.x
+                this.Display.y = this.pos.y
+            }
+        }
+        
+        //--------------------------------------------------------//
+        //  Client Side init
+        //--------------------------------------------------------//
+        var ClientEntity = [];
+        var ClientStage = null;
+        function initClientCanvas() {
+            var stage = new createjs.Stage("clientCanvas");
+            ClientStage = stage;
+
+            //Setting FPS
+            createjs.Ticker.addEventListener("tick", stage);
+
+            //Update Loop
+            var client_fps = 60;
+            var dt = 1000 / client_fps;
+
+            var onUpdateClient = function (obj) {
+                for (var i = 0; i < ClientEntity.length; i++) {
+                    ClientEntity[i].update(dt);
+                };
+            }
+
+            var client_interval = setInterval(onUpdateClient, dt);
+
+        }
+        
+        //--------------------------------------------------------//
+        //  Server side init
+        //--------------------------------------------------------//
+        var ServerEntity = []
+        var ServerStage = null;
+        function initServerCanvas() {
+            var stage = new createjs.Stage("serverCanvas");
+            ServerStage = stage;
+          
+            //Setting FPS
+            createjs.Ticker.addEventListener("tick", stage);
+
+            //Update loop
+            var server_fps = 20;
+            var dt = 1000 / server_fps;
+
+            var onUpdateServer = function (obj) {
+                for (var i = 0; i < ServerEntity.length; i++) {
+                    ServerEntity[i].update(dt);
+                };
+            }
+            var server_interval = setInterval(onUpdateServer, dt);
+        }
+        
+        //--------------------------------------------------------//
+        //  Fake connection function
+        //--------------------------------------------------------//
+        function addEntity (x, y) {
+            var UDID = 1
+
+            //Client
+            var clientEntity = new Entity()
+            clientEntity.udid = UDID
+            clientEntity.pos.x = x;
+            clientEntity.pos.y = y;
+            clientEntity.initDisplay(ClientStage);
+            clientEntity.update();
+            ClientEntity.push(clientEntity);
+
+            //Server
+            var serverEntity = new Entity()
+            serverEntity.udid = UDID
+            serverEntity.pos.x = x;
+            serverEntity.pos.y = y;
+            serverEntity.initDisplay(ServerStage);
+            serverEntity.update();
+            ServerEntity.push(serverEntity);
+
+        }
+        
+        //--------------------------------------------------------//
+        //  Startingup funcion
+        //--------------------------------------------------------//
+        function init() {
+            expandEntityPrototypes();
+
+            createjs.Ticker.useRAF = true;
+            createjs.Ticker.setFPS(60);
+
+            initClientCanvas();
+            initServerCanvas();
+
+            //Connect
+
+            //Init Entity
+            addEntity(50, 100);
+
+        }
+        
+        
+    </script>
+  </head>
+  <body onload="init();">
+    <canvas id="clientCanvas" width="800" height="200" style="background-color:#ccdbca"></canvas>
+      <br><br>
+    <canvas id="serverCanvas" width="800" height="200" style="background-color:#ccdbca"></canvas>
+  </body>
+</html>
