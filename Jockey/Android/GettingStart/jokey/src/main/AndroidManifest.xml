@@ -7,5 +7,5 @@
         android:supportsRtl="true">
 
     </application>
-
+    <activity android:name="webview.joy.com.jokey.joy.WebViewDialogActivity"></activity>
 </manifest>
