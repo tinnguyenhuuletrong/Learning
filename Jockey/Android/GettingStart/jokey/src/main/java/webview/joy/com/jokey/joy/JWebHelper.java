@@ -23,8 +23,11 @@ public class JWebHelper {
         CurrentURL = url;
         Intent intent = new Intent(mContext, WebViewDialogActivity.class);
         mContext.startActivity(intent);
+    }
 
-
+    public static void TestCallUnity(String objectName, String method, String arg)
+    {
+        com.unity3d.player.UnityPlayer.UnitySendMessage(objectName, method, "[Java]" + arg);
     }
 
     public static String WhoAreYou()
