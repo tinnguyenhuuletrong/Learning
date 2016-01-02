@@ -3,7 +3,8 @@ using System.Collections;
 
 public class TestWebView : MonoBehaviour
 {
-
+	string buttonText = "CallMe!";
+	
 	// Use this for initialization
 	void Start () {
 	    JWebViewHelper.Init();
@@ -18,7 +19,17 @@ public class TestWebView : MonoBehaviour
     {
         if (GUI.Button(new Rect(0, 0, 400, 200), "Click!"))
         {
-            JWebViewHelper.ShowWebView("http://hero.jskill.com/");
+            JWebViewHelper.ShowWebView("https://www.google.com/");
+        }
+		
+		if (GUI.Button(new Rect(0, 400, 400, 200), buttonText))
+        {
+            JWebViewHelper.TestJavaCall(this.name, "RenameButton", "Rename");
         }
     }
+	
+	void RenameButton(string newName)
+	{
+		buttonText = newName;
+	}
 }

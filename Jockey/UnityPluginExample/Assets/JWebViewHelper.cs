@@ -36,6 +36,14 @@ class JWebViewHelper
 
         mBridgeClass.CallStatic("ShowWebViewPopup", url);
     }
+	
+	public static void TestJavaCall(string objName, string methodName, string arg)
+	{
+		if (!mIsReady)
+            throw new Exception("JWebViewHelper.Init must be call first");
+
+        mBridgeClass.CallStatic("TestCallUnity", objName, methodName, arg);
+	}
 #else
     public static void Init()
     {
