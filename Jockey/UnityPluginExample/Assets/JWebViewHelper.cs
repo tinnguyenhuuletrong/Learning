@@ -20,7 +20,7 @@ class JWebViewHelper
             mPlayerActivityContext = actClass.GetStatic<AndroidJavaObject>("currentActivity");
         }
 
-        mBridgeClass = new AndroidJavaClass("webview.joy.com.jokey.joy.JWebHelper");
+        mBridgeClass = new AndroidJavaClass("jwebview.JWebHelper");
         Debug.Log(mPlayerActivityContext);
         mBridgeClass.CallStatic("SetContext", mPlayerActivityContext);
 
@@ -37,12 +37,28 @@ class JWebViewHelper
         mBridgeClass.CallStatic("ShowWebViewPopup", url);
     }
 	
-	public static void TestJavaCall(string objName, string methodName, string arg)
+	public static void RegisterEvent(string eventName, string objName, string methodName)
 	{
 		if (!mIsReady)
             throw new Exception("JWebViewHelper.Init must be call first");
 
-        mBridgeClass.CallStatic("TestCallUnity", objName, methodName, arg);
+        mBridgeClass.CallStatic<bool>("RegisterEvent", eventName, objName, methodName);
+	}
+	
+	public static void SendEvent(string eventName, string jsonArg)
+	{
+		if (!mIsReady)
+            throw new Exception("JWebViewHelper.Init must be call first");
+
+        mBridgeClass.CallStatic<bool>("SendEvent", eventName, jsonArg);
+	}
+	
+	public static void ClearAllEvent()
+	{
+		if (!mIsReady)
+            throw new Exception("JWebViewHelper.Init must be call first");
+
+        mBridgeClass.CallStatic<bool>("ClearAllEvent");
 	}
 #else
     public static void Init()
@@ -54,5 +70,20 @@ class JWebViewHelper
     {
         Debug.Log("[JWebView] Show URL " + url);
     }
+	
+	public static void RegisterEvent(string eventName, string objName, string methodName)
+	{
+		Debug.Log("[JWebView] RegisterEvent ");
+	}
+	
+	public static void SendEvent(string eventName, string jsonArg)
+	{
+		Debug.Log("[JWebView] SendEvent ");
+	}
+	
+	public static void ClearAllEvent()
+	{
+		Debug.Log("[JWebView] ClearAllEvent ");
+	}
 #endif
 }

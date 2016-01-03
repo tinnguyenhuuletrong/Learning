@@ -7,7 +7,9 @@ public class TestWebView : MonoBehaviour
 	
 	// Use this for initialization
 	void Start () {
+		DebugLogData("1");
 	    JWebViewHelper.Init();
+		
 	}
 	
 	// Update is called once per frame
@@ -19,17 +21,21 @@ public class TestWebView : MonoBehaviour
     {
         if (GUI.Button(new Rect(0, 0, 400, 200), "Click!"))
         {
-            JWebViewHelper.ShowWebView("https://www.google.com/");
+			JWebViewHelper.ClearAllEvent();
+			JWebViewHelper.RegisterEvent("log", this.name, "DebugLogData");
+            JWebViewHelper.ShowWebView("http://dev1.moba.jskill.com/TestWebView/index.html");
         }
 		
-		if (GUI.Button(new Rect(0, 400, 400, 200), buttonText))
-        {
-            JWebViewHelper.TestJavaCall(this.name, "RenameButton", "Rename");
-        }
+	
     }
 	
 	void RenameButton(string newName)
 	{
 		buttonText = newName;
+	}
+	
+	void DebugLogData(string content) 
+	{
+		Debug.LogError(content);
 	}
 }

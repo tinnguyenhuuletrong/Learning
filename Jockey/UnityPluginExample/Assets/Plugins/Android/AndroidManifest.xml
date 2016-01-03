@@ -26,6 +26,6 @@
             <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
             <meta-data android:name="unityplayer.ForwardNativeEventsToDalvik" android:value="false" />
         </activity>
-		<activity android:name="webview.joy.com.jokey.joy.WebViewDialogActivity" android:theme="@android:style/Theme.Translucent"/>
+		<activity android:name="webview.joy.com.jokey.joy.WebViewDialogActivity" android:theme="@android:style/Theme.Dialog"/>
     </application>
 </manifest>
