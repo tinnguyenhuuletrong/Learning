@@ -2,12 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 class JWebViewHelper
 {
 
 #if UNITY_IOS
+
+	public static void Init()
+	{
+
+	}
+
+	[DllImport ("__Internal")]
+	public static extern void ShowWebViewPopup(string url);
+
+	[DllImport ("__Internal")]
+	public static extern void RegisterEvent(string eventName, string objName, string methodName);
+
+	[DllImport ("__Internal")]
+	public static extern void SendEvent(string eventName, string jsonArg);
+
+	[DllImport ("__Internal")]
+	public static extern void ClearAllEvent();
 
 #elif UNITY_ANDROID
     private static AndroidJavaObject mPlayerActivityContext;
