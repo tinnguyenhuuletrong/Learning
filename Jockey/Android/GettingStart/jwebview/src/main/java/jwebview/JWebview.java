@@ -40,6 +40,11 @@ public class JWebview {
         webView.loadUrl(url);
     }
 
+    public void destroy() {
+        webView.destroy();
+        jockey.setWebViewClient(null);
+    }
+
     private void _Init()
     {
         jockey = JockeyImpl.getDefault();

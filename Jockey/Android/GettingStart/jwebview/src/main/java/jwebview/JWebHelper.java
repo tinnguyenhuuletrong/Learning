@@ -19,7 +19,7 @@ public class JWebHelper implements JWebview.IWebViewEventCallback{
     public  static  String CurrentURL;
     public  static HashMap<String, JWebview.JUnityWebEventCallbackArg> WebEventDB = new HashMap<String, JWebview.JUnityWebEventCallbackArg>();
     public static boolean IsUnityMode = true;
-    public static boolean IsDialogMode = false;
+
 
     public static void SetContext(Context ctx) {
         mContext = ctx;
@@ -31,12 +31,9 @@ public class JWebHelper implements JWebview.IWebViewEventCallback{
     public static void ShowWebViewPopup(String url){
         CurrentURL = url;
 
-        if(!IsDialogMode) {
-            Intent intent = new Intent(mContext, WebViewDialogActivity.class);
-            mContext.startActivity(intent);
-        } else {
-            WebViewDialog.StartDialog(mContext);
-        }
+        Log.d("Unity", "Show Web View " + url);
+        Intent intent = new Intent(mContext, WebViewDialogActivity.class);
+        mContext.startActivity(intent);
 
     }
 
@@ -58,13 +55,11 @@ public class JWebHelper implements JWebview.IWebViewEventCallback{
 
     public static boolean SendEvent(String event, String args) {
         JWebview webview;
-        if(!IsDialogMode) {
-            if( WebViewDialogActivity.Instance == null || WebViewDialogActivity.Instance.getWebView() == null )
-                return  false;
-            webview = WebViewDialogActivity.Instance.getWebView();
-        } else {
-            webview = WebViewDialog.getWebView();
-        }
+
+        if( WebViewDialogActivity.Instance == null || WebViewDialogActivity.Instance.getWebView() == null )
+            return  false;
+        webview = WebViewDialogActivity.Instance.getWebView();
+
 
         if(webview == null)
             return false;
