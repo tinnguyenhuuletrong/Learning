@@ -24,7 +24,7 @@ public class WebViewActivity extends Activity {
 
         jweb = new JWebview(webView, this);
 
-        jweb.loadUrl("file:///android_asset/index.html");
+        jweb.loadUrl("https://www.google.com/");
 
         test();
     }

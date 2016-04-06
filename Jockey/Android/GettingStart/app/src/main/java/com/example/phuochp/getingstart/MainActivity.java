@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 
 
-                ShowWebViewPopup("http://dev1.moba.jskill.com/TestWebView/index.html");
+                ShowWebViewPopup("http://thankiem3d.vn/test-webview");
             }
         });
 

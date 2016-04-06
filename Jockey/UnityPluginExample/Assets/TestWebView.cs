@@ -23,7 +23,7 @@ public class TestWebView : MonoBehaviour
         {
 			JWebViewHelper.ClearAllEvent();
 			JWebViewHelper.RegisterEvent("log", this.name, "DebugLogData");
-            JWebViewHelper.ShowWebView("http://dev1.moba.jskill.com/TestWebView/index.html");
+            JWebViewHelper.ShowWebView("http://thankiem3d.vn/test-webview");
         }
 		
 	

@@ -5,7 +5,8 @@
 	android:installLocation="preferExternal"
 	android:theme="@android:style/Theme.NoTitleBar"
     android:versionCode="1"
-    android:versionName="1.0">
+    android:versionName="1.0"
+	android:hardwareAccelerated="true">
     <supports-screens
         android:smallScreens="true"
         android:normalScreens="true"
@@ -26,6 +27,6 @@
             <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
             <meta-data android:name="unityplayer.ForwardNativeEventsToDalvik" android:value="false" />
         </activity>
-		<activity android:name="webview.joy.com.jokey.joy.WebViewDialogActivity" android:theme="@android:style/Theme.Dialog"/>
+		<activity android:name="webview.joy.com.jokey.joy.WebViewDialogActivity" android:hardwareAccelerated="true"/>
     </application>
 </manifest>

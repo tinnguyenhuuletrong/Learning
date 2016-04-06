@@ -36,21 +36,16 @@ public class WebViewDialogActivity extends Activity
     private WebView webView;
     private ImageView exitButton;
     private static JWebview jweb;
-    private static Dialog dialog;
+
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        setTheme(android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+
         super.onCreate(savedInstanceState);
         Log.e("Unity", "[WebViewDialogActivity] onStart");
         Instance = this;
-
-        if(dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
@@ -61,8 +56,7 @@ public class WebViewDialogActivity extends Activity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if(dialog != null)
-                dialog.dismiss();
+
             this.finish();
 
             return true;
@@ -73,17 +67,13 @@ public class WebViewDialogActivity extends Activity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(dialog != null)
-            dialog.dismiss();
+
         Instance = null;
     }
 
     public void StartDialog(Context mContext)
     {
-        if(dialog != null)
-            return;
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen));
         RelativeLayout myLayout = new RelativeLayout(this);
 
         myLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT);
@@ -96,6 +86,7 @@ public class WebViewDialogActivity extends Activity
                 RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT
         );
+
         //webViewParams.setMargins(20, 20, 20, 20);
         myLayout.addView(webView, webViewParams);
 
@@ -111,31 +102,10 @@ public class WebViewDialogActivity extends Activity
         buttonParam.setMargins(offset, offset, offset, offset);
         myLayout.addView(exitButton, buttonParam);
 
-        // Set alert content
-        alert.setView(myLayout);
+        this.setContentView(myLayout);
 
-        dialog = alert.show();
-
-        dialogSetup();
 
         Log.d("Unity", "[WebViewDialogActivity] Show Dialog Finish");
-    }
-
-    private void dialogSetup() {
-        dialog.getWindow().setLayout(-1, -1);
-        dialog.setOnKeyListener(new Dialog.OnKeyListener() {
-
-            @Override
-            public boolean onKey(DialogInterface arg0, int keyCode,
-                                 KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    finish();
-                    if(dialog != null)
-                        dialog.dismiss();
-                }
-                return true;
-            }
-        });
     }
 
     private void initComponents() {
@@ -151,11 +121,17 @@ public class WebViewDialogActivity extends Activity
         exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.dismiss();
 
                 self.finish();
             }
         });
+
+        //Remove title bar
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        //Remove notification bar
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
     }
 
 
@@ -166,6 +142,14 @@ public class WebViewDialogActivity extends Activity
 
         jweb = new JWebview(webView, this);
         jweb.loadUrl(url);
+
+        if (Build.VERSION.SDK_INT >= 19) {
+            // chromium, enable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        } else {
+            // older android version, disable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
 
         //Event Register
         for(Map.Entry<String, JWebview.JUnityWebEventCallbackArg> entry : JWebHelper.WebEventDB.entrySet()) {
