@@ -10,9 +10,12 @@ function getDirectories(srcpath) {
 	});
 }
 
+var basePath = process.cwd()
+console.log("Working Directory", basePath)
+
 var listDirectory = getDirectories("./")
 listDirectory.forEach((name) => {
-	var cmd = `svnup ./${name}/`
+	var cmd = `svn up ${basePath}/${name}/`
 	console.log(cmd)
 	var child = exec(cmd, function(err, stdout, stderr) {
 		console.log(stdout);
