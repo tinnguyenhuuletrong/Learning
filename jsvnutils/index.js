@@ -1,5 +1,4 @@
-#! /usr/bin/env node
-
+#!/usr/bin/env node
 var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
