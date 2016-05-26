@@ -1,6 +1,8 @@
 var path = require('path');
 var webpack = require('webpack');
 
+var PROD = false
+
 module.exports = {
     entry: './components/index.jsx',
     output: { path: __dirname + '/public', filename: 'bundle.js' },
@@ -14,5 +16,10 @@ module.exports = {
                 plugins: ['transform-class-properties']
             }
         }]
-    }
+    },
+    plugins: PROD ? [
+    new webpack.optimize.UglifyJsPlugin({
+      compress: { warnings: false }
+    })
+  ] : []
 }
