@@ -11,5 +11,9 @@
   "preferGlobal": true,
   "bin": {
     "jsvnutils": "./index.js"
+  },
+  "dependencies": {
+    "commander": "^2.9.0",
+    "simple-ssh": "^0.9.0"
   }
 }
