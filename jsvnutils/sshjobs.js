@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var SSH = require('simple-ssh');
+var SSH = require('./sshHelper.js');
 var program = require('commander');
 var fs = require('fs')
 
@@ -43,15 +43,6 @@ function _errorExit(msg) {
 	process.exit(1);
 }
 
-function getSSHClient(scope) {
-	return scope._SSH
-}
-
-function _ensureSSHConnect(scope) {
-	if (scope._SSH == null)
-		return _errorExit('connection error! Please check command order again. Ensure that your ssh info is correct')
-}
-
 //---------------------------------------------------------//
 //	Input reader
 //---------------------------------------------------------//
@@ -82,7 +73,12 @@ var ACTION_MAPPING = {
 }
 
 function launch(inpCommandList) {
-	var scope = {}
+	var scope = {
+		cmd: [],
+		onComplete: (text) => {
+			console.log(text)
+		}
+	}
 
 	inpCommandList.forEach(itm => {
 		var action = itm.action
@@ -96,59 +92,18 @@ function launch(inpCommandList) {
 	})
 
 	//where magic happen!
-	var ssh = scope._SSH
-	ssh.start()
+	SSH(scope)
 }
 
 function actionConnect(itm, scope) {
-	var ssh = new SSH(itm.args);
-	ssh.on('error', _errorExit)
-	ssh.on('ready', () => {
-		console.log("Connected!")
-	});
-
-	scope._SSH = ssh
+	Object.assign(scope, itm.args);
 }
 
 function actionCmd(itm, scope) {
-	_ensureSSHConnect(scope)
-
-	var ssh = getSSHClient(scope)
-
-	console.log(itm.input)
-
-	var options = {
-		out: function(stdout) {
-			console.log("[out]", stdout);
-		},
-		start: function(stdout) {
-			console.log("[start]",stdout);
-		},
-		err: function(stdout) {
-			console.log("[err]",stdout);
-		},
-		exit: function(stdout) {
-			console.log("[exit]",stdout);
-		}
-	}
-
-	if (itm.input != null) {
-		// options.in = itm.input;
-		options.pty = true
-	}
-
-	//Register cmd, redirect stdin and out
-	ssh.exec(itm.cmd, options)
+	var cmdList = scope.cmd || []
+	cmdList.push(itm.cmd)
 }
 
 function actionExit(itm, scope) {
-	_ensureSSHConnect(scope)
 
-	var ssh = getSSHClient(scope)
-
-	ssh.exec('exit 0', {
-		out: function(stdout) {
-			console.log(stdout);
-		}
-	})
 }

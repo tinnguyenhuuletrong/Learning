@@ -1,0 +1,14 @@
+[{
+	"action": "connect",
+	"args": {
+		"host": "YOUR_IP",
+		"user": "YOUR_USER",
+		"pass": "YOUR_PASS",
+		"port": 22
+	}
+}, {
+	"action": "command",
+	"cmd": "svn up /var/www/html/COA_Admin/trunk_webadmin/"
+}, {
+	"action": "exit"
+}]

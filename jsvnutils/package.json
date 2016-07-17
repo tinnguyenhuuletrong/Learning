@@ -1,6 +1,6 @@
 {
   "name": "jsvnutils",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,10 +10,11 @@
   "license": "ISC",
   "preferGlobal": true,
   "bin": {
-    "jsvnutils": "./index.js"
+    "jsvnutils": "./index.js",
+    "jsshjobs": "./sshjobs.js"
   },
   "dependencies": {
     "commander": "^2.9.0",
-    "simple-ssh": "^0.9.0"
+    "ssh2shell": "^1.4.8"
   }
 }

@@ -1,0 +1,29 @@
+[{
+  "action": "connect",
+  "args": {
+    "host": "YOUR_IP",
+    "user": "YOUR_USER",
+    "pass": "YOUR_PASS",
+    "port": 22
+  }
+}, {
+  "action": "command",
+  "cmd": "sudo su -"
+}, {
+  "action": "command",
+  "cmd": "cd /home/joy/JServerV5"
+},  {
+  "action": "command",
+  "cmd": "jsvnutils"
+},  {
+  "action": "command",
+  "cmd": "pm2 restart all"
+}, {
+  "action": "command",
+  "cmd": "sleep 1"
+}, {
+  "action": "command",
+  "cmd": "pm2 status"
+}, {
+  "action": "exit"
+}]
