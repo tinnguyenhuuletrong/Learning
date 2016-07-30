@@ -4,10 +4,12 @@
 1. Folk https://github.com/react-toolbox/react-toolbox-example.git
 2. Integrate Redux
 3. Demonstrate count example
+4. Implement React-Redux-Route
+5. Integrade Webpack Hot Reload
 
 ##Todo:
-1. Implement React-Redux-Route
-2. Implement Mocha Testing
+1. Implement Mocha Testing
+2. Webpack Minify and uglify for productions build
 
 
 ### Getting Started

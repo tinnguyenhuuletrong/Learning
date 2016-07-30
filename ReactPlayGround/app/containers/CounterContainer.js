@@ -1,27 +1,24 @@
-import React, {Component, PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
-// import 'react-toolbox/lib/commons.scss';           // Import common styles
-import PurpleAppBar from './components/PurpleAppBar.js';      // AppBar with simple overrides
-import SuccessButton from './components/SuccessButton.js';    // A button with complex overrides
+import SuccessButton from '../components/SuccessButton.js';    // A button with complex overrides
 import { Button } from 'react-toolbox/lib/button'; // Bundled component import
+import * as CounterActions from '../actions/counter.js';
 
-import * as CounterActions from './actions/counter';
 
-
-class App extends Component {
+class CounterContainer extends Component {
 	static propTypes = {
-	  counter: PropTypes.number.isRequired,
-	  increment: PropTypes.func.isRequired,
-	  decrement: PropTypes.func.isRequired
+		counter: PropTypes.number.isRequired,
+		increment: PropTypes.func.isRequired,
+		decrement: PropTypes.func.isRequired
 	};
 
 	render() {
 		const rootState = this.props;
+
 		return (
 			<div>
-				<PurpleAppBar />
 				<section style={{ padding: 20 }}>
 					<SuccessButton label='Inc' primary raised onMouseUp={rootState.increment}/>
 					<Button label='Dec' primary onMouseUp={rootState.decrement}/>
@@ -34,6 +31,7 @@ class App extends Component {
 	}
 }
 
+//Redux State Reducer Mapping
 function mapStateToProps(state) {
 	return {
 		counter: state.counter
@@ -41,7 +39,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators(CounterActions, dispatch);
+	return bindActionCreators(CounterActions, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(CounterContainer);
