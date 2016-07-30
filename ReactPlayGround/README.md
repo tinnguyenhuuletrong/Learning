@@ -6,6 +6,8 @@
 3. Demonstrate count example
 4. Implement React-Redux-Route
 5. Integrade Webpack Hot Reload
+6. Add Boostrap
+7. Trying Implements some components and practices Redux flow
 
 ##Todo:
 1. Implement Mocha Testing

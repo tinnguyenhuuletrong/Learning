@@ -6,7 +6,11 @@ class App extends Component {
 		return (
 			<div>
 				<TopContainer />
-				{this.props.children}
+				<div className="container">
+				    <div >
+				    	{this.props.children}
+				    </div>
+				</div>
 			</div>
 		);
 	}

@@ -1,4 +1,5 @@
 import 'react-toolbox/lib/commons.scss';
+import './theme/global.scss'
 import React from 'react';
 import { Provider } from 'react-redux';
 import { Router, hashHistory } from 'react-router';
