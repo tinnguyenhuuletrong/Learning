@@ -8,10 +8,11 @@
 5. Integrade Webpack Hot Reload
 6. Add Boostrap
 7. Trying Implements some components and practices Redux flow
+8. Webpack Minify and uglify for productions build
 
 ##Todo:
 1. Implement Mocha Testing
-2. Webpack Minify and uglify for productions build
+
 
 
 ### Getting Started

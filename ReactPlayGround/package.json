@@ -3,15 +3,18 @@
   "version": "0.11.4",
   "description": "A set of complementary tools to ReactJS.",
   "author": "React Toolbox Team (http://github.com/react-toolbox)",
-  "contributors": [{
-    "name": "Javi Jimenez Villar",
-    "url": "http://soyjavi.com/",
-    "email": "javi.jimenez.villar@gmail.com"
-  }, {
-    "name": "Javi Velasco Arjona",
-    "url": "http://javivelasco.com/",
-    "email": "javier.velasco86@gmail.com"
-  }],
+  "contributors": [
+    {
+      "name": "Javi Jimenez Villar",
+      "url": "http://soyjavi.com/",
+      "email": "javi.jimenez.villar@gmail.com"
+    },
+    {
+      "name": "Javi Velasco Arjona",
+      "url": "http://javivelasco.com/",
+      "email": "javier.velasco86@gmail.com"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/react-toolbox/react-toolbox/issues",
     "email": "issues@react-toolbox.com"
@@ -34,6 +37,7 @@
     "babel-preset-react": "^6.1.4",
     "babel-preset-stage-0": "^6.5.0",
     "classnames": "^2.2.1",
+    "copy-webpack-plugin": "^3.0.1",
     "cross-env": "^1.0.1",
     "css-loader": "0.23.1",
     "eslint": "^2.9.0",
@@ -47,25 +51,25 @@
     "react": "^15.0.0",
     "react-addons-css-transition-group": "^15.0.0",
     "react-dom": "^15.0.0",
+    "react-redux": "^4.4.5",
+    "react-router": "^2.6.1",
+    "react-router-redux": "^4.0.5",
     "react-toolbox": "^1.0.0",
     "react-transform-catch-errors": "^1.0.0",
     "react-transform-hmr": "^1.0.1",
     "redbox-react": "1.2.6",
+    "redux": "^3.5.2",
+    "redux-thunk": "^2.1.0",
     "sass-lint": "^1.7.0",
     "sass-loader": "3.2.0",
     "style-loader": "0.13.1",
     "webpack": "1.13.1",
     "webpack-dev-middleware": "1.6.1",
-    "webpack-hot-middleware": "2.10.0",
-    "react-redux": "^4.4.5",
-    "redux": "^3.5.2",
-    "react-router": "^2.6.1",
-    "react-router-redux": "^4.0.5",
-    "redux-thunk": "^2.1.0"
+    "webpack-hot-middleware": "2.10.0"
   },
   "scripts": {
     "start": "node ./server",
-    "build": "cross-env NODE_ENV=production UV_THREADPOOL_SIZE=100 webpack --config ./webpack.config",
+    "build": "cross-env NODE_ENV=production UV_THREADPOOL_SIZE=100 webpack --config ./webpack.production.config.js",
     "deploy": "gh-pages -d build"
   },
   "repository": "github:react-toolbox/react-toolbox-example",
