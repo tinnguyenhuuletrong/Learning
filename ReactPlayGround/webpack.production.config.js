@@ -6,6 +6,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   context: __dirname,
+  devtool: 'cheap-module-source-map',
   entry: [
     './app/client.js'
   ],
@@ -44,7 +45,7 @@ module.exports = {
       compress: {
         warnings: false
       },
-      sourceMap: false
+      sourceMap: true
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
