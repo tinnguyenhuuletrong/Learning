@@ -152,6 +152,7 @@
     <ClInclude Include="ShareAndWeakPtr.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringFormat.hpp" />
+    <ClInclude Include="StringTokenlizer.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>

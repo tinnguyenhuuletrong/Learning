@@ -9,7 +9,7 @@
 #include "Pool.hpp"
 #include "BasicString.hpp"
 #include "StringFormat.hpp"
-
+#include "StringTokenlizer.hpp"
 
 void line_break(std::string name = "") {
 	std::cout << "\n---" << name << "---" << '\n';
@@ -46,6 +46,9 @@ int main()
 
 	line_break("string_format");
 	string_format();
+
+	line_break("string_tokenlizer");
+	string_tokenlizer();
 
     return 0;
 }

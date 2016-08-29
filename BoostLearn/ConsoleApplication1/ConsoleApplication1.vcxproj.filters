@@ -48,6 +48,9 @@
     <ClInclude Include="StringFormat.hpp">
       <Filter>Source Files\String</Filter>
     </ClInclude>
+    <ClInclude Include="StringTokenlizer.hpp">
+      <Filter>Source Files\String</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
