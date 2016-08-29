@@ -5,7 +5,10 @@
 
 #include "Utils.hpp"
 #include "ShareAndWeakPtr.hpp"
-#include "BoostMemory.hpp"
+#include "MemoryBasic.hpp"
+#include "Pool.hpp"
+#include "BasicString.hpp"
+#include "StringFormat.hpp"
 
 
 void line_break(std::string name = "") {
@@ -28,6 +31,21 @@ int main()
 
 	line_break("scope_exit");
 	scope_exit();
+
+	line_break("basic_segment_pool");
+	basic_segment_pool();
+
+	line_break("object_pool");
+	object_pool();
+
+	line_break("string_algorithm");
+	string_algorithm();
+
+	line_break("string_convert");
+	string_convert();
+
+	line_break("string_format");
+	string_format();
 
     return 0;
 }

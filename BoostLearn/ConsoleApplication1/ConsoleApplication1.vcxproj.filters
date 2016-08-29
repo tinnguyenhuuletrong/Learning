@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Boot_Memory">
       <UniqueIdentifier>{8d80edcc-af2e-46a2-87ea-c1eb5c7f8416}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\String">
+      <UniqueIdentifier>{486fd3b1-6c31-4a02-bf79-a641c92bc601}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -30,11 +33,20 @@
     <ClInclude Include="Utils.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoostMemory.hpp">
-      <Filter>Source Files\Boot_Memory</Filter>
-    </ClInclude>
     <ClInclude Include="ShareAndWeakPtr.hpp">
       <Filter>Source Files\Boot_Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Pool.hpp">
+      <Filter>Source Files\Boot_Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryBasic.hpp">
+      <Filter>Source Files\Boot_Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicString.hpp">
+      <Filter>Source Files\String</Filter>
+    </ClInclude>
+    <ClInclude Include="StringFormat.hpp">
+      <Filter>Source Files\String</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

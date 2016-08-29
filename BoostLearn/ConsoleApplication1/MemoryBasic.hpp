@@ -9,6 +9,10 @@
 
 #include <iostream>
 
+//
+// http://theboostcpplibraries.com/raii-and-memory-management
+//
+
 // 
 // Pointer can't share owner (ref) and scoped variable life time
 //

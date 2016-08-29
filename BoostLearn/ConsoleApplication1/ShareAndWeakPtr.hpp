@@ -2,8 +2,8 @@
 #define SHARE_AND_WEAK_PTR_LEARN
 #include "stdafx.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <boost\shared_ptr.hpp>
+#include <boost\weak_ptr.hpp>
 #include <thread>
 #include <functional>
 #include <iostream>

@@ -146,9 +146,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoostMemory.hpp" />
+    <ClInclude Include="BasicString.hpp" />
+    <ClInclude Include="MemoryBasic.hpp" />
+    <ClInclude Include="Pool.hpp" />
     <ClInclude Include="ShareAndWeakPtr.hpp" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringFormat.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
