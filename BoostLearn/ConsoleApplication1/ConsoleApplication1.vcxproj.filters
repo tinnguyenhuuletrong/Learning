@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Container">
       <UniqueIdentifier>{29884f70-251f-4f82-8b76-d56cd2459a8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Data_Structure">
+      <UniqueIdentifier>{c12f429c-3231-4924-a08c-5eb49da8e6a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -56,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="Container.hpp">
       <Filter>Source Files\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStructure.hpp">
+      <Filter>Source Files\Data_Structure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

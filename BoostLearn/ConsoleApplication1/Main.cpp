@@ -11,6 +11,7 @@
 #include "StringFormat.hpp"
 #include "StringTokenlizer.hpp"
 #include "Container.hpp"
+#include "DataStructure.hpp"
 
 void line_break(std::string name = "") {
 	std::cout << "\n---" << name << "---" << '\n';
@@ -62,6 +63,15 @@ int main()
 
 	line_break("priority_queue");
 	heap();
+
+	line_break("tuple");
+	std_tuple();
+
+	line_break("boost_option");
+	boost_option();
+
+	std::string dummy;
+	std::cin >> dummy;
 
     return 0;
 }
