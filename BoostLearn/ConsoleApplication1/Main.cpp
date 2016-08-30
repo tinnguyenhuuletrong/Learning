@@ -76,6 +76,9 @@ int main()
 
 	line_break("lambda_function");
 	lambda_function();
+
+	line_break("lambda_closure_ref");
+	lambda_closure_ref();
 	
 
     return 0;
