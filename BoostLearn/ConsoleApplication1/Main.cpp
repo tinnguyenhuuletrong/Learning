@@ -10,6 +10,7 @@
 #include "BasicString.hpp"
 #include "StringFormat.hpp"
 #include "StringTokenlizer.hpp"
+#include "Container.hpp"
 
 void line_break(std::string name = "") {
 	std::cout << "\n---" << name << "---" << '\n';
@@ -49,6 +50,18 @@ int main()
 
 	line_break("string_tokenlizer");
 	string_tokenlizer();
+
+	line_break("bidirection_map");
+	bidirection_map();
+
+	line_break("multi_index_map");
+	multi_index_map();
+
+	line_break("circular_buffer");
+	circular_buffer();
+
+	line_break("priority_queue");
+	heap();
 
     return 0;
 }
