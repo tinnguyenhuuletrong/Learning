@@ -2,6 +2,9 @@
 #define DATA_STRUCTURE_LEARN
 
 #include "stdafx.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <boost/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 
@@ -47,5 +50,26 @@ void boost_option() {
 		std::cout << std::sqrt(static_cast<float>(*i)) << '\n';
 }
 
+
+
+//	PropertyTree
+//	http://theboostcpplibraries.com/boost.propertytree
+//
+void properties_tree() {
+	using boost::property_tree::ptree;
+
+	ptree pt;
+	pt.put("C.Windows.System", "20 files");
+	pt.put("C.Windows.Data", "10 files");
+
+	ptree &c = pt.get_child("C.Windows.System");
+	ptree &c1 = pt.get_child("C.Windows.Data");
+	
+	std::cout << "C.Windows.System: " << c.get_value<std::string>() << '\n';
+	std::cout << "C.Windows.Data: " << c1.get_value<std::string>() << '\n';
+	
+
+	boost::property_tree::json_parser::write_json("file.json", pt);
+}
 
 #endif

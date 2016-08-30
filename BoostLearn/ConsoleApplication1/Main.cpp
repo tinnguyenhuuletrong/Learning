@@ -12,6 +12,7 @@
 #include "StringTokenlizer.hpp"
 #include "Container.hpp"
 #include "DataStructure.hpp"
+#include "LambdaFunction.hpp"
 
 void line_break(std::string name = "") {
 	std::cout << "\n---" << name << "---" << '\n';
@@ -70,8 +71,12 @@ int main()
 	line_break("boost_option");
 	boost_option();
 
-	std::string dummy;
-	std::cin >> dummy;
+	line_break("properties_tree");
+	properties_tree();
+
+	line_break("lambda_function");
+	lambda_function();
+	
 
     return 0;
 }

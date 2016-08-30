@@ -149,6 +149,7 @@
     <ClInclude Include="BasicString.hpp" />
     <ClInclude Include="Container.hpp" />
     <ClInclude Include="DataStructure.hpp" />
+    <ClInclude Include="LambdaFunction.hpp" />
     <ClInclude Include="MemoryBasic.hpp" />
     <ClInclude Include="Pool.hpp" />
     <ClInclude Include="ShareAndWeakPtr.hpp" />
