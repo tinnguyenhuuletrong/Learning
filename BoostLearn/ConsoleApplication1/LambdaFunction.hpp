@@ -2,6 +2,7 @@
 #define LAMBDA_FUNC_LEARN
 
 #include "stdafx.h"
+#include <functional>
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -16,10 +17,25 @@ void abssort(float* x, unsigned n) {
 	);
 }
 
-void lambda_function() {
-	float A[] = { 1.1, 2.3, 4.5 };
+float reduce(float A[], int size, std::function<float(float)> cal) {
+	float sum = 0;
+	for (int i = 0; i < size; i++) {
+		sum += cal(A[i]);
+	}
+	return sum;
+}
 
-	abssort(A, 3);
+void lambda_function() {
+	float A[] = { 1.1f, 2.3f, 4.5f, 9.10f, 11.12f };
+	int size = 5;
+
+	abssort(A, size);
+
+	std::function<float(float)> transform = [](float x) -> float {
+		return x * 2; 
+	};
+	std::cout<< "Reduce Lambda: " << reduce(A, size, transform) << "\n";
+
 }
 
 #endif
