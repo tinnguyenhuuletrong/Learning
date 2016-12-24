@@ -1,0 +1,80 @@
+//
+// Tranditional Designs 
+//
+
+[Manager]
+	GameManager
+		+ Spawn/Unspawn SpriteCoin Obj
+		+ Update Selected Coin & Chain
+
+		+ Raise Event -> HUD
+		+ Calculate WinLose
+
+	GameInput
+		+ Handle Touch
+		+ Raise Selected Event -> GameManager
+
+[UI]
+	HUD
+		+ Handle event update Score, Time
+
+[LineRender]
+	LineRender
+		+ Dsiplay LineRender base on Selected chain
+
+[SpriteCoin]
+	SpriteCoin
+
+
+
+
+//
+// Redux 
+//
+[State] 
+{
+	coins: {
+		id: {
+			prefab:
+			score:
+			pos:
+			selectedIndex: (0,1,2,3,....)
+			... to Path
+		}
+	},
+	selectChains: []
+	score: 
+	time:
+}
+
+
+[Container]: 
+
+	UI -> { 
+		score,  => UI Score
+		time,   => UI Time
+	}
+
+	EnemiesBehavior -> { coins } 
+		-> Add/Remove Coin
+		-> Raise ActionUpdatePosition
+
+	GameSpawner -> { score, time, coins }
+		-> Raise ActionAddCoin
+		-> Raise ActionRemoveCoin
+
+	LineRenderer -> { coins } => UI LineRenderer base on selectedIndex
+
+	Input -> { coins }
+		-> Raise ActionSelectedIndexChange
+		-> Raise ActionScoreChange
+
+[Display]
+	UIScore (score)
+	UITime (time)
+	UILineRenderer (pos)
+	CoinSpriteDisplay (pos)
+
+[Reducer]:
+	State + Action -> State
+
