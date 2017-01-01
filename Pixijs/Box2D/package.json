@@ -25,5 +25,8 @@
     "html-webpack-plugin": "^2.24.1",
     "webpack": "*",
     "webpack-dev-server": "*"
+  },
+  "dependencies": {
+    "socket.io": "^1.7.2"
   }
 }

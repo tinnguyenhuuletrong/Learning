@@ -9,7 +9,9 @@ const Stats = require("../lib/Stats")
 
 const STAGE_WIDTH = window.innerWidth,
     STAGE_HEIGHT = window.innerHeight;
-const METER = 100;
+
+const GameWorld = require("./Logic.js")
+var game;
 
 var bodies = [],
     actors = [];
@@ -48,6 +50,8 @@ function onLoad() {
     renderer = PIXI.autoDetectRenderer(STAGE_WIDTH, STAGE_HEIGHT, undefined, false);
     document.body.appendChild(renderer.view);
 
+    game = new GameWorld(STAGE_WIDTH, STAGE_HEIGHT)
+
     const loader = new PIXI.AssetLoader(["assets/ball.png",
         "assets/box.jpg"
     ]);
@@ -56,68 +60,36 @@ function onLoad() {
 }
 
 function onLoadAssets() {
-    world = new Box2D.Dynamics.b2World(new Box2D.Common.Math.b2Vec2(0, 10), true);
 
-    const polyFixture = new Box2D.Dynamics.b2FixtureDef();
-    polyFixture.shape = new Box2D.Collision.Shapes.b2PolygonShape();
-    polyFixture.density = 1;
+    game.on("add", (arg) => {
+        const type = arg.type
+        const body = arg.body
+        const s = arg.scale
 
-    const circleFixture = new Box2D.Dynamics.b2FixtureDef();
-    circleFixture.shape = new Box2D.Collision.Shapes.b2CircleShape();
-    circleFixture.density = 1;
-    circleFixture.restitution = 0.7;
-
-    const bodyDef = new Box2D.Dynamics.b2BodyDef();
-    bodyDef.type = Box2D.Dynamics.b2Body.b2_staticBody;
-
-    //down
-    polyFixture.shape.SetAsBox(10, 1);
-    bodyDef.position.Set(9, STAGE_HEIGHT / METER + 1);
-    world.CreateBody(bodyDef).CreateFixture(polyFixture);
-
-    //left
-    polyFixture.shape.SetAsBox(1, 100);
-    bodyDef.position.Set(-1, 0);
-    world.CreateBody(bodyDef).CreateFixture(polyFixture);
-
-    //right
-    bodyDef.position.Set(STAGE_WIDTH / METER + 1, 0);
-    world.CreateBody(bodyDef).CreateFixture(polyFixture);
-    bodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
-
-    for (var i = 0; i < 40; i++) {
-        bodyDef.position.Set(MathUtil.rndRange(0, STAGE_WIDTH) / METER, -MathUtil.rndRange(50, 5000) / METER);
-        var body = world.CreateBody(bodyDef);
-        var s;
-        if (Math.random() > 0.5) {
-            s = MathUtil.rndRange(70, 100);
-            circleFixture.shape.SetRadius(s / 2 / METER);
-            body.CreateFixture(circleFixture);
-            bodies.push(body);
+        if (type == "ball") {
 
             var ball = new PIXI.Sprite(PIXI.Texture.fromFrame("assets/ball.png"));
             stage.addChild(ball);
-            ball.i = i;
+            
             ball.anchor.x = ball.anchor.y = 0.5;
             ball.scale.x = ball.scale.y = s / 100;
 
-            actors[actors.length] = ball;
-        } else {
-            s = MathUtil.rndRange(50, 100);
-            polyFixture.shape.SetAsBox(s / 2 / METER, s / 2 / METER);
-            body.CreateFixture(polyFixture);
-            bodies.push(body);
+            body.display = ball;
 
+        } else if (type == "box") {
             var box = new PIXI.Sprite(PIXI.Texture.fromFrame("assets/box.jpg"));
             stage.addChild(box);
-            box.i = i;
+            
             box.anchor.x = box.anchor.y = 0.5;
             box.scale.x = s / 100;
             box.scale.y = s / 100;
 
-            actors[actors.length] = box;
+            body.display = box
         }
-    }
+        
+    })
+
+    game.onInit()
 
     document.addEventListener("mousedown", function(event) {
         isBegin = true;
@@ -148,35 +120,14 @@ function onLoadAssets() {
     update();
 }
 
-function getBodyAtMouse() {
-    const mousePos = new Box2D.Common.Math.b2Vec2(touchX, touchY);
-    const aabb = new Box2D.Collision.b2AABB();
-    aabb.lowerBound.Set(touchX - 0.001, touchY - 0.001);
-    aabb.upperBound.Set(touchX + 0.001, touchY + 0.001);
-
-    var body;
-    world.QueryAABB(
-        function(fixture) {
-            if (fixture.GetBody().GetType() != Box2D.Dynamics.b2BodyDef.b2_staticBody) {
-                if (fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePos)) {
-                    body = fixture.GetBody();
-                    return false;
-                }
-            }
-            return true;
-        }, aabb);
-
-    return body;
-}
-
 function onMove(event) {
     if (event["changedTouches"]) {
         var touche = event["changedTouches"][0];
-        touchX = touche.pageX / METER;
-        touchY = touche.pageY / METER;
+        touchX = game.World2Logic(touche.pageX);
+        touchY = game.World2Logic(touche.pageY);
     } else {
-        touchX = event.clientX / METER;
-        touchY = event.clientY / METER;
+        touchX = game.World2Logic(event.clientX);
+        touchY = game.World2Logic(event.clientY);
     }
 }
 
@@ -184,15 +135,15 @@ function update() {
     requestAnimationFrame(update);
 
     if (isBegin && !mouseJoint) {
-        const dragBody = getBodyAtMouse();
+        const dragBody = game.getBodyAtMouse(touchX, touchY);
         if (dragBody) {
             const jointDef = new Box2D.Dynamics.Joints.b2MouseJointDef();
-            jointDef.bodyA = world.GetGroundBody();
+            jointDef.bodyA = game.getGroundBody();
             jointDef.bodyB = dragBody;
             jointDef.target.Set(touchX, touchY);
             jointDef.collideConnected = true;
             jointDef.maxForce = 300.0 * dragBody.GetMass();
-            mouseJoint = world.CreateJoint(jointDef);
+            mouseJoint = game.createJoint(jointDef);
             dragBody.SetAwake(true);
         }
     }
@@ -201,23 +152,12 @@ function update() {
         if (isBegin)
             mouseJoint.SetTarget(new Box2D.Common.Math.b2Vec2(touchX, touchY));
         else {
-            world.DestroyJoint(mouseJoint);
+            game.destroyBody(mouseJoint)
             mouseJoint = null;
         }
     }
 
-    world.Step(1 / 60, 3, 3);
-    world.ClearForces();
-
-    const n = actors.length;
-    for (var i = 0; i < n; i++) {
-        var body = bodies[i];
-        var actor = actors[i];
-        var position = body.GetPosition();
-        actor.position.x = position.x * 100;
-        actor.position.y = position.y * 100;
-        actor.rotation = body.GetAngle();
-    }
+    game.update(1/60)
 
     renderer.render(stage);
     stats.update();
