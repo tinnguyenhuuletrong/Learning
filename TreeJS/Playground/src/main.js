@@ -5,7 +5,8 @@ const Stats = require("../lib/Stats.js")
 const Dat = require("../lib/dat")
 
 // const Application = require("./basic_app.js")
-const Application = require("./basic_geo_app.js")
+// const Application = require("./basic_geo_app.js")
+const Application = require("./geo_generator_app.js")
 const AppContext = {}
 const app = new Application(AppContext)
 
@@ -16,18 +17,21 @@ animate();
 
 
 function initGUI() {
-	var GuiObj = {
-		message: "hello",
-		speed: 0,
-		displayOutline: true,
-		explode: function() { }
-	}
 
-	var gui = new Dat.GUI();
-	gui.add(GuiObj, 'message');
-	gui.add(GuiObj, 'speed', -5, 5);
-	gui.add(GuiObj, 'displayOutline');
-	gui.add(GuiObj, 'explode');
+	app.initGUI && app.initGUI()
+
+	// var GuiObj = {
+	// 	message: "hello",
+	// 	speed: 0,
+	// 	displayOutline: true,
+	// 	explode: function() { }
+	// }
+
+	// var gui = new Dat.GUI();
+	// gui.add(GuiObj, 'message');
+	// gui.add(GuiObj, 'speed', -5, 5);
+	// gui.add(GuiObj, 'displayOutline');
+	// gui.add(GuiObj, 'explode');
 }
 
 function initStats(argument) {
@@ -39,7 +43,10 @@ function initStats(argument) {
 function init() {
 	
 	app.onInit()
-	const {renderer} = AppContext;
+	const {renderer, scene} = AppContext;
+	window.scene =scene
+
+	renderer.setClearColor("#9aa7bc")
 	document.body.appendChild(renderer.domElement);
 	//
 	window.addEventListener('resize', onWindowResize, false);
