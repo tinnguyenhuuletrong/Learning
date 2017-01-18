@@ -6,7 +6,9 @@ const Dat = require("../lib/dat")
 
 // const Application = require("./basic_app.js")
 // const Application = require("./basic_geo_app.js")
-const Application = require("./geo_generator_app.js")
+// const Application = require("./geo_generator_app.js")
+const Application = require("./shader_app.js")
+
 const AppContext = {}
 const app = new Application(AppContext)
 

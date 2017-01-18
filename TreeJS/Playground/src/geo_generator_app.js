@@ -74,7 +74,7 @@ GeoGeneratorApp.prototype.initGeoMesh = function() {
 		}
 	}
 
-	var map = new THREE.TextureLoader().load('assets/runway.png');
+	var map = new THREE.TextureLoader().load('assets/UV_Grid_Sm.jpg');
 	this.material = new THREE.MeshBasicMaterial({
 		map: map,
 		side: THREE.DoubleSide,
