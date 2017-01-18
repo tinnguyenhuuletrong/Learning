@@ -60,7 +60,7 @@ function PlaneBufferGeometry2(width, height, widthSegments, heightSegments, eval
 
 			if (evalUvCallback) {
 				let res = evalUvCallback(ix, iy, gridX, gridY)
-				if (res && res.x && res.y) {
+				if (res && res.x != null && res.y != null) {
 					uv1 = res.x
 					uv2 = res.y
 				}

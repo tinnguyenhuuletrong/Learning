@@ -1,6 +1,6 @@
 import {
-	PlaneBufferGeometry2
-} from "../lib/plugins/PlaneBufferGeometry2"
+	TieMeshGenerator
+} from "../lib/plugins/TieMeshGenerator"
 const OrbitControls = require("../lib/plugins/OrbitControls.js")
 const THREE = require("../lib/threejs/Three.js")
 
@@ -15,7 +15,9 @@ const GeoGeneratorApp = function(context) {
 	this.UV_ROW = 10
 	this.UV_COL = 10
 	this.UV_SEGMENTS = [
-		[0], [2], [4]
+		[0],
+		[2],
+		[4]
 	]
 }
 
@@ -36,48 +38,51 @@ GeoGeneratorApp.prototype.onInit = function() {
 	this.context.renderer.setPixelRatio(window.devicePixelRatio);
 	this.context.renderer.setSize(window.innerWidth, window.innerHeight);
 
+	var axisHelper = new THREE.AxisHelper( 500 );
+	this.context.scene.add( axisHelper );
+
 	this.initCamControl(this.context.camera, this.context.renderer)
 	this.initGeoMesh()
 };
 
-GeoGeneratorApp.prototype.evalUV = function(ix, iy, gridX, gridY) {
-	const res = {
-		x: ix / gridX,
-		y: 1 - iy / gridY
+GeoGeneratorApp.prototype.uvConvert = function(tx, ty, maxX, maxY) {
+	const dx = 1 / maxX
+	const dy = 1 / maxY
+	return {
+		"0,0": [tx * dx, ty * dy],
+		"0,1": [tx * dx, (ty + 1) * dy],
+		"1,0": [(tx + 1) * dx, ty * dy],
+		"1,1": [(tx + 1) * dx, (ty + 1) * dy],
 	}
-
-	//const segIndex = this.UV_SEGMENTS[ix][iy]
-	//const uvPartX = ix / this.UV_ROW
-
-	console.log([ix, iy], '->', res)
-
-	return res
-}
+};
 
 GeoGeneratorApp.prototype.initGeoMesh = function() {
-	// var geometry = new THREE.BoxBufferGeometry(200, 200, 200);
-	// var material = new THREE.MeshNormalMaterial({
 
-	// });
-	// this.context.mesh = new THREE.Mesh(geometry, material);
-	// this.context.scene.add(this.context.mesh);
+	var gen = new TieMeshGenerator()
+	for (var i = 0; i < 3; i++) {
+		for (var j = 0; j < 3; j++) {
+			gen.addTie({
+				position: {
+					x: i * 50,
+					y: j * 50,
+					z: 0
+				},
+				width: 50,
+				heigh: 50,
+				uv: this.uvConvert(i, j, 3, 3)
+			})
+		}
+	}
 
-	var map = new THREE.TextureLoader().load('assets/UV_Grid_Sm.jpg');
-	const SIZE_X = 3
-	const SIZE_Y = 2
-	const WIDTH = 200
-	const HEIGHT = 50
-
-	this.geometry = new PlaneBufferGeometry2(this.SIZE_X * this.WIDTH, this.SIZE_Y * this.HEIGHT, 
-			this.SIZE_X, this.SIZE_Y, this.evalUV.bind(this));
-
+	var map = new THREE.TextureLoader().load('assets/runway.png');
 	this.material = new THREE.MeshBasicMaterial({
 		map: map,
 		side: THREE.DoubleSide,
 		wireframe: false
 	});
-	this.context.mesh = new THREE.Mesh(this.geometry, this.material);
-	this.context.scene.add(this.context.mesh);
+	const singleMesh = gen.getSingleMesh(this.material)
+	console.log(singleMesh.toJSON())
+	this.context.scene.add(singleMesh);
 };
 
 GeoGeneratorApp.prototype.onUpdate = function(dt) {
