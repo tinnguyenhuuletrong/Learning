@@ -3,8 +3,12 @@ import {
 } from "../lib/plugins/TieMeshGenerator"
 const OrbitControls = require("../lib/plugins/OrbitControls.js")
 const THREE = require("../lib/threejs/Three.js")
+
 import BasicVertexShader from "../shader/baseVts.glsl"
 import BasicFragmentShader from "../shader/baseFs.glsl"
+
+import MinPhongVertexShader from "../shader/phongVts.glsl"
+import MinPhongFragmentShader from "../shader/phongFs.glsl"
 
 const ShaderApp = function(context) {
 	this.context = context
@@ -52,19 +56,54 @@ ShaderApp.prototype.setupLight = function() {
 
 
 ShaderApp.prototype.initGeoMesh = function() {
-	// var material = new THREE.MeshPhongMaterial({
+	
+	const UniformsUtils = THREE.UniformsUtils
+	const UniformsLib = THREE.UniformsLib
 
-	// });
 
-	var material = new THREE.ShaderMaterial({
-		uniforms: {
-			color: {
-				type: "c", value: new THREE.Color( 0xffaa00 )
+	// Basic Shader
+	// const uniforms = THREE.UniformsUtils.merge([
+	// 	THREE.UniformsLib['lights'], {
+	// 		color: {
+	// 			type: "c",
+	// 			value: new THREE.Color(0xffaa00)
+	// 		}
+	// 	}
+	// ])
+
+	// const material = new THREE.ShaderMaterial({
+	// 	uniforms: uniforms,
+	// 	vertexShader: BasicVertexShader,
+	// 	fragmentShader: BasicFragmentShader
+	// })
+
+
+	const uniforms = UniformsUtils.merge( [
+			UniformsLib.common,
+			UniformsLib.aomap,
+			UniformsLib.lightmap,
+			UniformsLib.emissivemap,
+			UniformsLib.bumpmap,
+			UniformsLib.normalmap,
+			UniformsLib.displacementmap,
+			UniformsLib.gradientmap,
+			UniformsLib.fog,
+			UniformsLib.lights,
+			{
+				emissive: { value: new THREE.Color( 0x000000 ) },
+				specular: { value: new THREE.Color( 0x111111 ) },
+				shininess: { value: 30 }
 			}
-		},
-		vertexShader: BasicVertexShader,
-		fragmentShader: BasicFragmentShader
+		] )
+
+	const material = new THREE.ShaderMaterial({
+		uniforms: uniforms,
+		vertexShader: MinPhongVertexShader,
+		fragmentShader: MinPhongFragmentShader,
+		lights: true
 	})
+
+	// const material = new THREE.MeshPhongMaterial({})
 
 	var object = new THREE.Mesh(new THREE.SphereGeometry(75, 20, 10), material);
 	object.position.set(0, 0, 0);
