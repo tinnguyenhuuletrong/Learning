@@ -7,8 +7,8 @@ const THREE = require("../lib/threejs/Three.js")
 import BasicVertexShader from "../shader/baseVts.glsl"
 import BasicFragmentShader from "../shader/baseFs.glsl"
 
-import MinPhongVertexShader from "../shader/phongVts.glsl"
-import MinPhongFragmentShader from "../shader/phongFs.glsl"
+import MinPhongSceneBaseReflectVertexShader from "../shader/phongSceneBaseReflectionVts.glsl"
+import MinPhongSceneBaseReflectFragmentShader from "../shader/phongSceneBaseReflectionFs.glsl"
 
 const ShaderApp = function(context) {
 	this.context = context
@@ -23,7 +23,7 @@ ShaderApp.prototype.initCamControl = function(camera, renderer) {
 
 ShaderApp.prototype.onInit = function() {
 	this.context.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 100000);
-	this.context.camera.position.z = 400;
+	this.context.camera.position.z = -400;
 	this.context.camera.position.y = 400;
 	this.context.scene = new THREE.Scene();
 
@@ -40,7 +40,7 @@ ShaderApp.prototype.onInit = function() {
 
 	this.initCamControl(this.context.camera, this.context.renderer)
 	this.setupLight()
-	this.initGeoMesh()
+	this.initGeoMeshSceneBaseReflection()
 };
 
 ShaderApp.prototype.setupLight = function() {
@@ -52,31 +52,24 @@ ShaderApp.prototype.setupLight = function() {
 
 	var directLightHelper = new THREE.DirectionalLightHelper(dirLight)
 	this.context.scene.add(directLightHelper);
+
+	var axisHelper = new THREE.AxisHelper(1000);
+	this.context.scene.add(axisHelper);
 };
 
 
-ShaderApp.prototype.initGeoMesh = function() {
+ShaderApp.prototype.initGeoMeshSceneBaseReflection = function() {
 	
 	const UniformsUtils = THREE.UniformsUtils
 	const UniformsLib = THREE.UniformsLib
 
 
-	// Basic Shader
-	// const uniforms = THREE.UniformsUtils.merge([
-	// 	THREE.UniformsLib['lights'], {
-	// 		color: {
-	// 			type: "c",
-	// 			value: new THREE.Color(0xffaa00)
-	// 		}
-	// 	}
-	// ])
+	const diffuseMap = new THREE.TextureLoader().load('assets/Diffuse.bmp');
+	const brightMap = new THREE.TextureLoader().load('assets/bright.bmp');
+	const normalMap = new THREE.TextureLoader().load('assets/Normal.bmp');
 
-	// const material = new THREE.ShaderMaterial({
-	// 	uniforms: uniforms,
-	// 	vertexShader: BasicVertexShader,
-	// 	fragmentShader: BasicFragmentShader
-	// })
-
+	// brightMap.wrapS = brightMap.wrapT = THREE.RepeatWrapping;
+	// brightMap.repeat.set( 2, 2 );
 
 	const uniforms = UniformsUtils.merge( [
 			UniformsLib.common,
@@ -92,26 +85,51 @@ ShaderApp.prototype.initGeoMesh = function() {
 			{
 				emissive: { value: new THREE.Color( 0x000000 ) },
 				specular: { value: new THREE.Color( 0x111111 ) },
-				shininess: { value: 30 }
+				shininess: { value: 30 },
+				reflectMap: { value: null },
+				reflectionStrength: {value: 0.6},
+				reflectionBend: {value: 2.2},
+				reflectionBendOffsetY: {value: 0.2}
 			}
 		] )
 
 	const material = new THREE.ShaderMaterial({
 		uniforms: uniforms,
-		vertexShader: MinPhongVertexShader,
-		fragmentShader: MinPhongFragmentShader,
-		lights: true
+		vertexShader: MinPhongSceneBaseReflectVertexShader,
+		fragmentShader: MinPhongSceneBaseReflectFragmentShader,
+		lights: true,
+		side: 2
 	})
 
-	// const material = new THREE.MeshPhongMaterial({})
+	console.log(material.uniforms)
 
-	var object = new THREE.Mesh(new THREE.SphereGeometry(75, 20, 10), material);
+	material.isMeshPhongMaterial = true
+	material.color = new THREE.Color( 0xffffff ); // diffuse
+	material.specular = new THREE.Color( 0x111111 );
+	material.shininess = 30;
+	material.normalScale = new THREE.Vector2( 5, 5 );
+	material.bumpScale = 1;
+
+	
+	material.map = diffuseMap
+	material.normalMap = normalMap
+	material.uniforms.reflectMap.value = brightMap
+
+	// const material = new THREE.MeshPhongMaterial({
+	// 	map: diffuseMap
+	// })
+
+	// var object = new THREE.Mesh(new THREE.SphereGeometry(75, 20, 10), material);
+	var object = new THREE.Mesh(new THREE.PlaneGeometry(500, 500, 4, 4), material);
 	object.position.set(0, 0, 0);
+	object.rotation.set(-90 * Math.PI / 180, 0 , 0)
+
+	this.context.mesh = object
 	this.context.scene.add(object)
 };
 
 ShaderApp.prototype.onUpdate = function(dt) {
-	// this.context.mesh.rotation.x += 0.005;
+	// this.context.mesh.position.z += 0.3;
 	// this.context.mesh.rotation.y += 0.01;
 };
 
