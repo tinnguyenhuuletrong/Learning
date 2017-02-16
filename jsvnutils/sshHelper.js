@@ -48,10 +48,9 @@ function doJob(options) {
 
 	SSH.on('end', function onEnd(sessionText, sshObj) {
 		this.emit("msg", sessionText)
-		callbackCompleteFunc(sessionText)
 	});
 
-	SSH.connect();
+	SSH.connect(callbackCompleteFunc);
 }
 
 module.exports = doJob
