@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace JUnityGameFramework
 {
@@ -6,6 +7,7 @@ namespace JUnityGameFramework
 	{
 		// private
 		List<JGameLogicReducerBase> mReducerLists;
+		List<JGameLogicMiddleware> mMiddleware;
 		List<JGameAction> mActionList;
 
 		JObjectPool<JGameAction> mActionPool;
@@ -13,12 +15,14 @@ namespace JUnityGameFramework
 		object[] mTmpActionParams;
 
 		// Props
-		internal JEventEmitter Event { get; private set; }
+		private JEventEmitter Event { get; set; }
 
 		// Constructor
 		public JGameLogicStateBase() {
 			Event = new JEventEmitter();
 			mReducerLists = new List<JGameLogicReducerBase>();
+			mMiddleware = new List<JGameLogicMiddleware>();
+
 			mActionList = new List<JGameAction>();
 			mActionPool = new JObjectPool<JGameAction>();
 			mTmpActionParams = new object[1];
@@ -33,35 +37,47 @@ namespace JUnityGameFramework
 			mReducerLists.Add(reducer);
 		}
 
+		public void RegisterMiddleware(JGameLogicMiddleware middleware) {
+			mMiddleware.Add(middleware);
+		}
+
 
 		// Virtual Methods
 		public virtual List<string> ListAllEvents() {
 			return new List<string>();
 		}
 
-		public virtual void ToJson() {
-
+		public virtual string ToJson() {
+			return string.Empty;
 		}
 
-		public virtual void LoadFromJSon() {
-
+		public virtual bool LoadFromJSon(string data) {
+			return false;
 		}
 
 		// Hook
 		protected virtual void PreActionHook(JGameAction action) {
-
+			foreach(var item in mMiddleware) {
+				item.PreActionHook(action);
+			}
 		}
 
 		protected virtual void PostActionHook(JGameAction action) {
-			
+			foreach(var item in mMiddleware) {
+				item.PostActionHook(action);
+			}
 		}
 
 		protected virtual void PreStateHook() {
-
+			foreach(var item in mMiddleware) {
+				item.PreStateHook(this);
+			}
 		}
 
 		protected virtual void PostStateHook() {
-
+			foreach(var item in mMiddleware) {
+				item.PostStateHook(this);
+			}
 		}
 
 		// Processing
@@ -69,7 +85,8 @@ namespace JUnityGameFramework
 			PreActionHook(action);
 			foreach (var item in mReducerLists)
 			{
-				item.OnAction(action, this);
+				if(item.OnAction(action, this))
+					break;
 			}
 			PostActionHook(action);
 		}
@@ -80,14 +97,40 @@ namespace JUnityGameFramework
 				this.OnAction(item);
 				mActionPool.Destroy(item);
 			}
-			PostStateHook();
 			mActionList.Clear();
+			PostStateHook();
+
+			Event.FlushEmitDelay();
+		}
+
+		public virtual void Reset() {
+			foreach (var item in mReducerLists)
+			{
+				item.Reset(this);
+			}
+			foreach (var item in mMiddleware)
+			{
+				item.Reset(this);
+			}
 		}
 
 		// Action Factory
 		public JGameAction CreateAction(string name) {
 			mTmpActionParams[0] = name;
 			return mActionPool.Create(mTmpActionParams);
+		}
+		
+		//Utils
+		public void RegisterEvent(int name, Action<object> callback) {
+			Event.Register(name, callback);
+		}
+
+		public void UnRegisterEvent(int name, Action<object> callback) {
+			Event.UnRegister(name, callback);
+		}
+
+		public void RaiseEvent(int name, object param) {
+			Event.EmitDelay(name, param);
 		}
 
 	}

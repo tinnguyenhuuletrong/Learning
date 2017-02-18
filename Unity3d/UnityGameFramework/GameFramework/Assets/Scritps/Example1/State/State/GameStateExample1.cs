@@ -5,5 +5,10 @@ public class GameStateExample1 : JGameLogicStateBase {
 
     public Vector3 MCPosition { get; set; }
     public bool IsOnGround {get; set;}
-    
+    public bool IsGameOver {get; private set;}
+
+    public void OnGameOver() {
+        IsGameOver = true;
+        this.RaiseEvent(0, null);
+    }
 }

@@ -50,9 +50,11 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scritps\Example1\GameManagerExample1.cs" />
-     <Compile Include="Assets\Scritps\Example1\State\GameStateExample1.cs" />
-     <Compile Include="Assets\Scritps\Example1\State\MCExample1Reducer.cs" />
+     <Compile Include="Assets\Scritps\Example1\State\Middleware\Example1GameResetMiddleware.cs" />
+     <Compile Include="Assets\Scritps\Example1\State\Reducer\MCExample1Reducer.cs" />
+     <Compile Include="Assets\Scritps\Example1\State\State\GameStateExample1.cs" />
      <Compile Include="Assets\Scritps\UnityGameFramework\JGameAction.cs" />
+     <Compile Include="Assets\Scritps\UnityGameFramework\JGameLogicMiddleware.cs" />
      <Compile Include="Assets\Scritps\UnityGameFramework\JGameLogicReducerBase.cs" />
      <Compile Include="Assets\Scritps\UnityGameFramework\JGameLogicStateBase.cs" />
      <Compile Include="Assets\Scritps\Utils\JEventEmitter.cs" />
