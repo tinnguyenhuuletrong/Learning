@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scritps\Example1\Collectable.cs" />
      <Compile Include="Assets\Scritps\Example1\GameManagerExample1.cs" />
      <Compile Include="Assets\Scritps\Example1\State\Middleware\Example1GameResetMiddleware.cs" />
      <Compile Include="Assets\Scritps\Example1\State\Reducer\MCExample1Reducer.cs" />

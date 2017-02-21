@@ -13,7 +13,8 @@ public class GameManagerExample1 : MonoBehaviour {
 	public GameObject MC;
 
 	public Vector3 DebugPos;
-	public bool IsOnGround;
+	public bool DebugIsOnGround;
+	public int DebugCoin;
 
 	private MCStateParams mcParam = new MCStateParams();
 
@@ -62,7 +63,8 @@ public class GameManagerExample1 : MonoBehaviour {
 	void LateUpdate() {
 		// Debug
 		DebugPos = mGameState.MCPosition;
-		IsOnGround = mGameState.IsOnGround;
+		DebugIsOnGround = mGameState.IsOnGround;
+		DebugCoin = mGameState.Coin;
 	}
 
 	void _SyncMC() {

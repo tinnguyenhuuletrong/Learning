@@ -12,6 +12,11 @@ public class MCExample1Reducer : JGameLogicReducerBase {
         GameStateExample1 state = (GameStateExample1)currentState;
 		
 		switch(action.Name) {
+			case "Collect":
+			{
+				state.Coin++;
+				return true;
+			}
 			case "GameOver":
 			{
 				state.OnGameOver();
