@@ -60,7 +60,7 @@ void main() {
 	#include <aomap_fragment>
 
 	// indirectSpecular base on texture
-	float offset = abs(normalize(normal).z);
+	float offset = abs(normalize(normal).x);
 	vec3 screenReflectCol = texture2D( reflectMap, vec2(VSN.x, VSN.y *offset)).rgb * reflectionStrength;
 
 	vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance + screenReflectCol;

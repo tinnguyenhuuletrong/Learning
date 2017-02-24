@@ -122,7 +122,7 @@ ShaderApp.prototype.initGeoMeshSceneBaseReflection = function() {
 	// var object = new THREE.Mesh(new THREE.SphereGeometry(75, 20, 10), material);
 	var object = new THREE.Mesh(new THREE.PlaneGeometry(500, 500, 4, 4), material);
 	object.position.set(0, 0, 0);
-	object.rotation.set(-90 * Math.PI / 180, 0 , 0)
+	object.rotation.set(0 * Math.PI / 180, -90 * Math.PI / 180 , 0)
 
 	this.context.mesh = object
 	this.context.scene.add(object)
