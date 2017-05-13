@@ -1,9 +1,9 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2008
-
-Project("{B2371EF7-8CFE-E2EB-3103-FF566006AD2C}") = "UnityTest", "Assembly-CSharp.csproj", "{03FB2056-251D-5424-624C-AD3996B1095C}"
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityTest", "Assembly-CSharp.csproj", "{03FB2056-251D-5424-624C-AD3996B1095C}"
 EndProject
-Project("{B2371EF7-8CFE-E2EB-3103-FF566006AD2C}") = "UnityTest", "Assembly-CSharp-Editor.csproj", "{5BCC3040-CF24-59AA-FBEB-0FD0002ED0FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityTest", "Assembly-CSharp-Editor.csproj", "{5BCC3040-CF24-59AA-FBEB-0FD0002ED0FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
