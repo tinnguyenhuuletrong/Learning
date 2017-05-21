@@ -47,7 +47,7 @@ namespace JTask
             return ETaskRunningStatus.Done;
         }
 
-        internal readonly uint _ticket;
+        public readonly uint _ticket;
 
         public ETaskStatus Status
         {

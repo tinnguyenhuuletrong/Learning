@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JTask", "JTaskManager\JTask.csproj", "{B690BFD7-1008-4EE2-994B-E7C506F72661}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{F82316E9-3F5E-4D62-BA51-64F9B6CE76B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,5 +15,9 @@ Global
 		{B690BFD7-1008-4EE2-994B-E7C506F72661}.Debug|x86.Build.0 = Debug|x86
 		{B690BFD7-1008-4EE2-994B-E7C506F72661}.Release|x86.ActiveCfg = Release|x86
 		{B690BFD7-1008-4EE2-994B-E7C506F72661}.Release|x86.Build.0 = Release|x86
+		{F82316E9-3F5E-4D62-BA51-64F9B6CE76B3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F82316E9-3F5E-4D62-BA51-64F9B6CE76B3}.Debug|x86.Build.0 = Debug|Any CPU
+		{F82316E9-3F5E-4D62-BA51-64F9B6CE76B3}.Release|x86.ActiveCfg = Release|Any CPU
+		{F82316E9-3F5E-4D62-BA51-64F9B6CE76B3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
