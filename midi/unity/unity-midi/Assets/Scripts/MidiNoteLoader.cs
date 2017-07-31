@@ -132,20 +132,24 @@ public class MidiNoteLoader : MonoBehaviour {
 
     void OnAudioFilterRead(float[] data, int channel)
 	{
-		Debug.Assert(this.channel == channel);
-		int count = 0;
-		while (count < data.Length)
-		{
-			if (currentBuffer == null || bufferHead >= currentBuffer.Length)
-			{
-				synthesizer.GetNext();
-				currentBuffer = synthesizer.WorkingBuffer;
-				bufferHead = 0;
-			}
-			var length = Mathf.Min(currentBuffer.Length - bufferHead, data.Length - count);
-			System.Array.Copy(currentBuffer, bufferHead, data, count, length);
-			bufferHead += length;
-			count += length;
-		}
+        lock (sequencer.Synth)
+        {
+            Debug.Assert(this.channel == channel);
+            int count = 0;
+            while (count < data.Length)
+            {
+                if (currentBuffer == null || bufferHead >= currentBuffer.Length)
+                {
+                    synthesizer.GetNext();
+                    currentBuffer = synthesizer.WorkingBuffer;
+                    bufferHead = 0;
+                }
+                var length = Mathf.Min(currentBuffer.Length - bufferHead, data.Length - count);
+                System.Array.Copy(currentBuffer, bufferHead, data, count, length);
+                bufferHead += length;
+                count += length;
+            }
+        }
+            
 	}
 }

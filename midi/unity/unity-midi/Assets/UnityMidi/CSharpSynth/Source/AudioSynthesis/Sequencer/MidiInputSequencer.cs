@@ -38,9 +38,12 @@ namespace AudioSynthesis.Sequencer
         }
         public void AddMidiEvent(MidiMessage midiMsg)
         {
-            midiMsg.delta = 0;
-            synth.midiEventQueue.Enqueue(midiMsg);
-            synth.midiEventCounts[0]++;
+            lock (synth)
+            {
+                midiMsg.delta = 0;
+                synth.midiEventQueue.Enqueue(midiMsg);
+                synth.midiEventCounts[0]++;
+            }
         }
     }
 }
