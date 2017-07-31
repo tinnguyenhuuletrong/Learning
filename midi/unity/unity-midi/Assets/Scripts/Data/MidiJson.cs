@@ -35,7 +35,7 @@ namespace MidiJSON {
         public string instrument;
         public string instrumentFamily;
         public List<MidiNoteEvent> notes;
-        public Dictionary<string, MidiControlEvent> controlChanges;
+        public List<MidiControlEvent> controlChanges;
 	}
 
 	[System.Serializable]
@@ -52,6 +52,7 @@ namespace MidiJSON {
 	[System.Serializable]
 	public class MidiControlEvent
 	{
+        public uint command;
 		public uint number;
 		public float time;
 		public float value;

@@ -12,19 +12,20 @@ public class MidiObjectController : MonoBehaviour {
     private int state = 0;
 
 
-    public void Update() {
+    public bool ManualUpdate() {
         
         this.transform.position += velocity * Time.deltaTime;
 
         if(state == 0 && this.transform.position.x < 0) {
             On();
             state = 1;
-        } else if (state == 1 && this.transform.position.x < -midiNoteEvent.duration)
+        } else if (state == 1 && this.transform.position.x <= -midiNoteEvent.duration)
 		{
             Off();
+            return false;
         }
 
-
+        return true;
     }
 
     private void On() {

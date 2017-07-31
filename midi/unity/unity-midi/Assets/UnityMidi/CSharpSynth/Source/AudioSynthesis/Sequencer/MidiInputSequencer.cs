@@ -16,21 +16,12 @@ namespace AudioSynthesis.Sequencer
 {
     public class MidiInputSequencer
     {
-        private class DelaySignal {
-            internal MidiMessage msg;
-            internal float fireAt;
-        }
-        private List<DelaySignal> delaySignalQueue = new List<DelaySignal>();
-        private List<DelaySignal> removeMsg = new List<DelaySignal>();
-
         private Synthesizer synth;
         public Synthesizer Synth
         {
             get { return synth; }
             set { synth = value; }
         }
-
-        private float timer;
 
         public MidiInputSequencer(Synthesizer synth)
         {

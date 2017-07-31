@@ -27,7 +27,11 @@ public class MidiNoteLoader : MonoBehaviour {
 	int bufferHead;
 	float[] currentBuffer;
 
-    private List<MidiObjectController> notes = new List<MidiObjectController>();
+    List<MidiJSON.MidiControlEvent> controlEvents = new List<MidiJSON.MidiControlEvent>();
+    int controlEventIndex = 0;
+
+    List<MidiObjectController> notes = new List<MidiObjectController>();
+    List<MidiObjectController> removedNotes = new List<MidiObjectController>();
 
     private void Awake()
     {
@@ -54,9 +58,22 @@ public class MidiNoteLoader : MonoBehaviour {
         foreach (var item in midiJson.tracks)
         {
             yield return VisualTrack(item, Vector3.right * 5, Random.ColorHSV(0.5f, 1.0f));
+
+            controlEvents.AddRange(item.controlChanges);
         }
 
+        controlEvents.Sort((x,y) =>{
+            if (x.time < y.time)
+                return -1;
+            else if (x.time == y.time)
+                return 0;
+            else
+                return 1;
+        });
+        controlEventIndex = 0;
+
         audioSource.Play();
+        UpdateToTime(0);
 
         yield break;
 	}
@@ -111,19 +128,50 @@ public class MidiNoteLoader : MonoBehaviour {
             midiJson = JsonUtility.FromJson<MidiJSON.MidiJson>(output);
         }
     }
+
+    private void UpdateToTime(float t) {
+
+        while(controlEventIndex < controlEvents.Count && controlEvents[controlEventIndex].time <= t) {
+            var tmp = controlEvents[controlEventIndex++];
+            MidiMessage ctrEvent = new MidiMessage(0, (byte)0xB0, (byte)tmp.number, (byte)(tmp.value*127));
+            sequencer.AddMidiEvent(ctrEvent);
+        }
+    }
+
+    public void Update() {
+        int length = notes.Count;
+        removedNotes.Clear();
+        for (int i = 0; i < length; i++)
+        {
+            if(!notes[i].ManualUpdate()) {
+                removedNotes.Add(notes[i]);
+            }
+        }
+
+        if(removedNotes.Count > 0) {
+            foreach (var item in removedNotes)
+            {
+                notes.Remove(item);
+            }
+        }
+    }
 	
 
     private void OnPlayNote(MidiJSON.MidiNoteEvent note) {
-        Debug.Log("On: " + note.name);
+        //Debug.Log("On: " + note.name);
+
+        UpdateToTime(note.time);
 
         // Note On
-        MidiMessage msg = new MidiMessage((byte)note.channel, (byte)AudioSynthesis.Midi.MidiEventTypeEnum.NoteOn, (byte)note.midi, (byte)(note.velocity * 100));
+        MidiMessage msg = new MidiMessage((byte)note.channel, (byte)AudioSynthesis.Midi.MidiEventTypeEnum.NoteOn, (byte)note.midi, (byte)(note.velocity * 127));
         sequencer.AddMidiEvent(msg);
     }
 
 	private void OnPlayNoteOff(MidiJSON.MidiNoteEvent note)
 	{
-		Debug.Log("Off: " + note.name);
+        //Debug.Log("Off: " + note.name);
+
+        UpdateToTime(note.time + note.duration);
 
 		// Note Off
         MidiMessage msg = new MidiMessage((byte)note.channel, (byte)AudioSynthesis.Midi.MidiEventTypeEnum.NoteOn, (byte)note.midi, 0);
