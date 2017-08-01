@@ -133,6 +133,18 @@ function where(tokens) {
 	return valTest
 }
 
+//query         =  select, ws, from, [ ws, join ], [ ws, where ] ;
+function query(tokens) {
+	const sel = select(tokens)
+	const fr = from(tokens)
+	const wh = where(tokens)
+
+	if(sel && fr && wh)
+		return true
+
+	return false
+}
+
 //--------------------------------------------//
 let test = `SELECT movies.title, actors.name
 FROM movies
@@ -142,7 +154,22 @@ WHERE movies.cert <= 15
 `
 
 const tokens = parseToken(test)
-select(tokens)
-from(tokens)
-where(tokens)
-console.log(CMD)
+query(tokens)
+
+
+//--------------------------------------------------------------------//
+// EBNF 
+//--------------------------------------------------------------------//
+// query         =  select, ws, from, [ ws, join ], [ ws, where ] ;
+// select        =  "SELECT ", column-id, [ { ", ", column-id } ] ;
+// from          =  "FROM ", table-name, [ { ws, join } ] ;
+// join          =  "JOIN ", table-name, " on ", value-test ;
+// where         =  "WHERE ", value-test ;
+// value-test    =  value, comparison, value;
+// column-id     =  table-name, ".", column-name ;
+// table-name    = ? a valid SQL table name ? ;
+// column-name   = ? a valid SQL column name ? ;
+// value         =  column-id | const
+// comparison    =  " = " | " > " | " < " | " <= " | " >= " | " <> " ;
+// const         =  ? a number ? | ? a SQL single-quoted string ? ;
+// ws            = " " | "\n" | ws, ws ;
