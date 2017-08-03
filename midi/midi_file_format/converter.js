@@ -29,16 +29,16 @@ fs.readFile(input, "binary", function(err, midiBlob) {
 
 			const res = Object.assign({}, itm)
 			let transformData = []
-			// res.controlChanges = Object.keys(res.controlChanges).forEach(ctr => {
+			res.controlChanges = Object.keys(res.controlChanges).forEach(ctr => {
 
-			// 	transformData = transformData.concat(res.controlChanges[ctr].map(evn => {
-			// 		return Object.assign({}, evn, {
-			// 			command: ctr
-			// 		})
-			// 	}))
-			// })
+				transformData = transformData.concat(res.controlChanges[ctr].map(evn => {
+					return Object.assign({}, evn, {
+						command: ctr
+					})
+				}))
+			})
 
-			// res.controlChanges = transformData;
+			res.controlChanges = transformData;
 
 			return res
 		})
