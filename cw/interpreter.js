@@ -33,15 +33,6 @@ Interpreter.prototype.letter = function(tokens) {
 	return /[A-Za-z]/.test(tokens[0]) && tokens.shift()
 };
 
-Interpreter.prototype.identifierChar = function(tokens) {
-	let res = null;
-	[this.acceptLowDash, this.letter, this.number].some(func => {
-		res = func.call(this, tokens)
-		return (res != null) && (res != false)
-	})
-	return res
-};
-
 Interpreter.prototype.identifier = function(tokens) {
 	let res = null
 	res = this.letter(tokens)
@@ -54,19 +45,19 @@ Interpreter.prototype.identifier = function(tokens) {
 	return res
 };
 
-Interpreter.prototype.assignment = function(tokens) {
-	const id = this.identifier(tokens)
+Interpreter.prototype.assignment = function(tokens, preID) {
+	const id = preID || this.identifier(tokens)
 	if (!id)
 		return null
 	const eq = this.accept(tokens, '=')
 	if (!eq)
 		return null
 	const exp = this.expression(tokens)
-	console.log([{
-		cmd: 'assign',
-		'var': id,
-		'val': exp
-	}])
+	// console.log([{
+	// 	cmd: 'assign',
+	// 	'var': id,
+	// 	'val': exp
+	// }])
 
 	this.vars[id] = exp
 	return exp
@@ -82,15 +73,21 @@ Interpreter.prototype.bracketExpression = function(tokens) {
 	return exp
 };
 
-Interpreter.prototype.mathExpression = function(tokens) {
-	const exp1 = this.expression(tokens)
+Interpreter.prototype.mathExpression = function(tokens, leftOf) {
+	if (tokens.length <= 0) return
+
+	const exp1 = leftOf || this.expression(tokens)
 	if (!exp1) return null;
+	console.log("mathExpression left", exp1)
 
 	const op = this.operator(tokens)
 	if (!op) return null;
+	console.log("mathExpression op", op)
 
 	const exp2 = this.expression(tokens)
 	if (!exp2) return null;
+
+	console.log("mathExpression final", exp1, op, exp2)
 
 	switch (op) {
 		case '+':
@@ -110,33 +107,65 @@ Interpreter.prototype.mathExpression = function(tokens) {
 	}
 };
 
+
+Interpreter.prototype.identifierChar = function(tokens) {
+	let res = null;
+	[this.acceptLowDash, this.letter, this.number].some(func => {
+		res = func.call(this, tokens)
+		return (res != null) && (res !== false)
+	})
+	return res
+};
+
+Interpreter.prototype.identifierOrAssign = function(tokens) {
+	const id = this.identifier(tokens)
+	const assignTest = this.assignment(tokens, id)
+
+	if (assignTest != null)
+		return assignTest
+	return id
+};
+
+
 Interpreter.prototype.factor = function(tokens) {
+	if (tokens.length <= 0) return
+
 	let res = null;
 	let count = 1;
-	[this.number, this.assignment, this.identifier, this.bracketExpression].some(func => {
+	[this.number, this.identifierOrAssign, this.bracketExpression].some(func => {
 		res = func.call(this, tokens)
-		console.log("factor", count++, res)
-		return (res != null) && (res != false)
+			console.log("factor", count++, res)
+		return (res != null) && (res !== false)
 	})
 	return res
 };
 
 Interpreter.prototype.expression = function(tokens) {
-	let res = null;
-	let count = 1;
-	[this.factor, this.mathExpression].some(func => {
-		res = func.call(this, tokens)
-		console.log("exp: ", res, count++)
-		return (res != null) && (res != false)
-	})
+	if (tokens.length <= 0) return
+
+	let res = this.factor(tokens)
+
+	// Lookup var
+	if (res && typeof(res) !== 'number') {
+		if (!(res in this.vars))
+			throw new Error("variable not found")
+		res = this.vars[res]
+	}
+
+	console.log("expression", res)
+
+	let tmpRes = this.mathExpression(tokens, res)
+	console.log("math exp", tmpRes)
+	if (tmpRes != null && tmpRes !== false)
+		res = tmpRes;
 	return res
 };
 
 Interpreter.prototype.input = function(expr) {
 	var tokens = this.tokenize(expr);
-	console.log(tokens)
-	const res = this.expression(tokens)
-	console.log(" ---> ", res, tokens)
+	const res = this.expression(tokens) || ''
+	console.log(tokens, " ---> ", res, tokens)
+	return res
 };
 
 //--------------------------------------------------------------------//
@@ -158,5 +187,9 @@ Interpreter.prototype.input = function(expr) {
 
 //----------------------------------------------------//
 const interpreter = new Interpreter()
-interpreter.input("x = 2")
-interpreter.input("1 + 1")
+interpreter.input("4 / 2 * 3")
+// interpreter.input("x = 2")
+// interpreter.input("15 % 10")
+// interpreter.input("x = 1")
+// interpreter.input("y = x * 100")
+// interpreter.input("y % 11")
