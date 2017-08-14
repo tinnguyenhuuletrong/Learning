@@ -39,16 +39,29 @@ function next(A) {
 function listPosition(word) {
   //Return the anagram list position of the word
   let arr = Array.from(word).sort()
-  console.log(arr)
+ 
   let count = 1;
-  // do {
-  // 	if(arr.join('') == word)
-  // 		return count
-  // 	count++
-  // } while(next(arr))
+  do {
+     console.log(arr.join(''), count)
+  	// if(arr.join('') == word)
+  	// 	return count
+  	count++
+  } while(next(arr))
 
   return 1;
 }
 //---------------------------------------------------------------//
 
-console.log(listPosition('IMMUNOELECTROPHORETICALLY'))
+console.log(listPosition('1224'))
+
+// P = (total number of letters)! / (number of repeats)!
+
+// Diference
+// Des 
+// Set(Des) -> S
+// while(n>0)
+//    find index Des[i] in set S
+//    T = S.length! / (numDuplicate)!
+//    A += i * T / n
+//    remove Des[i] in S
+//    n--
