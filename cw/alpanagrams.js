@@ -42,9 +42,9 @@ function listPosition(word) {
  
   let count = 1;
   do {
-     console.log(arr.join(''), count)
-  	// if(arr.join('') == word)
-  	// 	return count
+    console.log(arr.join(''), count)
+  	 // if(arr.join('') == word)
+  	 	// return count
   	count++
   } while(next(arr))
 
@@ -52,7 +52,7 @@ function listPosition(word) {
 }
 //---------------------------------------------------------------//
 
-console.log(listPosition('1224'))
+console.log(listPosition('BOOKKEEPER'))
 
 // P = (total number of letters)! / (number of repeats)!
 
