@@ -1,6 +1,6 @@
-const exp = /(0+1(0+1(01*00)*01*01(0+1))*1(01*00)*1)*/g
+const exp = /^(0*((1(0(11|0)(111)*0)*1(01*00)*1)|(10101)+)*)+/
 
-const inp = "1110"
+const inp = "1"
 const res = inp.match(exp)
 console.log(res)
 
