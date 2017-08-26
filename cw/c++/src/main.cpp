@@ -1,4 +1,4 @@
-#include "problem/sortInner.hpp"
+#include "problem/stray.hpp"
 
 int main() {
     test();
