@@ -1,4 +1,4 @@
-#include "problem/stray.hpp"
+#include "problem/stepInPrimes.hpp"
 
 int main() {
     test();
