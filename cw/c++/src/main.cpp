@@ -1,4 +1,4 @@
-#include "problem/stepInPrimes.hpp"
+#include "problem/perimeterOfSquares.hpp"
 
 int main() {
     test();
