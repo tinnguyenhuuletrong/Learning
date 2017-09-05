@@ -1,4 +1,4 @@
-#include "problem/perimeterOfSquares.hpp"
+#include "problem/sqrEncode.hpp"
 
 int main() {
     test();
