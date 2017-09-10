@@ -1,4 +1,4 @@
-#include "problem/sqrEncode.hpp"
+#include "problem/negabinary.hpp"
 
 int main() {
     test();
