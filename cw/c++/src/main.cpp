@@ -1,4 +1,4 @@
-#include "problem/arcParabLen.hpp"
+#include "problem/primeDecomp.hpp"
 
 int main() {
     test();
