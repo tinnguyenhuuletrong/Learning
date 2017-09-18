@@ -1,4 +1,4 @@
-#include "problem/negabinary.hpp"
+#include "problem/mix.hpp"
 
 int main() {
     test();
