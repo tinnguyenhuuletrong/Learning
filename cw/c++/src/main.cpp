@@ -1,4 +1,4 @@
-#include "problem/egyptianFractions.hpp"
+#include "problem/_playGround.hpp"
 
 int main() {
     test();
