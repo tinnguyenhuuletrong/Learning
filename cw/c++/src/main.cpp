@@ -1,4 +1,4 @@
-#include "problem/_playGround.hpp"
+#include "problem/peanoNumbers.hpp"
 
 int main() {
     test();
