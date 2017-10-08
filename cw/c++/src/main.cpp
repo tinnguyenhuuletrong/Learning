@@ -1,4 +1,4 @@
-#include "problem/divisibility13.hpp"
+#include "problem/simpleEncryption.hpp"
 
 int main() {
     test();
