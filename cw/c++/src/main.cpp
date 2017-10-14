@@ -1,4 +1,4 @@
-#include "problem/simpleEncryption.hpp"
+#include "problem/regexParser.hpp"
 
 int main() {
     test();
