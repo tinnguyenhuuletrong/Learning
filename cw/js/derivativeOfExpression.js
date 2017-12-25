@@ -106,9 +106,9 @@ function expression(tokens) {
     else if (a == '(')
       stack.push('(');
 
-    if(stack.length == 0)
+    if (stack.length == 0)
       break;
-    
+
     res.push(a);
     a = next(tokens);
   }
@@ -118,7 +118,7 @@ function expression(tokens) {
 function diff(expr) {
   let tokens = parseToken(expr);
   let exp = expression(tokens);
-  return diffExpression(exp);
+  return diffExpression(exp).join(' ');
 }
 
 
@@ -134,12 +134,17 @@ function isNumber(val) {
 }
 
 function expressionReduce(exp) {
-  if(!Array.isArray(exp))
+  if (!Array.isArray(exp))
     return exp;
 
   const tmp = exp.slice(0);
   const op = tmp.shift();
 
+  // expression
+  if (op == '(')
+    return exp;
+
+  // constant Or Varialble
   if (OPERATORS.indexOf(op) == -1)
     return op;
 
@@ -155,52 +160,56 @@ function expressionReduce(exp) {
   if (arg1 == null || arg2 == null)
     return [].concat('(', op, exp1, exp2, ')');
 
-  switch (op) {
-    case '+':
-      {
-        return [arg1 + arg2];
-      }
-      break;
-    case '-':
-      {
-        return [arg1 - arg2];
-      }
-      break;
-    case '*':
-      {
-        return [arg1 * arg2];
-      }
-      break;
-    case '/':
-      {
-        return [arg1 / arg2];
-      }
-      break;
-    case '^':
-      {
-        return [Math.pow(arg1, arg2)];
-      }
-      break;
+    switch (op) {
+      case '+':
+        {
+          return [arg1 + arg2];
+        }
+        break;
+      case '-':
+        {
+          return [arg1 - arg2];
+        }
+        break;
+      case '*':
+        {
+          return [arg1 * arg2];
+        }
+        break;
+      case '/':
+        {
+          return [arg1 / arg2];
+        }
+        break;
+      case '^':
+        {
+          return [Math.pow(arg1, arg2)];
+        }
+        break;
+    }
   }
-}
 
 
 function test(exp) {
   const res = diff(exp);
-  console.log(exp, ' -> ', res.join(' '));
+  console.log(exp, ' -> ', res);
+  return res
 }
 
 // basic
-// test('x')
-// test('5')
-// test("(+ x x)")
-// test("(- x x)")
-// test("(* x 2)")
-// test("(^ x 2)")
-// test("(/ x 2)")
+test('x')
+test('5')
+test("(+ x x)")
+test("(- x x)")
+test("(* x 2)")
+test("(^ x 2)")
+test("(/ x 2)")
 
 // medium
-// test('(+ x (+ x x))');
-// test('(- (+ x x) x)');
-// test('(* 2 (+ x 2))');
+test('(+ x (+ x x))');
+test('(- (+ x x) x)');
+test('(* 2 (+ x 2))');
 test('(/ 2 (+ 1 x))'); // (/ -2 (^ (+ 1 x) 2))
+
+// high
+console.log((diff('( * 3 ( ^ x 2 ) )')));
