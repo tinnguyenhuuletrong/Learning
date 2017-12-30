@@ -77,43 +77,54 @@ DFunctionsTable['/'] = function (tokens) {
   return expressionReduce(['/', upVal, downVal]);
 }
 
-//sin x -> cos x
+//sin x -> x' * cos x
 DFunctionsTable['sin'] = function (tokens) {
   const exp = expression(tokens);
-  return expressionReduce(['cos', exp]);
+  const dexp = diffExpression(exp.slice(0));
+
+  const subExp = expressionReduce(['cos', exp]);
+  return expressionReduce(['*', dexp, subExp]);
 }
 
-//cos x -> -1 * sin x
+//cos x -> x' * -1 * sin x
 DFunctionsTable['cos'] = function (tokens) {
   const exp = expression(tokens);
+  const dexp = diffExpression(exp.slice(0));
 
   const tmp = expressionReduce(['sin', exp]);
-  return expressionReduce(['*', '-1', tmp]);
+  const subExp = expressionReduce(['*', '-1', tmp]);
+  return expressionReduce(['*', dexp, subExp]);
 }
 
 //exp x -> exp x
 DFunctionsTable['exp'] = function (tokens) {
   const exp = expression(tokens);
-  return expressionReduce(['exp', exp]);
+  const dexp = diffExpression(exp.slice(0));
+  const subExp = expressionReduce(['exp', exp]);
+  return expressionReduce(['*', dexp, subExp]);
 }
 
 //ln x -> 1/x
 DFunctionsTable['ln'] = function (tokens) {
   const exp = expression(tokens);
-  return expressionReduce(['/', '1', exp]);
+  const dexp = diffExpression(exp.slice(0));
+  const subExp = expressionReduce(['/', '1', exp]);
+  return expressionReduce(['*', dexp, subExp]);
 }
 
 // tan x -> 1 + tan(x)^2
 DFunctionsTable['tan'] = function (tokens) {
   const exp = expression(tokens);
+  const dexp = diffExpression(exp.slice(0));
   const subExp1 = expressionReduce(['tan', exp]);
   const subExp2 = expressionReduce(['^', subExp1, 2]);
 
-  return expressionReduce(['+', 1, subExp2]);
+  const subExp = expressionReduce(['+', 1, subExp2]);
+  return expressionReduce(['*', dexp, subExp]);
 }
 
 // Evaluate value
-function isNumber(val) {
+function evaluateParam(val) {
   if (val == null)
     return null;
 
@@ -143,29 +154,30 @@ function isNumber(val) {
 
 // reduce expression
 function expressionReduce(exp) {
-  if (exp == null)
-    return null;
-
-  if (!Array.isArray(exp))
+  // forward null OR constant value
+  if (exp == null || !Array.isArray(exp))
     return exp;
 
   const tmp = exp.slice(0);
   const op = tmp.shift();
 
-  // expression
+  // Expression -> Expression
   if (op == '(')
     return exp;
 
-  // constant Or Varialble
+  // Varialble -> Variable
   if (VARIABLES.indexOf(op) != -1)
     return op;
 
+  // Reduce Params
   let exp1 = expressionReduce(tmp.shift());
   let exp2 = expressionReduce(tmp.shift());
 
-  let arg1 = isNumber(exp1);
-  let arg2 = isNumber(exp2);
+  // Evaluate
+  let arg1 = evaluateParam(exp1);
+  let arg2 = evaluateParam(exp2);
 
+  // Apply Operator
   switch (op) {
     case '+':
       {
@@ -189,6 +201,10 @@ function expressionReduce(exp) {
       {
         if (arg1.v === 0 || arg2.v === 0)
           return [0];
+        else if (arg1.v === 1)
+          return arg2.val();
+        else if (arg2.v === 1)
+          return arg1.val();
         else if (arg1.t + arg2.t !== 0)
           return [].concat('(', op, arg1.val(), arg2.val(), ')');
         return [arg1.v * arg2.v];
@@ -211,11 +227,11 @@ function expressionReduce(exp) {
 
     default:
       {
-        // case only constat value
-        if(arg1 == null && arg2 == null)
+        // case only constat value / variables
+        if (arg1 == null && arg2 == null)
           return op;
-        
-        // construct op
+
+        // Functions
         let res = ['(', op];
         if (arg1 != null)
           res = res.concat(arg1.val());
@@ -281,7 +297,7 @@ function diff(expr) {
   let res = diffExp.reduce((acc, v) => {
     if (v == '(')
       return acc + v;
-    else if(v == ')')
+    else if (v == ')')
       return acc.slice(0, acc.length - 1) + ')' + ' ';
     return acc + v + ' ';
   }, "").trim();
@@ -300,6 +316,12 @@ function test(exp) {
   return res
 }
 
+function test2(exp) {
+  const res = diff(diff(exp));
+  console.log(exp, ' -> ', res);
+  return res
+}
+
 // Simple expressions
 test('x')
 test('5')
@@ -314,11 +336,19 @@ test("(tan x)") // (+ 1 (^ (tan x) 2))
 test("(exp x)")
 test("(ln x)")
 
-// // medium
+// Nested expressions
 test('(+ x (+ x x))');
 test('(- (+ x x) x)');
 test('(* 2 (+ x 2))');
 test('(/ 2 (+ 1 x))'); // (/ -2 (^ (+ 1 x) 2))
+test('(cos (* 2 x))'); // (* 2 (* -1 (sin (* 2 x))))
+test('(cos (+ x 1))'); // (* -1 (sin (+ x 1)))
+test("(sin (+ x 1))"); //"(cos (+ x 1))"
+test("(sin (* 2 x))"); //"(* 2 (cos (* 2 x)))"
+test("(tan (* 2 x))"); //"(* 2 (+ 1 (^ (tan (* 2 x)) 2)))"
+test("(exp (* 2 x))"); //"(* 2 (exp (* 2 x)))"
 
-// // high
-console.log(diff(diff('(^ x 3)'))); // (* 3 (* 2 x))
+// Second derivatives
+test2('(sin x)'); // (* -1 (sin x))
+test2('(exp x)'); // (exp x)
+test2('(^ x 3)'); // (* 3 (* 2 x))
