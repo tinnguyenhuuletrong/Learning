@@ -118,19 +118,43 @@ function expression(tokens) {
 function diff(expr) {
   let tokens = parseToken(expr);
   let exp = expression(tokens);
-  return diffExpression(exp).join(' ');
+
+  let diffExp = diffExpression(exp);
+
+  // reduce to res string
+  let res = diffExp.reduce((acc, v) => {
+    if (['(', ')'].indexOf(v) != -1)
+      return acc + v;
+    return acc + v + ' ';
+  }, "");
+
+  return res;
 }
 
 
 function isNumber(val) {
-  try {
-    if (VARIABLES.indexOf(val) != -1) return null;
-    if (Array.isArray(val)) return null;
+  // variable
+  if (VARIABLES.indexOf(val) != -1) 
+    return {
+    v: val,
+    t: 2, //'variable',
+    val: _ => [val]
+  };
 
-    return parseInt(val);
-  } catch (error) {
-    return null;
-  }
+  // expression
+  if (Array.isArray(val)) 
+    return {
+    v: val,
+    t: 1, //'expression'
+    val: _ => val
+  };
+
+  // number
+  return {
+    v: parseInt(val),
+    t: 0, //'num',
+    val: _ => [parseInt(val)]
+  };
 }
 
 function expressionReduce(exp) {
@@ -154,40 +178,50 @@ function expressionReduce(exp) {
   let arg1 = isNumber(exp1);
   let arg2 = isNumber(exp2);
 
-  if (op === '*' && (arg1 === 0 || arg2 === 0))
-    return [0];
-
-  if (arg1 == null || arg2 == null)
-    return [].concat('(', op, exp1, exp2, ')');
-
-    switch (op) {
-      case '+':
-        {
-          return [arg1 + arg2];
-        }
-        break;
-      case '-':
-        {
-          return [arg1 - arg2];
-        }
-        break;
-      case '*':
-        {
-          return [arg1 * arg2];
-        }
-        break;
-      case '/':
-        {
-          return [arg1 / arg2];
-        }
-        break;
-      case '^':
-        {
-          return [Math.pow(arg1, arg2)];
-        }
-        break;
-    }
+  switch (op) {
+    case '+':
+      {
+        if (arg1.v === 0)
+          return arg2.val();
+        else if (arg2.v === 0)
+          return arg1.val();
+        else if (arg1.t + arg2.t !== 0)
+          return [].concat('(', op, arg1.val(), arg2.val(), ')');
+        return [arg1.v + arg2.v];
+      }
+      break;
+    case '-':
+      {
+        if (arg1.t + arg2.t !== 0)
+          return [].concat('(', op, arg1.val(), arg2.val(), ')');
+        return [arg1.v - arg2.v];
+      }
+      break;
+    case '*':
+      {
+        if (arg1.v === 0 || arg2.v === 0)
+          return [0];
+        else if (arg1.t + arg2.t !== 0)
+          return [].concat('(', op, arg1.val(), arg2.val(), ')');
+        return [arg1.v * arg2.v];
+      }
+      break;
+    case '/':
+      {
+        if (arg1.t + arg2.t !== 0)
+          return [].concat('(', op, arg1.val(), arg2.val(), ')');
+        return [arg1.v / arg2.v];
+      }
+      break;
+    case '^':
+      {
+        if (arg1.t + arg2.t !== 0)
+          return [].concat('(', op, arg1.val(), arg2.val(), ')');
+        return [Math.pow(arg1.v, arg2.v)];
+      }
+      break;
   }
+}
 
 
 function test(exp) {
@@ -212,4 +246,4 @@ test('(* 2 (+ x 2))');
 test('(/ 2 (+ 1 x))'); // (/ -2 (^ (+ 1 x) 2))
 
 // high
-console.log((diff('( * 3 ( ^ x 2 ) )')));
+console.log(diff(diff('(^ x 3)'))); // (* 3 (* 2 x))
