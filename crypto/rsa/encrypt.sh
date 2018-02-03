@@ -1,0 +1,1 @@
+openssl rsautl -encrypt -inkey publickey.pem -pubin -in message.txt -out message.rsa
