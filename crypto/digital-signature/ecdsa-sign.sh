@@ -1,0 +1,1 @@
+openssl dgst -ecdsa-with-SHA1 -sign ec-privatekey.pem -out ecdsa_signature.bin message.txt
