@@ -1,0 +1,17 @@
+{
+  "name": "ethereum-tutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev-server": "ganache-cli",
+    "compile_solc": "olcjs -o ./bin/ --optimize --bin --abi src/voting.sol"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ganache-cli": "^6.0.3",
+    "solc": "^0.4.20",
+    "web3": "^0.20.2"
+  }
+}
