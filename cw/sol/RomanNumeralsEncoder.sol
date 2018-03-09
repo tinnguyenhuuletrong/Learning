@@ -1,30 +1,31 @@
 pragma solidity ^0.4.13;
 
 contract Kata {
-    struct Item {
-        string key;
-        uint val;
-        uint size;
-    }
-    Item[] public LookupTable;
-
-    function() public {
-        LookupTable.push(Item("M", 1000, 1));
-        LookupTable.push(Item("CM", 900, 2));
-        LookupTable.push(Item("D", 500, 1));
-        LookupTable.push(Item("CD", 400, 2));
-        LookupTable.push(Item("C", 100, 1));
-        LookupTable.push(Item("XC", 90, 2));
-        LookupTable.push(Item("L", 50, 1));
-        LookupTable.push(Item("XL", 40, 2));
-        LookupTable.push(Item("X", 10, 1));
-        LookupTable.push(Item("IX", 9, 2));
-        LookupTable.push(Item("V", 9, 1));
-        LookupTable.push(Item("IV", 4, 2));
-        LookupTable.push(Item("I", 1, 1));
-    }
+   
+    string[] RomanCharaters = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+    uint[] RomanValue = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
 
     function solution(uint n) public returns (string) {
-        // Convert the positive integer to a Roman Numeral
+        uint resultIndex = 0;
+        uint val = n;
+        uint i;
+        uint j;
+        uint romanValue;
+        bytes memory results = new bytes(32);
+        for ( i = 0; i < RomanCharaters.length; i++) {
+            romanValue = RomanValue[i];
+            bytes memory _tmpVal = bytes(RomanCharaters[i]);
+            while (val >= romanValue) {
+                for ( j = 0; j < _tmpVal.length; j++) {
+                    results[resultIndex++] = _tmpVal[j];
+                }
+                val -= romanValue;
+            }
+        }
+        bytes memory bytesStringTrimmed = new bytes(resultIndex);
+        for (j = 0; j < resultIndex; j++) {
+            bytesStringTrimmed[j] = results[j];
+        }
+        return string(bytesStringTrimmed);
     }
 }
