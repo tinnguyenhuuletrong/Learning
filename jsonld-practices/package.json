@@ -1,0 +1,15 @@
+{
+  "name": "jsonld-practices",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsonld": "^1.0.1",
+    "jsonld-signatures": "^2.3.0"
+  }
+}
