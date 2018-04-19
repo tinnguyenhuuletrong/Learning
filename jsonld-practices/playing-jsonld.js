@@ -135,11 +135,7 @@ async function sign() {
 
             // scId -> hashpublickey 
             const res = options._scChecker(owner);
-            console.log({
-                '@context': jsig.SECURITY_CONTEXT_URL,
-                id: owner,
-                publicKey: [res]
-            })
+            
             callback(null, {
                 '@context': jsig.SECURITY_CONTEXT_URL,
                 id: owner,
