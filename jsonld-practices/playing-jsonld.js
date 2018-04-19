@@ -44,77 +44,106 @@ testPrivateKeyWif = 'L4mEi7eEdTNNFQEWaa7JhUKAbtHdVvByGAqvpJKC53mfiqunjBjw';
 testPublicKeyWif = '1LGpGhGK8whX23ZNdxrgtjKrek9rP4xWER';
 
 async function sign() {
+
+    // 1st Sign by services
     var sign = await jsig.promises.sign(testDocument, {
         algorithm: 'EcdsaKoblitzSignature2016',
-        creator: "hashpubKey",
+        creator: "hashPubKeyServices01",
         privateKeyWif: testPrivateKeyWif,
     })
 
     console.log("1", sign)
 
+    // 2st Sign by blockpass
     sign = await jsig.promises.sign(sign, {
         algorithm: 'EcdsaKoblitzSignature2016',
-        creator: "hashpubKeyBp",
+        creator: "hashPubKeyBp01",
         privateKeyWif: testPrivateKeyWif,
-        // proof: {
-        //     "@context": ["http://schema.org", {
-        //         "env": "schema:text",
-        //         "scAddress": "schema:text"
-        //     }],
-        //     "scAddress": "rinkeby:0x000",
-        //     "env": "sandbox@0.0.1"
-        // },
         nonce: "sandbox@0.0.1,rinkeby:0x000"
     })
 
     console.log("2", sign)
 
-
+    // verify procedures
     const ver = await jsig.promises.verify(sign, {
         algorithm: 'EcdsaKoblitzSignature2016',
         checkNonce(nonce, options, callback) {
             console.log("[Nonce]", nonce);
+            const FAKE_OWNER = [
+                {
+                    serviceId: "01",
+                    scId: "0x01",
+                    keyIds: [{
+                        index: 0,
+                        pubKey: testPublicKeyWif,
+                        hashPubKey: '/hashPubKeyServices01'
+                    }],
+                },
+                {
+                    serviceId: "bp",
+                    scId: "0x02",
+                    keyIds: [{
+                        index: 0,
+                        pubKey: testPublicKeyWif,
+                        hashPubKey: '/hashPubKeyBp01'
+                    }],
+                }
+            ]
+
+            const SC_FAKE = {
+                "/0x01@0": "hashPubKeyServices01",
+                "/0x02@0": "hashPubKeyBp01",
+            }
 
             // init context checking function
-            
-            options._scChecker = function(owner) {
-                console.log("....sc checker by: " + owner)
-                return true;
-            }
-            options._apiChecker = function(keyId) {
+            options._apiChecker = function (keyId) {
                 console.log("....Query api by: " + keyId)
-                return true;
+
+                const itm = FAKE_OWNER.find(itm => itm.keyIds.find(key => key.hashPubKey === keyId));
+                const index = itm.keyIds.filter(key => key.hashPubKey === keyId)[0].index
+                return {
+                    owner: `${itm.scId}@${index}`,
+                    publickey: itm.keyIds[index].pubKey
+                };
             }
+
+            options._scChecker = function (owner) {
+                console.log("....sc checker by: " + owner)
+
+                return SC_FAKE[owner]
+            }
+
 
             callback(null, true);
         },
-        publicKey: function (keyId, options, callback) {
-            console.log("[Query Key]", keyId);
+        publicKey: function (creator, options, callback) {
+            console.log("[Query Key]", creator);
 
-            // api keyId -> publickey
-
-            options._apiChecker(keyId);
+            // api creator -> publickey
+            const res = options._apiChecker(creator);
 
             callback(null, {
                 '@context': jsig.SECURITY_CONTEXT_URL,
-                id: "hashpubKey",
-                owner: 'sc:<service_id>',
+                id: creator,
+                owner: res.owner,
                 type: 'CryptographicKey',
-                publicKeyWif: testPublicKeyWif
+                publicKeyWif: res.publickey
             })
         },
         publicKeyOwner: function (owner, options, callback) {
             console.log("[Query Owner]", owner);
 
-            // sc 'sc:<service_id>' -> hashpublickey 
-            // place hashpublickey to 'publicKey'
-
-            options._scChecker(owner);
-
+            // scId -> hashpublickey 
+            const res = options._scChecker(owner);
+            console.log({
+                '@context': jsig.SECURITY_CONTEXT_URL,
+                id: owner,
+                publicKey: [res]
+            })
             callback(null, {
                 '@context': jsig.SECURITY_CONTEXT_URL,
-                id: 'sc:<service_id>',
-                publicKey: ["hashpubKey"]
+                id: owner,
+                publicKey: [res]
             })
         },
         checkTimestamp: function () { return true }
