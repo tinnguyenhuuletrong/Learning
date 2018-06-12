@@ -11,5 +11,4 @@ spec:
     port: 8080
   selector:
     app: "node-example-deployment"
-  type: "LoadBalancer"
-  loadBalancerIP: ""
+  type: "NodePort"
