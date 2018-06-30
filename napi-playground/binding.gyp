@@ -7,7 +7,12 @@
         "<!@(node -p \"require('node-addon-api').include\")"
       ],
       "target_name": "hello_world",
-      "sources": [ "hello_world.cc" ],
+      "sources": [ 
+        "hello_world.cc", 
+        "native_object.cc",
+        "libpi/pi.cc",
+        "lib_pi_wrapper.cc"
+      ],
       'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ]
     }
   ]
