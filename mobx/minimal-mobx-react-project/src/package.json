@@ -1,0 +1,15 @@
+{
+    "name": "minimal-mobx-react-project",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [],
+    "homepage": "https://codesandbox.io/s/v3v0my2370",
+    "main": "index.js",
+    "dependencies": {
+        "mobx": "4.1.0",
+        "mobx-react": "5.0.0",
+        "mobx-react-devtools": "5.0.0",
+        "react": "16.0.0",
+        "react-dom": "16.0.0"
+    }
+}
