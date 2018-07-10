@@ -1,7 +1,7 @@
 const { decorate, observable, autorun, action, computed, spy, when } = require("mobx");
 
 function onChange(change) {
-    const { type, name, index, oldValue, newValue, added, removed, object} = change
+    const { type, name, index, oldValue, newValue, added, removed, object } = change
     console.log({
         object: object.constructor,
         type,
@@ -102,16 +102,16 @@ function obj2() {
             this.showAge = false
 
             // objects don't need to be converted into observables
-            this.ref = null; 
+            this.ref = null;
         }
-      
+
         get labelText() {
             console.warn('[compute]', 'labelText')
             const info = this.showAge ? `${this.name} (age: ${this.age})` : this.name;
             return info
         }
 
-        get labelTextWithRef () {
+        get labelTextWithRef() {
             console.warn('[compute]', 'labelTextWithRef')
             return `${this.labelText} ${this.ref}`
         }
@@ -150,7 +150,7 @@ function computeVSautorun() {
 
         get sum() {
             console.log('[compute] sum calculate')
-            return this.bags.reduce((a,b) => a + b, 0);
+            return this.bags.reduce((a, b) => a + b, 0);
         }
     }
 
@@ -184,7 +184,7 @@ async function whenTest() {
         }
 
         get sum() {
-            const tmp = this.bags.reduce((a,b) => a + b, 0);
+            const tmp = this.bags.reduce((a, b) => a + b, 0);
             console.log('[compute] sum calculate', tmp)
             return tmp
         }
@@ -208,7 +208,7 @@ async function whenTest() {
     console.log('half...')
 
     // When trigger
-    when( 
+    when(
         // Conditional
         _ => ins.sum >= 10
 
@@ -216,7 +216,7 @@ async function whenTest() {
         , _ => {
             console.log('done')
             clearTimeout(ticket)
-    })
+        })
 }
 
 // Spy
