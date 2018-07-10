@@ -1,4 +1,4 @@
-const { decorate, observable, autorun, action, computed, spy, when } = require("mobx");
+const { decorate, observable, autorun, action, computed, spy, when, reaction, toJS } = require("mobx");
 
 function onChange(change) {
     const { type, name, index, oldValue, newValue, added, removed, object } = change
@@ -219,14 +219,99 @@ async function whenTest() {
         })
 }
 
+
+function reactionTest1() {
+    console.info('---- Reaction 1----');
+    const todos = observable([
+        {
+            title: "Make coffee",
+            done: true,
+        },
+        {
+            title: "Find biscuit",
+            done: false
+        }
+    ]);
+
+    // reacts to length changes, but not to title changes!
+    const reaction1 = reaction(
+        () => todos.length,
+        length => console.log("reaction 1:", todos.map(todo => todo.title).join(", "))
+    );
+
+    // reacts to length and title changes
+    const reaction2 = reaction(
+        () => todos.map(todo => todo.title),
+        titles => {
+            console.log("reaction 2:", titles.join(", "))
+        }
+    );
+
+    // autorun reacts to just everything that is used in its function
+    // autorun trigger when created
+    const autorun1 = autorun(
+        () => console.log("autorun 1:", todos.map(todo => todo.title).join(", "))
+    );
+
+    todos.push({ title: "explain reactions", done: false });
+    // prints:
+    // reaction 1: Make coffee, find biscuit, explain reactions
+    // reaction 2: Make coffee, find biscuit, explain reactions
+    // autorun 1: Make coffee, find biscuit, explain reactions
+
+    todos[0].title = "Make tea"
+    // prints:
+    // reaction 2: Make tea, find biscuit, explain reactions
+    // autorun 1: Make tea, find biscuit, explain reactions
+}
+
+function reactionTest2() {
+    const todo = observable(
+        {
+            title: "Make coffee",
+            logs: [],
+            done: true,
+        }
+    );
+
+    const titleMonitoringDisposer = reaction(
+        _ => todo.title,
+        newVal => {
+            todo.logs.push({
+                note: 'title change',
+                newVal,
+                time: new Date()
+            });
+        }
+    )
+
+    const statusMonitoringDisposer = reaction(
+        _ => todo.done,
+        newVal => {
+            todo.logs.push({
+                note: 'status change',
+                newVal,
+                time: new Date()
+            });
+        }
+    )
+
+    // do it
+    todo.title = 'Make Pizza'
+    todo.done = false;
+    console.log(toJS(todo))
+}
+
 // Spy
 // spy((event) => {
 //     // console.log(`${event.name} with args: ${event.arguments}`)
 //     // console.log(event)
 // })
 
-//basic();
-//obj();
-//obj2();
+// basic();
+// obj();
+// obj2();
 // computeVSautorun();
-whenTest();
+// whenTest();
+// reactionTest1();
+reactionTest2();
