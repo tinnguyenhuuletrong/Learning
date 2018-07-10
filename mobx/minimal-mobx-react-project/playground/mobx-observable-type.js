@@ -1,4 +1,4 @@
-const { decorate, observable, autorun, action, computed, spy } = require("mobx");
+const { decorate, observable, autorun, action, computed, spy, when } = require("mobx");
 
 function onChange(change) {
     const { type, name, index, oldValue, newValue, added, removed, object} = change
@@ -176,6 +176,49 @@ function computeVSautorun() {
     }, 100);
 }
 
+async function whenTest() {
+    console.info('---- When ----');
+    class NumBag {
+        constructor() {
+            this.bags = []
+        }
+
+        get sum() {
+            const tmp = this.bags.reduce((a,b) => a + b, 0);
+            console.log('[compute] sum calculate', tmp)
+            return tmp
+        }
+    }
+
+    decorate(NumBag, {
+        bags: observable,
+        sum: computed
+    })
+
+    const ins = new NumBag();
+    let inc = 1;
+
+    const ticket = setInterval(_ => {
+        ins.bags.push(inc)
+    }, 1000)
+
+    // async
+    await when(_ => ins.sum > 5);
+
+    console.log('half...')
+
+    // When trigger
+    when( 
+        // Conditional
+        _ => ins.sum >= 10
+
+        // Reaction
+        , _ => {
+            console.log('done')
+            clearTimeout(ticket)
+    })
+}
+
 // Spy
 // spy((event) => {
 //     // console.log(`${event.name} with args: ${event.arguments}`)
@@ -185,4 +228,5 @@ function computeVSautorun() {
 //basic();
 //obj();
 //obj2();
-computeVSautorun()
+// computeVSautorun();
+whenTest();
