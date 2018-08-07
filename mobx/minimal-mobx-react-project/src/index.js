@@ -1,8 +1,11 @@
 import React from "react";
 import { render } from "react-dom";
-import { observable, action } from "mobx";
+import { observable, action, set, toJS } from "mobx";
 import { observer } from "mobx-react";
 import DevTools from "mobx-react-devtools";
+
+window.toJS = toJS
+window.setMobx = set
 
 class AppState {
 
@@ -11,7 +14,15 @@ class AppState {
 
   @observable
   author= {
-    name: "Michel"
+    name: "Michel",
+    extra: {
+      abc: "def",
+      g: {
+        e: {
+          f: "h"
+        }
+      }
+    }
   }
 
   @observable
@@ -19,6 +30,18 @@ class AppState {
     "John", "Sara"
   ]
 
+  @observable
+  emptyState= new Map()
+
+}
+
+
+function getReviewerById(message, id) {
+  if (message.emptyState.has(id)) return message.emptyState.get(id);
+  else 
+    message.emptyState.set(id, {})
+
+  return message.emptyState.get(id);
 }
 
 //
@@ -29,12 +52,26 @@ const Message = observer(({ message }) =>
   <div>
     <h3>Title: {message.title}</h3>
     <Author author={message.author} />
+    <AuthorExtra author={message.author} />
     <Likes likes={message.likes} />
+    {
+      ["1", "2", "3"].map(id => <Reviewer key={id} message={message} id={id}/>)
+    }
   </div>
+)
+
+const Reviewer = observer(({ message, id}) => 
+  <pre>
+    {JSON.stringify(getReviewerById(message, id), null, 2)}
+  </pre>  
 )
 
 const Author = observer(({ author }) =>
   <h4>Author: {author.name}</h4>
+)
+
+const AuthorExtra = observer(({ author }) =>
+  <h4>Author: {author.extra.g.e.f}</h4>
 )
 
 const Likes = observer(({ likes }) =>
