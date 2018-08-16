@@ -21,7 +21,7 @@
 
 'use strict';
 
-const applicationServerPublicKey = 'BPjHHp0-05-EIQgvrVBXQ2e6QnTCx5ymyVYouR-dUWHAxppCrVvY_ESdq0oz07k4Sd3WethIThcu5OYbRsSGUKs';
+const applicationServerPublicKey = 'BAQ_ymq0A9rrvQ-Vu4G1EjHO1CpL9zat5yo-G0wBdz9jeB_o8iUEmBwg25cG6Jjc46ZEa4BGh4RIfRkYLPF6fzg';
 
 const pushButton = document.querySelector('.js-push-btn');
 
@@ -48,6 +48,28 @@ function urlB64ToUint8Array(base64String) {
 //-------------------------------------------------------------//
 function updateSubscriptionOnServer(subscription) {
   // TODO: Send subscription to application server
+
+  if (subscription)
+    fetch('/register', {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(subscription)
+    }).then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      console.log('API:', data);
+    });
+  else 
+    fetch('/unregister', {
+      method: 'delete',
+    }).then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      console.log('API:', data);
+    });
 
   console.log('send to server', subscription)
 
