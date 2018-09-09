@@ -1,0 +1,69 @@
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+option java_outer_classname = "HelloWorldProto";
+option objc_class_prefix = "HLW";
+
+package helloworld;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc SayHelloCrash (HelloRequest) returns (HelloReply) {}
+  rpc SayHelloDelay (HelloDelayRequest) returns (HelloReply) {}
+
+  // streaming response
+  rpc CountTo (CountRequest) returns (stream CountProgressReply) {}
+
+  // stream request
+  rpc SumAll (stream SumRequest) returns (SumReply) {}
+
+  // bi stream
+  rpc ChatChannel (stream ChatRequest) returns (stream ChatRepy) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloDelayRequest {
+  string name = 1;
+  int32 delay = 2;
+}
+
+message CountRequest {
+  int32 from = 1;
+  int32 to = 2;
+  int32 interval = 3;
+}
+
+message SumRequest {
+  int32 value = 1;
+}
+
+message ChatRequest {
+  string message = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+
+message CountProgressReply {
+  string message = 1;
+}
+
+message SumReply {
+  int32 sum = 1;
+  int32 sampleCount = 2;
+  float elapsedTime = 3;
+}
+
+message ChatRepy {
+  string message = 1;
+}
