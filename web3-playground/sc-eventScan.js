@@ -50,16 +50,23 @@ async function allWhitelistAddr() {
 
   assert.strictEqual(whiteListRemoveEvents.length, 0)
 
-  return addrs.map(({ transactionHash, returnValues }) => {
-    return {
-      txHash: transactionHash,
-      addr: returnValues.addr
-    }
-  })
+  return Promise.all(
+    addrs.map(async ({ transactionHash, returnValues, blockNumber }) => {
+      const createdAtUnix = (await web3.eth.getBlock(blockNumber)).timestamp
+      const createdAt = new Date(createdAtUnix * 1000)
+      return {
+        txHash: transactionHash,
+        addr: returnValues.addr,
+        blockNumber,
+        createdAt,
+        createdAtUnix
+      }
+    })
+  )
 }
 
 const main = async () => {
-  const allEvents = await allEvent()
+  const allEvents = await allWhitelistAddr()
   console.log(allEvents.length)
 
   fs.writeFile(
