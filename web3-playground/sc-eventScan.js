@@ -5,7 +5,7 @@ const assert = require('assert')
 
 const abi = require('./deploy/pass.abi.json')
 
-const HttpProviderUrl = 'https://ropsten.infura.io/VDzXYTpyoIcSNDP86lv0'
+const HttpProviderUrl = 'https://ropsten.infura.io/v3/5030d8e827704195aa6a82d088c8b20f'
 
 var web3 = new Web3(HttpProviderUrl)
 
