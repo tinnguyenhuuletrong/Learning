@@ -3,7 +3,6 @@ package kata
 
 import (
 	"fmt"
-	"math"
 	"testing"
 )
 
@@ -14,14 +13,29 @@ func isPrime(n int) bool {
 	if val, ok := CachePrime[n]; ok {
 		return val
 	}
-	var end = int(math.Sqrt(float64(n)))
-	for i := 2; i < end; i++ {
-		if n%i == 0 {
-			return false
+	var res = true
+	if n == 2 || n == 3 {
+		res = true
+	} else if n%2 == 0 || n%3 == 0 {
+		res = false
+	} else {
+		var i = 5
+		var w = 2
+
+		for i*i <= n {
+			if n%i == 0 {
+				res = false
+				break
+			}
+
+			i += w
+			w = 6 - w
 		}
+
 	}
-	CachePrime[n] = true
-	return true
+
+	CachePrime[n] = res
+	return res
 }
 
 func nextPrimeLessThan(start, end int) int {
@@ -37,8 +51,13 @@ func primeFactorCount(n int) int {
 	if val, ok := CacheKPrime[n]; ok {
 		return val
 	}
-
 	var start, tmp, count = 2, n, 0
+
+	if isPrime(n) {
+		count = 1
+		tmp = 1
+	}
+
 	for tmp != 1 {
 		if tmp%start == 0 {
 			count++
@@ -103,7 +122,7 @@ func Puzzle(s int) int {
 
 // go test -run TestSumEvenFibonacci
 func TestKprime(t *testing.T) {
-	var k, start, nd = 7, 1000, 1500
+	var k, start, nd = 5, 1000, 1100
 	//[]int{1020, 1026, 1032, 1044, 1050, 1053, 1064,   1072, 1092, 1100}
 	fmt.Println(CountKprimes(k, start, nd))
 	fmt.Println(Puzzle(138))
