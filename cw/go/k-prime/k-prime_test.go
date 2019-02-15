@@ -6,68 +6,20 @@ import (
 	"testing"
 )
 
-var CachePrime = make(map[int]bool)
 var CacheKPrime = make(map[int]int)
-
-func isPrime(n int) bool {
-	if val, ok := CachePrime[n]; ok {
-		return val
-	}
-	var res = true
-	if n == 2 || n == 3 {
-		res = true
-	} else if n%2 == 0 || n%3 == 0 {
-		res = false
-	} else {
-		var i = 5
-		var w = 2
-
-		for i*i <= n {
-			if n%i == 0 {
-				res = false
-				break
-			}
-
-			i += w
-			w = 6 - w
-		}
-
-	}
-
-	CachePrime[n] = res
-	return res
-}
-
-func nextPrimeLessThan(start, end int) int {
-	for i := start; i < end; i++ {
-		if isPrime(i) {
-			return i
-		}
-	}
-	return -1
-}
 
 func primeFactorCount(n int) int {
 	if val, ok := CacheKPrime[n]; ok {
 		return val
 	}
-	var start, tmp, count = 2, n, 0
 
-	if isPrime(n) {
-		count = 1
-		tmp = 1
-	}
+	var count, tmp = 0, n
 
-	for tmp != 1 {
-		if tmp%start == 0 {
+	for i := 2; tmp != 1; i++ {
+		if tmp%i == 0 {
+			tmp /= i
 			count++
-			tmp /= start
-		} else {
-			start = nextPrimeLessThan(start+1, tmp)
-			if start == -1 {
-				count++
-				break
-			}
+			i--
 		}
 	}
 
