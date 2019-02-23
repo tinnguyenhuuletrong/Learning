@@ -35,6 +35,11 @@ func Solution(list []int) string {
 			{
 				if runLength == -1 {
 					runLength = list[i] - list[begin]
+					if runLength != 1 {
+						i = doWrite(list, begin, i-1)
+						begin = -1
+						state = "LOOK"
+					}
 				} else if list[i]-list[i-1] != runLength {
 					i = doWrite(list, begin, i-1)
 					begin = -1
