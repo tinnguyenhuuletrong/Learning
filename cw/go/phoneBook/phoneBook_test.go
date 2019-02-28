@@ -13,7 +13,7 @@ func Phone(dir, num string) string {
 	var tmp = strings.Split(dir, "\n")
 	var findPhone = regexp.MustCompile(fmt.Sprintf(`\+(%v)`, num))
 	var findName = regexp.MustCompile(`<(.*?)>`)
-	var trimNonAlphaNumeric = regexp.MustCompile(`[^a-zA-Z\d\s:-\\.]`)
+	var trimNonAlphaNumeric = regexp.MustCompile(`[^a-zA-Z.\d\s:-]`)
 	var name = ""
 	var address = ""
 	var phone = ""
