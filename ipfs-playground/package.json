@@ -1,0 +1,16 @@
+{
+  "name": "ipfs-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ipfs": "^0.34.4",
+    "ipld": "^0.21.1",
+    "ipld-in-memory": "^2.0.0"
+  }
+}
