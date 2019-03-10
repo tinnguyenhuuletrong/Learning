@@ -28,7 +28,7 @@ const App = () => {
           </div>
         )}
         {id && <IpfsId {...id} />}
-        {peers && peers.length && <IpfsPeer peers={peers} />}
+        {Boolean(peers && peers.length) && <IpfsPeer peers={peers} />}
       </main>
     </div>
   )
@@ -47,7 +47,9 @@ const IpfsId = props => {
         {['id', 'agentVersion', 'addresses'].map(key => (
           <div className="mb4" key={key}>
             <Title>{key}</Title>
-            <div className="bg-white pa2 br2  monospace">{props[key]}</div>
+            <div className="bg-white pa2 br2 truncate monospace">
+              {props[key]}
+            </div>
           </div>
         ))}
       </div>
