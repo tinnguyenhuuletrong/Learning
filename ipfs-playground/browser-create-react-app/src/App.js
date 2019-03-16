@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import useIpfsFactory from './hooks/use-ipfs-factory.js'
 import useIpfs from './hooks/use-ipfs.js'
 import useIpfsPeers from './hooks/use-ipfs-peer.js'
 import logo from './ipfs-logo.svg'
+import SnackBar from './Snackbar'
 
 const App = () => {
   const { ipfs, ipfsInitError } = useIpfsFactory({ commands: ['id'] })
@@ -28,8 +29,10 @@ const App = () => {
           </div>
         )}
         {id && <IpfsId {...id} />}
+        {Boolean(ipfs) && <ConnectToPeer ipfs={ipfs} />}
         {Boolean(peers && peers.length) && <IpfsPeer peers={peers} />}
       </main>
+      <SnackBar />
     </div>
   )
 }
@@ -71,6 +74,58 @@ const IpfsPeer = ({ peers }) => {
             {itm}
           </li>
         ))}
+      </div>
+    </section>
+  )
+}
+
+const ConnectToPeer = ({ ipfs }) => {
+  const [connectToAddr, setConnectToAddr] = useState('')
+
+  const _connectToMultiAddr = async multiaddr => {
+    if (!multiaddr) {
+      return console.error('No multiaddr was inserted.')
+    }
+
+    ipfs.swarm
+      .connect(multiaddr)
+      .then(() => {
+        window.showMessage(`Successfully connected to peer.`)
+      })
+      .catch(e =>
+        window.showMessage('An error occurred when connecting to the peer.')
+      )
+  }
+
+  return (
+    <section className="bg-snow mw8 center mt5">
+      <h1 className="f3 fw4 ma0 pv3 aqua montserrat tc">Connect To</h1>
+
+      <div className="pa3">
+        <Title>Multiaddr</Title>
+        <div className="bg-white pa2 br2">
+          <input
+            id="multiaddr-input"
+            type="text"
+            placeholder="Multiaddr"
+            value={connectToAddr}
+            style={{ width: '100%' }}
+            onChange={e => {
+              setConnectToAddr(e.target.value)
+            }}
+          />
+        </div>
+        <center>
+          <button
+            id="peer-btn"
+            style={{ margin: 10 }}
+            onClick={e => {
+              _connectToMultiAddr(connectToAddr)
+            }}
+          >
+            Connect
+          </button>
+        </center>
       </div>
     </section>
   )

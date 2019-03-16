@@ -47,10 +47,14 @@ export default function useIpfsFactory({ commands }) {
                 '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'
               ]
             }
+          },
+          EXPERIMENTAL: {
+            pubsub: true
           }
         })
         console.timeEnd('IPFS Started')
         window.ipfs = ipfs
+        window.Buffer = ipfs.types.Buffer
       } catch (error) {
         console.error('IPFS init error:', error)
         ipfs = null
