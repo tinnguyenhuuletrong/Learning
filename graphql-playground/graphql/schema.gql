@@ -17,3 +17,7 @@ type Query {
   bookById(id: Int!): Book
   authors: [Author]
 }
+
+type Mutation {
+  addBook(title: String!, authorId: Int!): Book
+}
