@@ -1,0 +1,20 @@
+{
+  "name": "graphql-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server-express": "^2.4.8",
+    "express": "^4.16.4",
+    "graphql": "^14.2.1",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0"
+  }
+}

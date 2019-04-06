@@ -1,0 +1,19 @@
+# Comments in GraphQL are defined with the hash (#) symbol.
+
+type Book {
+  id: Int
+  title: String
+  author: Author
+}
+
+type Author {
+  id: Int
+  name: String
+  books: [Book]
+}
+
+type Query {
+  books: [Book]
+  bookById(id: Int!): Book
+  authors: [Author]
+}
