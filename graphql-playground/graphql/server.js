@@ -5,6 +5,15 @@ const typeDefs = gql`
   ${schema}
 `
 const resolvers = require('./resolvers')
-const server = new ApolloServer({ typeDefs, resolvers })
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  rootValue: { _type: 'rootQueryObj' },
+  context: ({ req }) => {
+    return {
+      authScope: []
+    }
+  }
+})
 
 module.exports = server
