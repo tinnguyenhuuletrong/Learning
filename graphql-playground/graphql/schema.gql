@@ -45,3 +45,8 @@ type LikeBookMutationResponse {
   book: Book
   author: Author
 }
+
+type Subscription {
+  bookAdded: Book
+  reputationChanged(id: Int): Author
+}

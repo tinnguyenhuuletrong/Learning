@@ -1,4 +1,6 @@
-const { ApolloServer, gql } = require('apollo-server-express')
+const { ApolloServer, gql, PubSub } = require('apollo-server-express')
+
+const pubsub = new PubSub()
 
 const schema = require('fs').readFileSync(__dirname + '/schema.gql')
 const typeDefs = gql`
@@ -9,8 +11,12 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   rootValue: { _type: 'rootQueryObj' },
-  context: ({ req }) => {
+  context: ({ req, connection }) => {
+    if (connection) {
+      console.log(connection.context)
+    }
     return {
+      pubsub,
       authScope: []
     }
   }
