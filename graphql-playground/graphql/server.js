@@ -12,12 +12,24 @@ const server = new ApolloServer({
   resolvers,
   rootValue: { _type: 'rootQueryObj' },
   context: ({ req, connection }) => {
+    let connectionType = 'http'
     if (connection) {
-      console.log(connection.context)
+      connectionType = 'ws'
     }
     return {
+      connectionType,
       pubsub,
       authScope: []
+    }
+  },
+  subscriptions: {
+    onConnect: (connectionParams, webSocket, context) => {
+      console.log('on ws connect', connectionParams)
+      return true
+    },
+    onDisconnect: (webSocket, context) => {
+      console.log('on ws disconnect', connectionParams)
+      return true
     }
   }
 })
