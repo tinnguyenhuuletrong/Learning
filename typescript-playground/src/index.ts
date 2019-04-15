@@ -1,4 +1,4 @@
-import { CodeHelper } from './utils'
+import { CodeHelper, Debug } from './utils'
 import { EUserScopes, UserService } from './userService'
 
 UserService.createUser('user1', '1')
@@ -17,7 +17,7 @@ for (let i = 0; i < 100; i++) {
   const tmp = CodeHelper.inlineIf(() => ran % 2 === 0, 'even', 'odd')
   const tmp2 = CodeHelper.inlineIf((ran + 1) % 2 === 0, 'even', 'odd')
 
-  console.log(`${ran} -> ${tmp} , ${tmp2}`)
+  Debug.log({ name: 'random1', value: `${ran} -> ${tmp} , ${tmp2}` })
 }
 
 const asyncRandom = async () => {
@@ -29,7 +29,7 @@ const asyncRandom = async () => {
       Promise.resolve('odd-pm')
     )
 
-    console.log(`${ran} -> ${tmp}`)
+    Debug.log({ name: 'random2', value: `${ran} -> ${tmp}` })
   }
 }
 asyncRandom()
