@@ -36,4 +36,8 @@ function inlineIf(
   return conditionValue ? trueReturn : falseReturn
 }
 
-export { inlineIf }
+function castJson<T>(jsonStr: string): T {
+  return JSON.parse(jsonStr) as T
+}
+
+export { inlineIf, castJson }

@@ -12,12 +12,14 @@ const lookup = async (query: Object) => {
 
 lookup({ lastName: '1' })
 
-for (let i = 0; i < 100; i++) {
-  const ran = Math.randomFromRange(1, 200)
-  const tmp = CodeHelper.inlineIf(() => ran % 2 === 0, 'even', 'odd')
-  const tmp2 = CodeHelper.inlineIf((ran + 1) % 2 === 0, 'even', 'odd')
+const random = () => {
+  for (let i = 0; i < 100; i++) {
+    const ran = Math.randomFromRange(1, 200)
+    const tmp = CodeHelper.inlineIf(() => ran % 2 === 0, 'even', 'odd')
+    const tmp2 = CodeHelper.inlineIf((ran + 1) % 2 === 0, 'even', 'odd')
 
-  Debug.log({ name: 'random1', value: `${ran} -> ${tmp} , ${tmp2}` })
+    Debug.log({ name: 'random1', value: `${ran} -> ${tmp} , ${tmp2}` })
+  }
 }
 
 const asyncRandom = async () => {
@@ -32,4 +34,17 @@ const asyncRandom = async () => {
     Debug.log({ name: 'random2', value: `${ran} -> ${tmp}` })
   }
 }
-asyncRandom()
+
+const castCode = () => {
+  const strJson = JSON.stringify({ a: 1, b: 2, c: 3 })
+  type ExpectDataLoaded = {
+    a: number
+    b: number
+    c: number
+  }
+
+  // Auto complete helper
+  const tmp = CodeHelper.castJson<ExpectDataLoaded>(strJson)
+  console.log(tmp.b)
+}
+castCode()
