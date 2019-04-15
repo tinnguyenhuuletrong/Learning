@@ -1,3 +1,4 @@
+import { commandLogDecorator } from './decorator'
 import { v4 } from 'uuid'
 import { find } from 'lodash'
 
@@ -7,7 +8,7 @@ enum EUserScopes {
 }
 
 class UserModel {
-  public _id: string = v4()
+  public _id: string = ''
   public firstName: string = ''
   public lastName: string = ''
   public scopes: Array<EUserScopes> = [
@@ -24,8 +25,10 @@ class UserModel {
 class UserService {
   private static DB: UserModel[] = []
 
+  @commandLogDecorator('USER_CREATE')
   public static createUser(firstName: string, lastName: string): UserModel {
     const ins = new UserModel()
+    ins._id = v4()
     ins.firstName = firstName
     ins.lastName = lastName
 
