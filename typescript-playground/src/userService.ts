@@ -1,10 +1,19 @@
 import { v4 } from 'uuid'
 import { find } from 'lodash'
 
+enum EUserScopes {
+  EUpdatePersonalData = 'update_personal_data',
+  ELogin = 'login'
+}
+
 class UserModel {
   public _id: string = v4()
   public firstName: string = ''
   public lastName: string = ''
+  public scopes: Array<EUserScopes> = [
+    EUserScopes.ELogin,
+    EUserScopes.EUpdatePersonalData
+  ]
 
   public toString() {
     const { firstName, lastName } = this
@@ -29,4 +38,4 @@ class UserService {
   }
 }
 
-export { UserService, UserModel }
+export { UserService, UserModel, EUserScopes }
