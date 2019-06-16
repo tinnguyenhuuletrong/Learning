@@ -1,9 +1,16 @@
-const { convertBtcPrivateWipToJws } = require('./index')
+const {
+  convertBtcPrivateWipToJwk,
+  jwkToBtcPrivateWip,
+  jwkToBtcAddressCompressed,
+  JWK
+} = require('./lib/utils')
 
-const res = convertBtcPrivateWipToJws({
+const res = convertBtcPrivateWipToJwk({
   keyID: '1',
-  privateKeyWIP: 'L1SfrY4D8V3qcMYFKYsGNt6ZgR75fdsBNeW9ZNgytYyN752ZXW3h',
-  isPubKeyOnly: true
+  privateKeyWIP: '5JmnWMBF5R2YrhT7R98Jz4semGtDqdSsP88xrvrPQTjDwSs9CG1',
+  isPubKeyOnly: false
 })
 
 console.log(res)
+console.log(jwkToBtcPrivateWip(res))
+console.log(jwkToBtcAddressCompressed(res))
