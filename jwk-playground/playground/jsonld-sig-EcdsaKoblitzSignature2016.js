@@ -1,6 +1,7 @@
 const bs58 = require('bs58')
 const { documentLoaders } = require('jsonld')
 const jsigs = require('jsonld-signatures')
+const VerifyMultiEcdsaKoblitzSignature2016 = require('./jsonld-sig-patch/VerifyMultiEcdsaKoblitzSignature2016')
 
 async function signDoc({ doc, creator, publicKeyWif, privateKeyWif }) {
   const { node } = documentLoaders
@@ -39,7 +40,7 @@ async function verifyDoc({ signedDoc, preLoadedDocuments, controller }) {
   }, {})
 
   const result = await jsigs.verify(signedDoc, {
-    suite: new EcdsaKoblitzSignature2016(),
+    suite: new VerifyMultiEcdsaKoblitzSignature2016(),
     documentLoader: async url => {
       if (mapped[url]) return mapped[url]
       return documentLoader(url)
