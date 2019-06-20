@@ -3,28 +3,86 @@ const { Ed25519KeyPair } = require('crypto-ld')
 const { documentLoaders } = require('jsonld')
 const jsigs = require('jsonld-signatures')
 
+// specify the public key object
+const publicKey = (id, controller, key) => ({
+  '@context': jsigs.SECURITY_CONTEXT_URL,
+  type: 'Ed25519VerificationKey2018',
+  id,
+  controller,
+  publicKeyBase58: key
+})
+
+const linkPubKey = (id, pubKeys) => ({
+  '@context': jsigs.SECURITY_CONTEXT_URL,
+  id,
+  publicKey: [...pubKeys],
+  authentication: [...pubKeys.map(itm => itm.id)]
+})
+
+async function signDoc({ doc, creator, privateKeyBase58, publicKeyBase58 }) {
+  const { node } = documentLoaders
+  const documentLoader = node()
+
+  const { Ed25519Signature2018 } = jsigs.suites
+  const { PublicKeyProofPurpose } = jsigs.purposes
+
+  const signed = await jsigs.sign(doc, {
+    suite: new Ed25519Signature2018({
+      verificationMethod: creator,
+      key: new Ed25519KeyPair({ privateKeyBase58, publicKeyBase58 })
+    }),
+    purpose: new PublicKeyProofPurpose(),
+    documentLoader: async url => {
+      console.log(url)
+      return documentLoader(url)
+    }
+  })
+  return signed
+}
+
+async function verifyDoc({ signedDoc, preLoadedDocuments, controller }) {
+  const { node } = documentLoaders
+  const documentLoader = node()
+
+  const { PublicKeyProofPurpose } = jsigs.purposes
+  const { Ed25519Signature2018 } = jsigs.suites
+
+  const mapped = Object.keys(preLoadedDocuments).reduce((acc, key) => {
+    return {
+      ...acc,
+      [key]: {
+        context: null,
+        document: preLoadedDocuments[key]
+      }
+    }
+  }, {})
+
+  const suites = Object.keys(preLoadedDocuments)
+    .filter(key => Boolean(preLoadedDocuments[key].type))
+    .map(key => preLoadedDocuments[key])
+    .map(
+      itm =>
+        new Ed25519Signature2018({
+          key: new Ed25519KeyPair({ ...itm })
+        })
+    )
+
+  const result = await jsigs.verify(signedDoc, {
+    suite: suites,
+    documentLoader: async url => {
+      console.log(url)
+      if (mapped[url]) return mapped[url]
+      return documentLoader(url)
+    },
+    purpose: new PublicKeyProofPurpose({ controller })
+  })
+  return result
+}
+
 async function start() {
   const publicKeyBase58 = 'CXjyVf7diom6ixzDzRfkFPWRdEpa5qibgUBdHB4nEDDP'
   const privateKeyBase58 =
     'seXmkgpQ7XMJH3rLWiwtiZuiQoTLuhNf9fsbvVEeQMq6hDJZVpXfxpfBHkaNbtPRdCXt25nNeGjB2zQWc5qjt6R'
-
-  // specify the public key object
-  const publicKey = {
-    '@context': jsigs.SECURITY_CONTEXT_URL,
-    type: 'Ed25519VerificationKey2018',
-    id: 'https://example.com/i/alice/keys/2',
-    controller: 'https://example.com/i/alice',
-    publicKeyBase58
-  }
-
-  // specify the public key controller object
-  const controller = {
-    '@context': jsigs.SECURITY_CONTEXT_URL,
-    id: 'https://example.com/i/alice',
-    publicKey: [publicKey],
-    // this authorizes this key to be used for authenticating
-    authentication: [publicKey.id]
-  }
 
   // create the JSON-LD document that should be signed
   const doc = {
@@ -47,38 +105,28 @@ async function start() {
     }
   }
 
-  // we will need the documentLoader to verify the controller
-  const { node } = documentLoaders
-  const documentLoader = node()
-
-  // sign the document for the purpose of authentication
-  const { Ed25519Signature2018 } = jsigs.suites
-  const { PublicKeyProofPurpose } = jsigs.purposes
-
-  const signed = await jsigs.sign(doc, {
-    documentLoader,
-    suite: new Ed25519Signature2018({
-      verificationMethod: publicKey.id,
-      key: new Ed25519KeyPair({ privateKeyBase58, publicKeyBase58 })
-    }),
-    purpose: new PublicKeyProofPurpose()
+  const signed = await signDoc({
+    doc,
+    creator: '/ttin/key/1',
+    privateKeyBase58,
+    publicKeyBase58
   })
 
   console.log('Signed document:', signed)
 
-  // verify the signed document
-  const result = await jsigs.verify(signed, {
-    documentLoader,
-    suite: new Ed25519Signature2018({
-      key: new Ed25519KeyPair(publicKey)
-    }),
-    purpose: new PublicKeyProofPurpose({ controller })
+  const pubKeyObj1 = publicKey('/ttin/key/1', '/ttin', publicKeyBase58)
+  const pubKeyController = linkPubKey('/ttin', [pubKeyObj1])
+
+  const result = await verifyDoc({
+    signedDoc: signed,
+    preLoadedDocuments: {
+      '/ttin/key/1': pubKeyObj1,
+      '/ttin': pubKeyController
+    },
+    controller: pubKeyController
   })
-  if (result.verified) {
-    console.log('Signature verified.')
-  } else {
-    console.log('Signature verification error:', result.error)
-  }
+
+  console.log(result)
 }
 
 start()
