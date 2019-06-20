@@ -80,9 +80,13 @@ async function verifyDoc({ signedDoc, preLoadedDocuments, controller }) {
 }
 
 async function start() {
-  const publicKeyBase58 = 'CXjyVf7diom6ixzDzRfkFPWRdEpa5qibgUBdHB4nEDDP'
-  const privateKeyBase58 =
+  const publicKeyBase58_1 = 'CXjyVf7diom6ixzDzRfkFPWRdEpa5qibgUBdHB4nEDDP'
+  const privateKeyBase58_1 =
     'seXmkgpQ7XMJH3rLWiwtiZuiQoTLuhNf9fsbvVEeQMq6hDJZVpXfxpfBHkaNbtPRdCXt25nNeGjB2zQWc5qjt6R'
+
+  const publicKeyBase58_2 = '26VPhpycm9qg8WnQivxW1dGAhHYox5dqdDDxfji8a4hz'
+  const privateKeyBase58_2 =
+    '26c96kKGqJYWyoo9FSUXhEdnpfxUd4aztudRKtnnSxmH8J1BbX5Knxyfn52kQDLbkHg2qaruvKyijsSBypbkaxSp'
 
   // create the JSON-LD document that should be signed
   const doc = {
@@ -105,22 +109,32 @@ async function start() {
     }
   }
 
-  const signed = await signDoc({
+  let signed = await signDoc({
     doc,
     creator: '/ttin/key/1',
-    privateKeyBase58,
-    publicKeyBase58
+    privateKeyBase58: privateKeyBase58_1,
+    publicKeyBase58: publicKeyBase58_1
+  })
+
+  signed = await signDoc({
+    doc,
+    creator: '/ttin/key/2',
+    privateKeyBase58: privateKeyBase58_2,
+    publicKeyBase58: publicKeyBase58_2
   })
 
   console.log('Signed document:', signed)
 
-  const pubKeyObj1 = publicKey('/ttin/key/1', '/ttin', publicKeyBase58)
-  const pubKeyController = linkPubKey('/ttin', [pubKeyObj1])
+  const pubKeyObj1 = publicKey('/ttin/key/1', '/ttin', publicKeyBase58_1)
+  const pubKeyObj2 = publicKey('/ttin/key/2', '/ttin', publicKeyBase58_2)
+
+  const pubKeyController = linkPubKey('/ttin', [pubKeyObj1, pubKeyObj2])
 
   const result = await verifyDoc({
     signedDoc: signed,
     preLoadedDocuments: {
       '/ttin/key/1': pubKeyObj1,
+      '/ttin/key/2': pubKeyObj2,
       '/ttin': pubKeyController
     },
     controller: pubKeyController
@@ -133,8 +147,8 @@ start()
 
 // genKeys()
 function genKeys() {
-  // var ins = Ed25519KeyPair.generate()
-  // console.log(ins)
+  var ins = Ed25519KeyPair.generate()
+  console.log(ins)
 
   //http://ed25519.herokuapp.com/
   console.log(
