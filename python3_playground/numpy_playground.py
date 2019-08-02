@@ -33,8 +33,57 @@ def io():
     np.save('random_array.npy', a)
     b = np.load('random_array.npy')
     print("io - load array", b)
-    assert (a == b, "equal")
+    assert a == b
+
+
+def math():
+    a = np.random.random_sample((2, 2))
+    b = np.random.random_sample((2, 2))
+    print(a, b)
+    print('a + b', '=', a + b)
+    print('a - b', '=', a - b)
+    print('a * b', '=', a * b)
+    print('a / b', '=', a / b)
+
+    a = np.array([1, 0, 0])
+    b = np.array([0, 1, 0])
+    np.cross(a, b)
+    print('a dot b', '=', a.dot(b))
+    print('a cross b', '=', np.cross(a, b))
+
+
+def aggreate():
+    a = np.random.random_sample(4)
+    print(np.sort(a))
+    print('min a', '=', np.min(a))
+    print('max a', '=', np.max(a))
+    print('mean a', '=', np.mean(a))
+    print('median a', '=', np.median(a))
+    print('standard deviation', '=', np.std(a))
+
+
+# https: // www.tutorialspoint.com/numpy/numpy_indexing_and_slicing
+def subset_slicing():
+    a = np.array([1, 2, 3])
+    b = np.array([(1.5, 2, 3), (4, 5, 6)])
+
+    print('a -> ', a)
+    print('b -> ', b)
+
+    print(a[2], '-> 3')
+    print(b[1, 2], '-> 6')
+
+    print("start:stop:step")
+    print(a[0:2], '-> "0:2" start at 0 stop at 2 items -> [1,2]')
+    print(b[0:2, 1], '-> "0:2, 1" index 0 get 2 items where column = 1 -> [2,5]')
+    print(b[:1], '-> ":1" all item at row 0, start begin, stop end, step 1')
+
+    # ellipsis (…) to make a selection tuple of the same length as the dimension of an array
+    print(b[..., 1:], '-> "..., 1:" remove first column')
+
+    # reverse
+    print(a[::-1], '-> "::-1" step -1 (reverse)')
 
 
 if __name__ == "__main__":
-    io()
+    subset_slicing()
