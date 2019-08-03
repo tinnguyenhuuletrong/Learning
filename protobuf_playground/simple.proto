@@ -1,5 +1,5 @@
-package messasing;
 syntax = "proto3";
+package messasing;
 
 import "google/protobuf/any.proto";
 
@@ -13,15 +13,15 @@ message PongBody {
 }
 
 enum MSG_TYPE {
-    PING = 1;
-    PONG = 2;
+    PING = 0;
+    PONG = 1;
 }
  
 message AwesomeMessage {
     MSG_TYPE type = 1; 
     int64 id = 2; 
     int64 createdAt = 3;
-    map<string,Any> extra = 4;
+    map<string,google.protobuf.Any> extra = 4;
 
     oneof body {
         PingBody pingBody = 5;

@@ -396,13 +396,13 @@ $root.messasing = (function() {
      * MSG_TYPE enum.
      * @name messasing.MSG_TYPE
      * @enum {string}
-     * @property {number} PING=1 PING value
-     * @property {number} PONG=2 PONG value
+     * @property {number} PING=0 PING value
+     * @property {number} PONG=1 PONG value
      */
     messasing.MSG_TYPE = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[1] = "PING"] = 1;
-        values[valuesById[2] = "PONG"] = 2;
+        values[valuesById[0] = "PING"] = 0;
+        values[valuesById[1] = "PONG"] = 1;
         return values;
     })();
 
@@ -442,7 +442,7 @@ $root.messasing = (function() {
          * @memberof messasing.AwesomeMessage
          * @instance
          */
-        AwesomeMessage.prototype.type = 1;
+        AwesomeMessage.prototype.type = 0;
 
         /**
          * AwesomeMessage id.
@@ -634,8 +634,8 @@ $root.messasing = (function() {
                 switch (message.type) {
                 default:
                     return "type: enum value expected";
+                case 0:
                 case 1:
-                case 2:
                     break;
                 }
             if (message.id != null && message.hasOwnProperty("id"))
@@ -689,12 +689,12 @@ $root.messasing = (function() {
             var message = new $root.messasing.AwesomeMessage();
             switch (object.type) {
             case "PING":
-            case 1:
-                message.type = 1;
+            case 0:
+                message.type = 0;
                 break;
             case "PONG":
-            case 2:
-                message.type = 2;
+            case 1:
+                message.type = 1;
                 break;
             }
             if (object.id != null)
@@ -754,7 +754,7 @@ $root.messasing = (function() {
             if (options.objects || options.defaults)
                 object.extra = {};
             if (options.defaults) {
-                object.type = options.enums === String ? "PING" : 1;
+                object.type = options.enums === String ? "PING" : 0;
                 if ($util.Long) {
                     var long = new $util.Long(0, 0, false);
                     object.id = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;

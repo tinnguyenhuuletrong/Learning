@@ -184,8 +184,8 @@ export namespace messasing {
 
     /** MSG_TYPE enum. */
     enum MSG_TYPE {
-        PING = 1,
-        PONG = 2
+        PING = 0,
+        PONG = 1
     }
 
     /** Properties of an AwesomeMessage. */
