@@ -6,9 +6,9 @@ import (
 	pb "play/messasing"
 
 	b64 "encoding/base64"
-	"encoding/json"
+	json "encoding/json"
 
-	"github.com/gogo/protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
 	any "github.com/golang/protobuf/ptypes/any"
 )
 
@@ -35,8 +35,8 @@ func main() {
 	}
 	jsonVal, _ := json.Marshal(&msg)
 
-	println("JSON", string(jsonVal))
 	println("Encoded ", b64.StdEncoding.EncodeToString(buffer))
+	println("JSON", string(jsonVal))
 
 	// Decode
 	var obj pb.AwesomeMessage
@@ -44,5 +44,8 @@ func main() {
 	if err != nil {
 		log.Fatalln("Failed to encode", err)
 	}
+	jsonVal1, _ := json.Marshal(&obj)
+
 	println("Decoded", obj.String())
+	println("JSON", string(jsonVal1))
 }
