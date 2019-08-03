@@ -1,0 +1,16 @@
+{
+  "name": "protobuf_playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-proto": "pbjs -t static-module -w commonjs ../simple.proto -o protoGenerated.js",
+    "gen-proto-type": "pbts -o protoGenerated.d.ts protoGenerated.js",
+    "build": "npm run build-proto && npm run gen-proto-type"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "protobufjs": "^6.8.8"
+  }
+}

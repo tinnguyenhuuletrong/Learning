@@ -1,0 +1,30 @@
+package messasing;
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+
+message PingBody {
+    int32 nounce = 1;
+}
+
+message PongBody {
+    int32 reply = 1;
+}
+
+enum MSG_TYPE {
+    PING = 1;
+    PONG = 2;
+}
+ 
+message AwesomeMessage {
+    MSG_TYPE type = 1; 
+    int64 id = 2; 
+    int64 createdAt = 3;
+    map<string,Any> extra = 4;
+
+    oneof body {
+        PingBody pingBody = 5;
+        PongBody pongBody = 6;
+    };
+}
