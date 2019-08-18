@@ -24,3 +24,22 @@ print('Select row by index iloc[:3, :2] \n', data.iloc[:3, :2])
 # Select row by explicit index :'Illinois', :'pop'
 print(
     "Select row by explicit index loc[:'Illinois', :'pop'] \n", data.loc[:'Illinois', :'pop'])
+
+
+# Operations DataFrame
+rng = np.random.RandomState(42)
+A = pd.DataFrame(rng.randint(0, 20, (2, 2)),
+                 columns=list('AB'))
+B = pd.DataFrame(rng.randint(0, 10, (3, 3)),
+                 columns=list('BAC'))
+print('A = \n', A)
+print('B = \n', B)
+print('A + B', '= \n', A + B)
+
+
+# Operations DataFrame vs Series
+df = pd.DataFrame(rng.randint(10, size=(3, 4)), columns=list('QRST'))
+print('df = \n', df)
+print('df - df.iloc[0] = \n', df - df.iloc[0])
+print('halfdf = \n', df.iloc[:, ::2])
+print('df - df.iloc[:, ::2] = \n', (df - df.iloc[:, ::2]).fillna(-99999))
