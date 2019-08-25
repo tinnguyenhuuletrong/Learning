@@ -1,15 +1,28 @@
-import React, { useCallback, useState, useMemo, useEffect } from 'react'
+import React, { useCallback, useState, useMemo, useReducer } from 'react'
+import SimplePeer from 'simple-peer'
+import { toast } from 'bulma-toast'
+import copy from 'copy-to-clipboard'
+
 import { useStateValue, CONSTANT } from '../AppContext'
 import connectionMonitor from '../utils/connectionMonitor'
 
-import SimplePeer from 'simple-peer'
+const copyClipboard = data => {
+  copy(data)
+  toast({
+    message: 'copied',
+    type: 'is-info',
+    animate: { in: 'fadeIn', out: 'fadeOut' }
+  })
+}
 
 export default props => {
   const [{ appStep, mode, connection, eventSource }, dispatch] = useStateValue()
 
   const [subStep, setSubStep] = useState(1)
   const [inputSignalData, setInputSignalData] = useState('')
-  const [answerToHost, setAnswerToHost] = useState([])
+  const [answerToHost, dispatchAnswerToHost] = useReducer((state, val) => {
+    return [...state, val]
+  }, [])
 
   const stepLock = useMemo(() => {
     const isEnable =
@@ -21,20 +34,6 @@ export default props => {
   // Effect
   connectionMonitor(connection, eventSource, dispatch)
 
-  // Offer signal
-  useEffect(() => {
-    if (!connection) return
-    const signalHandler = data => {
-      const newSignalData = data
-      setAnswerToHost([...answerToHost, newSignalData])
-      setSubStep(2)
-    }
-    connection.on('signal', signalHandler)
-    return () => {
-      connection.off('signal', signalHandler)
-    }
-  }, [connection, answerToHost, setSubStep])
-
   // UI Callback
   const doConnect = useCallback(() => {
     console.log('begin connect ', inputSignalData)
@@ -42,12 +41,20 @@ export default props => {
       initiator: false,
       trickle: false
     })
+
+    const signalHandler = data => {
+      const newSignalData = data
+      dispatchAnswerToHost(newSignalData)
+    }
+    p.on('signal', signalHandler)
+
     try {
       const arr = JSON.parse(inputSignalData)
       if (!Array.isArray(arr)) throw new Error('Input signal must be aray')
 
       arr.forEach(itm => p.signal(itm))
 
+      setSubStep(2)
       dispatch({
         type: CONSTANT.EACTION.updateConenction,
         value: p
@@ -55,7 +62,11 @@ export default props => {
     } catch (error) {
       console.error(error)
     }
-  }, [inputSignalData, dispatch])
+  }, [inputSignalData, dispatchAnswerToHost, setSubStep, dispatch])
+
+  const copyAnswerDataClipboard = useCallback(() => {
+    copyClipboard(JSON.stringify(answerToHost))
+  }, [answerToHost])
 
   return (
     <fieldset {...stepLock}>
@@ -78,7 +89,15 @@ export default props => {
       )}
       {subStep === 2 && (
         <div className="field">
-          <label className="label">Answer To Host</label>
+          <label className="label">
+            Answer To Host{' '}
+            <a
+              className="button is-rounded is-small"
+              onClick={copyAnswerDataClipboard}
+            >
+              <i className="far fa-clipboard" />
+            </a>
+          </label>
           <div className={['control'].join(' ')}>
             <textarea
               className={['textarea', 'is-small'].join(' ')}

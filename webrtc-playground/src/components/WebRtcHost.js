@@ -1,14 +1,27 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react'
+import React, { useCallback, useMemo, useReducer, useState } from 'react'
+import SimplePeer from 'simple-peer'
+import { toast } from 'bulma-toast'
+import copy from 'copy-to-clipboard'
+
 import { useStateValue, CONSTANT } from '../AppContext'
 import connectionMonitor from '../utils/connectionMonitor'
 
-import SimplePeer from 'simple-peer'
+const copyClipboard = data => {
+  copy(data)
+  toast({
+    message: 'copied',
+    type: 'is-info',
+    animate: { in: 'fadeIn', out: 'fadeOut' }
+  })
+}
 
 export default props => {
   const [{ appStep, mode, connection, eventSource }, dispatch] = useStateValue()
 
   const [subStep, setSubStep] = useState(1)
-  const [hostSignalData, setHostSignalData] = useState([])
+  const [hostSignalData, dispatchHostSignalData] = useReducer((state, val) => {
+    return [...state, val]
+  }, [])
   const [hostAnswer, setHostAnswer] = useState('')
 
   const stepLock = useMemo(() => {
@@ -21,26 +34,20 @@ export default props => {
   // Effect
   connectionMonitor(connection, eventSource, dispatch)
 
-  // Offer signal
-  useEffect(() => {
-    if (!connection) return
-    const signalHandler = data => {
-      const newSignalData = data
-      setHostSignalData([...hostSignalData, newSignalData])
-      setSubStep(2)
-    }
-    connection.on('signal', signalHandler)
-    return () => {
-      connection.off('signal', signalHandler)
-    }
-  }, [connection, hostSignalData, setHostSignalData, setSubStep])
-
   // UI Callback
   const createNew = useCallback(() => {
     const p = new SimplePeer({
       initiator: true
       // trickle: false
     })
+
+    const signalHandler = data => {
+      const newSignalData = data
+      dispatchHostSignalData(newSignalData)
+    }
+    p.on('signal', signalHandler)
+
+    setSubStep(2)
     dispatch({
       type: CONSTANT.EACTION.updateConenction,
       value: p
@@ -59,10 +66,22 @@ export default props => {
     }
   }, [hostAnswer, connection])
 
+  const copyHostDataClipboard = useCallback(() => {
+    copyClipboard(JSON.stringify(hostSignalData))
+  }, [hostSignalData])
+
   return (
     <fieldset {...stepLock}>
       <div className="field">
-        <label className="label">Host Signal Data</label>
+        <label className="label">
+          Host Signal Data{' '}
+          <a
+            className="button is-rounded is-small"
+            onClick={copyHostDataClipboard}
+          >
+            <i className="far fa-clipboard" />
+          </a>
+        </label>
         <div
           className={['control', hostSignalData ? '' : 'is-loading'].join(' ')}
         >
