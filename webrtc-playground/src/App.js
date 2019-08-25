@@ -3,6 +3,8 @@ import ChoiceMode from './components/ChoiceMode'
 import WebRtcHost from './components/WebRtcHost'
 import WebRtcClient from './components/WebRtcClient'
 import WebRtcStatus from './components/WebRtcStatus'
+import WebRtcLog from './components/WebRtcLog'
+import WebRtcData from './components/WebRtcData'
 // import TabContainer from './containers/TabContainer'
 import DisplayIfMode from './containers/DisplayIfMode'
 import { StateProvider, CONSTANT } from './AppContext'
@@ -44,6 +46,15 @@ function App() {
 
           <div className="column">
             <WebRtcStatus />
+          </div>
+
+          <div className="column is-multiline">
+            <div className="box">
+              <WebRtcLog />
+            </div>
+            <div className="box">
+              <WebRtcData />
+            </div>
           </div>
         </div>
       </section>

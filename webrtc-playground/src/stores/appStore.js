@@ -10,7 +10,7 @@ export const initialState = {
   eventSource: new EventEmitter()
 }
 
-export const reducer = (state, action) => {
+const mainReducer = (state, action) => {
   switch (action.type) {
     case EACTION.reset:
       return {
@@ -35,3 +35,11 @@ export const reducer = (state, action) => {
       return state
   }
 }
+
+const debugDev = reducer => (state, action) => {
+  const newState = reducer(state, action)
+  window.store = newState
+  return newState
+}
+
+export const reducer = debugDev(mainReducer)

@@ -19,7 +19,7 @@ export default props => {
   }, [appStep, mode])
 
   // Effect
-  connectionMonitor(connection, eventSource)
+  connectionMonitor(connection, eventSource, dispatch)
 
   // UI Callback
   const doConnect = useCallback(() => {
