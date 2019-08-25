@@ -1,28 +1,37 @@
-class AppStore {
-  connection = null
-  mode = ''
-  signalData = ''
+import { EventEmitter } from 'events'
+import { ESTEP, EACTION } from './constant'
 
-  setSignalData = data => {
-    this.signalData = data
-  }
-  setMode = mode => {
-    this.mode = mode
-  }
-  setConnection = con => {
-    this.connection = con
-    con.on('connect', () => {
-      console.log('CONNECT')
-    })
-    con.on('data', data => {
-      console.log('data: ' + data)
-    })
-  }
-  reset = () => {
-    this.connection = null
-    this.mode = ''
-    this.signalData = ''
-  }
+export const initialState = {
+  appStep: ESTEP.CHOICE_MODE,
+  mode: '',
+  connection: null,
+  signalData: '',
+
+  eventSource: new EventEmitter()
 }
 
-export default AppStore
+export const reducer = (state, action) => {
+  switch (action.type) {
+    case EACTION.reset:
+      return {
+        ...initialState
+      }
+    case EACTION.setAppMode:
+      return {
+        ...state,
+        mode: action.value
+      }
+    case EACTION.setAppStep:
+      return {
+        ...state,
+        appStep: action.value
+      }
+    case EACTION.updateConenction:
+      return {
+        ...state,
+        connection: action.value
+      }
+    default:
+      return state
+  }
+}

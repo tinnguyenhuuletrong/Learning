@@ -1,7 +1,12 @@
-import React from 'react'
+import React, { createContext, useContext, useReducer } from 'react'
+import { initialState, reducer } from './stores/appStore'
+import * as ECONSTANT from './stores/constant'
 
-const AppContext = React.createContext({})
-
-export const AppProvider = AppContext.Provider
-export const AppConsumer = AppContext.Consumer
-export default AppContext
+export const StateContext = createContext()
+export const StateProvider = ({ children }) => (
+  <StateContext.Provider value={useReducer(reducer, initialState)}>
+    {children}
+  </StateContext.Provider>
+)
+export const useStateValue = () => useContext(StateContext)
+export const CONSTANT = ECONSTANT
