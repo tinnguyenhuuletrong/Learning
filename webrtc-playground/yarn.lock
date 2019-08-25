@@ -3130,6 +3130,11 @@ detect-port-alt@1.1.6:
     address "^1.0.1"
     debug "^2.6.0"
 
+detectrtc@^1.3.9:
+  version "1.3.9"
+  resolved "https://registry.yarnpkg.com/detectrtc/-/detectrtc-1.3.9.tgz#a18646f22d954e4f47e9d4220459c71c8c68526c"
+  integrity sha512-uDmANQib8St/dRppyQGXHX36qG2wel5dKHslqz0qr2958rcpN6heOzofV2PoKi7ogtCXpQuz0JUzazWhnLBPcA==
+
 diff-sequences@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-24.9.0.tgz#5715d6244e2aa65f48bba0bc972db0b0b11e95b5"

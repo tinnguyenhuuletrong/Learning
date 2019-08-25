@@ -1,20 +1,28 @@
 import { EventEmitter } from 'events'
+import DetectRTC from 'detectrtc'
 import { ESTEP, EACTION } from './constant'
 
 export const initialState = {
+  supportWebRTC: false,
   appStep: ESTEP.CHOICE_MODE,
   mode: '',
   connection: null,
-  signalData: '',
-
   eventSource: new EventEmitter()
 }
 
 const mainReducer = (state, action) => {
+  console.log('action', action)
   switch (action.type) {
     case EACTION.reset:
       return {
-        ...initialState
+        ...initialState,
+        eventSource: new EventEmitter(),
+        supportWebRTC: DetectRTC.isWebRTCSupported
+      }
+    case EACTION.updateWebRTCSupport:
+      return {
+        ...state,
+        supportWebRTC: action.value
       }
     case EACTION.setAppMode:
       return {

@@ -26,7 +26,8 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
   const onSendTextMsg = useCallback(() => {
     connection.send(inputMsg)
     eventSource.emit('action-send-text', inputMsg)
-  }, [inputMsg, connection, eventSource])
+    onMsgChangeCallback('')
+  }, [inputMsg, connection, eventSource, onMsgChangeCallback])
 
   return (
     <fieldset disabled={!enable}>
@@ -38,6 +39,14 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
             placeholder="message to send"
             value={inputMsg}
             onChange={e => onMsgChangeCallback(e.target.value)}
+            onKeyPress={e => {
+              if (!e) e = window.event
+              var keyCode = e.keyCode || e.which
+              if (String(keyCode) === '13') {
+                onSendTextMsg(e.target.value)
+                return false
+              }
+            }}
           />
         </div>
         <div className="column">

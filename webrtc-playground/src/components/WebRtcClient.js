@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from 'react'
+import React, { useCallback, useState, useMemo, useEffect } from 'react'
 import { useStateValue, CONSTANT } from '../AppContext'
 import connectionMonitor from '../utils/connectionMonitor'
 
@@ -9,7 +9,7 @@ export default props => {
 
   const [subStep, setSubStep] = useState(1)
   const [inputSignalData, setInputSignalData] = useState('')
-  const [answerToHost, setAnswerToHost] = useState('')
+  const [answerToHost, setAnswerToHost] = useState([])
 
   const stepLock = useMemo(() => {
     const isEnable =
@@ -21,6 +21,20 @@ export default props => {
   // Effect
   connectionMonitor(connection, eventSource, dispatch)
 
+  // Offer signal
+  useEffect(() => {
+    if (!connection) return
+    const signalHandler = data => {
+      const newSignalData = data
+      setAnswerToHost([...answerToHost, newSignalData])
+      setSubStep(2)
+    }
+    connection.on('signal', signalHandler)
+    return () => {
+      connection.off('signal', signalHandler)
+    }
+  }, [connection, answerToHost, setSubStep])
+
   // UI Callback
   const doConnect = useCallback(() => {
     console.log('begin connect ', inputSignalData)
@@ -28,17 +42,20 @@ export default props => {
       initiator: false,
       trickle: false
     })
-    p.on('signal', data => {
-      setAnswerToHost(JSON.stringify(data))
-    })
-    p.signal(inputSignalData)
-    setSubStep(2)
+    try {
+      const arr = JSON.parse(inputSignalData)
+      if (!Array.isArray(arr)) throw new Error('Input signal must be aray')
 
-    dispatch({
-      type: CONSTANT.EACTION.updateConenction,
-      value: p
-    })
-  }, [inputSignalData, setAnswerToHost, setSubStep, dispatch])
+      arr.forEach(itm => p.signal(itm))
+
+      dispatch({
+        type: CONSTANT.EACTION.updateConenction,
+        value: p
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }, [inputSignalData, dispatch])
 
   return (
     <fieldset {...stepLock}>
@@ -66,8 +83,7 @@ export default props => {
             <textarea
               className={['textarea', 'is-small'].join(' ')}
               disabled
-              value={answerToHost}
-              onChange={e => setAnswerToHost(e.target.value)}
+              value={JSON.stringify(answerToHost)}
             />
           </div>
         </div>

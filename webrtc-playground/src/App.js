@@ -5,7 +5,7 @@ import WebRtcClient from './components/WebRtcClient'
 import WebRtcStatus from './components/WebRtcStatus'
 import WebRtcLog from './components/WebRtcLog'
 import WebRtcData from './components/WebRtcData'
-// import TabContainer from './containers/TabContainer'
+import WebRTCSupport from './containers/WebRTCSupport'
 import DisplayIfMode from './containers/DisplayIfMode'
 import { StateProvider, CONSTANT } from './AppContext'
 
@@ -21,41 +21,43 @@ function App() {
               </div>
             </div>
           </section>
-          <p className="has-text-centered is-size-3">Start here !</p>
-          <div className="column">
-            <div className="box">
-              <ChoiceMode />
-            </div>
-          </div>
-
-          <DisplayIfMode expectedMode={CONSTANT.ECLIENT_MODE.HOST}>
+          <WebRTCSupport>
+            <p className="has-text-centered is-size-3">Start here !</p>
             <div className="column">
               <div className="box">
-                <WebRtcHost />
+                <ChoiceMode />
               </div>
             </div>
-          </DisplayIfMode>
 
-          <DisplayIfMode expectedMode={CONSTANT.ECLIENT_MODE.PEER}>
+            <DisplayIfMode expectedMode={CONSTANT.ECLIENT_MODE.HOST}>
+              <div className="column">
+                <div className="box">
+                  <WebRtcHost />
+                </div>
+              </div>
+            </DisplayIfMode>
+
+            <DisplayIfMode expectedMode={CONSTANT.ECLIENT_MODE.PEER}>
+              <div className="column">
+                <div className="box">
+                  <WebRtcClient />
+                </div>
+              </div>
+            </DisplayIfMode>
+
             <div className="column">
+              <WebRtcStatus />
+            </div>
+
+            <div className="column is-multiline">
               <div className="box">
-                <WebRtcClient />
+                <WebRtcLog />
+              </div>
+              <div className="box">
+                <WebRtcData />
               </div>
             </div>
-          </DisplayIfMode>
-
-          <div className="column">
-            <WebRtcStatus />
-          </div>
-
-          <div className="column is-multiline">
-            <div className="box">
-              <WebRtcLog />
-            </div>
-            <div className="box">
-              <WebRtcData />
-            </div>
-          </div>
+          </WebRTCSupport>
         </div>
       </section>
     </StateProvider>

@@ -11,5 +11,6 @@ export const EACTION = {
   reset: 'reset',
   setAppStep: 'setAppStep',
   setAppMode: 'setAppMode',
-  updateConenction: 'updateConenction'
+  updateConenction: 'updateConenction',
+  updateWebRTCSupport: 'updateWebRTCSupport'
 }
