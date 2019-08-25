@@ -82,7 +82,7 @@ export default props => {
           <div className={['control'].join(' ')}>
             <textarea
               className={['textarea', 'is-small'].join(' ')}
-              disabled
+              readOnly
               value={JSON.stringify(answerToHost)}
             />
           </div>
