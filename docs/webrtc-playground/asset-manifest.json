@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.js": "/Learning/webrtc-playground/static/js/main.ea938e92.chunk.js",
+    "main.js.map": "/Learning/webrtc-playground/static/js/main.ea938e92.chunk.js.map",
+    "runtime~main.js": "/Learning/webrtc-playground/static/js/runtime~main.5ec6b0ce.js",
+    "runtime~main.js.map": "/Learning/webrtc-playground/static/js/runtime~main.5ec6b0ce.js.map",
+    "static/css/2.62908225.chunk.css": "/Learning/webrtc-playground/static/css/2.62908225.chunk.css",
+    "static/js/2.24baafc7.chunk.js": "/Learning/webrtc-playground/static/js/2.24baafc7.chunk.js",
+    "static/js/2.24baafc7.chunk.js.map": "/Learning/webrtc-playground/static/js/2.24baafc7.chunk.js.map",
+    "index.html": "/Learning/webrtc-playground/index.html",
+    "precache-manifest.35eccd7d516aaf4438b272de1a0407cd.js": "/Learning/webrtc-playground/precache-manifest.35eccd7d516aaf4438b272de1a0407cd.js",
+    "service-worker.js": "/Learning/webrtc-playground/service-worker.js",
+    "static/css/2.62908225.chunk.css.map": "/Learning/webrtc-playground/static/css/2.62908225.chunk.css.map"
+  }
+}
