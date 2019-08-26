@@ -3,6 +3,8 @@ import SimplePeer from 'simple-peer'
 import { toast } from 'bulma-toast'
 import copy from 'copy-to-clipboard'
 
+import WebRtcConfig from './WebRtcConfig'
+
 import { useStateValue, CONSTANT } from '../AppContext'
 import connectionMonitor from '../utils/connectionMonitor'
 
@@ -23,6 +25,12 @@ export default props => {
   const [answerToHost, dispatchAnswerToHost] = useReducer((state, val) => {
     return [...state, val]
   }, [])
+  const [rtcConfig, dispatchRtcConfig] = useReducer((state, val) => {
+    return {
+      ...state,
+      ...val
+    }
+  }, {})
 
   const stepLock = useMemo(() => {
     const isEnable =
@@ -36,10 +44,11 @@ export default props => {
 
   // UI Callback
   const doConnect = useCallback(() => {
+    console.log('Create peer with', rtcConfig)
     console.log('begin connect ', inputSignalData)
     const p = new SimplePeer({
       initiator: false,
-      trickle: false
+      ...rtcConfig
     })
 
     const signalHandler = data => {
@@ -68,8 +77,16 @@ export default props => {
     copyClipboard(JSON.stringify(answerToHost))
   }, [answerToHost])
 
+  const onRtcConfigChange = useCallback(
+    val => {
+      dispatchRtcConfig(val)
+    },
+    [dispatchRtcConfig]
+  )
+
   return (
     <fieldset {...stepLock}>
+      <WebRtcConfig onChange={onRtcConfigChange} />
       <div className="field">
         <label className="label">SignalData from Host</label>
         <div className={['control'].join(' ')}>
