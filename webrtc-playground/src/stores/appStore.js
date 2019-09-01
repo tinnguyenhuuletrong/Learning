@@ -1,13 +1,24 @@
 import { EventEmitter } from 'events'
 import DetectRTC from 'detectrtc'
+import Firebase from 'firebase/app'
+import 'firebase/database'
+
 import { ESTEP, EACTION } from './constant'
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ',
+  databaseURL: 'https://weeklyhack-ff068.firebaseio.com/'
+}
+Firebase.initializeApp(firebaseConfig)
 
 export const initialState = {
   supportWebRTC: false,
   appStep: ESTEP.CHOICE_MODE,
+  roomId: `room-${Date.now()}`,
   mode: '',
   connection: null,
-  eventSource: new EventEmitter()
+  eventSource: new EventEmitter(),
+  firebaseDatabase: Firebase.database()
 }
 
 const mainReducer = (state, action) => {
@@ -28,6 +39,11 @@ const mainReducer = (state, action) => {
       return {
         ...state,
         mode: action.value
+      }
+    case EACTION.setRoomId:
+      return {
+        ...state,
+        roomId: action.value
       }
     case EACTION.setAppStep:
       return {

@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useMemo, useReducer } from 'react'
+import React, {
+  useCallback,
+  useState,
+  useMemo,
+  useReducer,
+  useEffect
+} from 'react'
 import SimplePeer from 'simple-peer'
 import { toast } from 'bulma-toast'
 import copy from 'copy-to-clipboard'
@@ -11,14 +17,17 @@ import connectionMonitor from '../utils/connectionMonitor'
 const copyClipboard = data => {
   copy(data)
   toast({
-    message: 'copied',
+    message: 'copied - sync with firebase',
     type: 'is-info',
     animate: { in: 'fadeIn', out: 'fadeOut' }
   })
 }
 
 export default props => {
-  const [{ appStep, mode, connection, eventSource }, dispatch] = useStateValue()
+  const [
+    { appStep, mode, roomId, connection, eventSource, firebaseDatabase },
+    dispatch
+  ] = useStateValue()
 
   const [subStep, setSubStep] = useState(1)
   const [inputSignalData, setInputSignalData] = useState('')
@@ -41,6 +50,30 @@ export default props => {
 
   // Effect
   connectionMonitor(connection, eventSource, dispatch)
+
+  // Effect - update hostSignal from firebase
+  useEffect(() => {
+    const roomRef = `/room/${roomId}/hostSignal`
+    const hostSignalRef = firebaseDatabase.ref(roomRef)
+
+    const updateHostSignalFromFirebase = value => {
+      console.log('aaaa', value)
+      const { data } = value.val() || {}
+      if (data) {
+        setInputSignalData(data)
+        toast({
+          message: 'host - sync from firebase',
+          type: 'is-info',
+          animate: { in: 'fadeIn', out: 'fadeOut' }
+        })
+      }
+    }
+
+    hostSignalRef.on('value', updateHostSignalFromFirebase)
+    return () => {
+      hostSignalRef.off('value', updateHostSignalFromFirebase)
+    }
+  }, [roomId, firebaseDatabase, setInputSignalData])
 
   // UI Callback
   const doConnect = useCallback(() => {
@@ -74,8 +107,12 @@ export default props => {
   }, [inputSignalData, dispatchAnswerToHost, setSubStep, dispatch, rtcConfig])
 
   const copyAnswerDataClipboard = useCallback(() => {
-    copyClipboard(JSON.stringify(answerToHost))
-  }, [answerToHost])
+    const answerStr = JSON.stringify(answerToHost)
+    copyClipboard(answerStr)
+
+    const roomRef = `/room/${roomId}/answer`
+    firebaseDatabase.ref(roomRef).set({ data: answerStr })
+  }, [answerToHost, firebaseDatabase, roomId])
 
   const onRtcConfigChange = useCallback(
     val => {

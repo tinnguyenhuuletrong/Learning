@@ -73,14 +73,14 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
           <div className="content" key={id}>
             <p>
               {index}) Type: <strong>{String(type)}</strong> - Id: {String(id)}
-              <ul>
-                {Object.keys(others).map((key, index) => (
-                  <li key={index}>
-                    {String(key)}: {String(others[key])}
-                  </li>
-                ))}
-              </ul>
             </p>
+            <ul>
+              {Object.keys(others).map((key, index) => (
+                <li key={index}>
+                  {String(key)}: {String(others[key])}
+                </li>
+              ))}
+            </ul>
           </div>
         ))}
       </div>

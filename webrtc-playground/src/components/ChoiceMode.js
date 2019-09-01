@@ -3,7 +3,7 @@ import DisplayIfStep from '../containers/DisplayIfStep'
 import { useStateValue, CONSTANT } from '../AppContext'
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
-  const [{ appStep, mode, connection }, dispatch] = useStateValue()
+  const [{ appStep, mode, roomId, connection }, dispatch] = useStateValue()
 
   const setMode = useCallback(
     mode => {
@@ -26,13 +26,34 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     })
   }, [dispatch, connection])
 
+  const updateRoomId = useCallback(
+    roomId => {
+      dispatch({
+        type: CONSTANT.EACTION.setRoomId,
+        value: roomId
+      })
+    },
+    [dispatch]
+  )
+
   const stepLock =
     appStep === CONSTANT.ESTEP.CHOICE_MODE
       ? { disabled: false }
       : { disabled: true }
 
   return (
-    <div className="columns is-multiline">
+    <div className="columns is-multiline is-centered">
+      <div className="column is-6">
+        <fieldset {...stepLock}>
+          <input
+            className="input is-rounded"
+            type="text"
+            value={roomId}
+            onChange={e => updateRoomId(e.target.value)}
+            placeholder="Room Id"
+          />
+        </fieldset>
+      </div>
       <div className="column is-full">
         <fieldset {...stepLock}>
           <div className="field is-grouped is-grouped-centered">

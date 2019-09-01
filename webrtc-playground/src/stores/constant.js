@@ -10,6 +10,7 @@ export const ECLIENT_MODE = {
 export const EACTION = {
   reset: 'reset',
   setAppStep: 'setAppStep',
+  setRoomId: 'setRoomId',
   setAppMode: 'setAppMode',
   updateConenction: 'updateConenction',
   updateWebRTCSupport: 'updateWebRTCSupport'
