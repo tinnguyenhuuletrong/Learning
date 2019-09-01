@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import DetectRTC from 'detectrtc'
+import Peer from 'simple-peer'
 import { useStateValue, CONSTANT } from '../AppContext'
 
 export default ({ expectedMode, children }) => {
@@ -18,7 +19,7 @@ export default ({ expectedMode, children }) => {
 
   return (
     <React.Fragment>
-      {checking ? null : supportWebRTC ? (
+      {checking ? null : supportWebRTC && Peer.WEBRTC_SUPPORT ? (
         children
       ) : (
         <article class="message is-danger">

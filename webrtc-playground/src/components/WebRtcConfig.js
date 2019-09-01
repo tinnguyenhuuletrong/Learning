@@ -19,7 +19,7 @@ export default ({ onChange }) => {
       <label className="label">
         STUN/TURN config{' '}
         <span
-          class={[
+          className={[
             'icon',
             isCorrect ? 'has-text-success' : 'has-text-danger'
           ].join(' ')}
