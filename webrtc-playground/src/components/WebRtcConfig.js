@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo, useEffect, useState } from 'react'
-import { useStateValue, CONSTANT } from '../AppContext'
+import React, { useEffect, useState } from 'react'
 
 export default ({ onChange }) => {
   const [configJson, setConfig] = useState(`{
@@ -10,6 +9,7 @@ export default ({ onChange }) => {
   }`)
   const [isCorrect, setIsCorrect] = useState(true)
 
+  // Init value
   useEffect(() => {
     onChange && onChange(JSON.parse(configJson))
   }, [])

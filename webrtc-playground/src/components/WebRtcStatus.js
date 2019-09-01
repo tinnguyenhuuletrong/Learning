@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useEffect, useState } from 'react'
-import { useStateValue, CONSTANT } from '../AppContext'
+import React, { useEffect, useState } from 'react'
+import { useStateValue } from '../AppContext'
 
 const COLOR_MAP = {
   connecting: 'is-link',

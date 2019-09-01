@@ -71,7 +71,7 @@ export default props => {
     } catch (error) {
       console.error(error)
     }
-  }, [inputSignalData, dispatchAnswerToHost, setSubStep, dispatch])
+  }, [inputSignalData, dispatchAnswerToHost, setSubStep, dispatch, rtcConfig])
 
   const copyAnswerDataClipboard = useCallback(() => {
     copyClipboard(JSON.stringify(answerToHost))
