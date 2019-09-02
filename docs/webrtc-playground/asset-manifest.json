@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.js": "/Learning/webrtc-playground/static/js/main.2168483d.chunk.js",
-    "main.js.map": "/Learning/webrtc-playground/static/js/main.2168483d.chunk.js.map",
+    "main.js": "/Learning/webrtc-playground/static/js/main.f5eb7fcd.chunk.js",
+    "main.js.map": "/Learning/webrtc-playground/static/js/main.f5eb7fcd.chunk.js.map",
     "runtime~main.js": "/Learning/webrtc-playground/static/js/runtime~main.5ec6b0ce.js",
     "runtime~main.js.map": "/Learning/webrtc-playground/static/js/runtime~main.5ec6b0ce.js.map",
     "static/css/2.62908225.chunk.css": "/Learning/webrtc-playground/static/css/2.62908225.chunk.css",
-    "static/js/2.f65ee617.chunk.js": "/Learning/webrtc-playground/static/js/2.f65ee617.chunk.js",
-    "static/js/2.f65ee617.chunk.js.map": "/Learning/webrtc-playground/static/js/2.f65ee617.chunk.js.map",
+    "static/js/2.53944fce.chunk.js": "/Learning/webrtc-playground/static/js/2.53944fce.chunk.js",
+    "static/js/2.53944fce.chunk.js.map": "/Learning/webrtc-playground/static/js/2.53944fce.chunk.js.map",
     "index.html": "/Learning/webrtc-playground/index.html",
-    "precache-manifest.d523c3895cecb51476520c26b772c867.js": "/Learning/webrtc-playground/precache-manifest.d523c3895cecb51476520c26b772c867.js",
+    "precache-manifest.22922d01fffc474753a6e3d37712a356.js": "/Learning/webrtc-playground/precache-manifest.22922d01fffc474753a6e3d37712a356.js",
     "service-worker.js": "/Learning/webrtc-playground/service-worker.js",
     "static/css/2.62908225.chunk.css.map": "/Learning/webrtc-playground/static/css/2.62908225.chunk.css.map"
   }
