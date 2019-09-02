@@ -20,7 +20,6 @@ export default props => {
     }
     connection.on('stream', incomingStream)
     return () => {
-      setOtherStream(null)
       connection.off('stream', incomingStream)
     }
   }, [connection, setOtherStream])
