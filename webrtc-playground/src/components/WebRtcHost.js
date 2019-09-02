@@ -25,7 +25,15 @@ const copyClipboard = data => {
 
 export default props => {
   const [
-    { appStep, roomId, mode, connection, eventSource, firebaseDatabase },
+    {
+      appStep,
+      roomId,
+      mode,
+      mineMedia,
+      connection,
+      eventSource,
+      firebaseDatabase
+    },
     dispatch
   ] = useStateValue()
 
@@ -57,6 +65,7 @@ export default props => {
     console.log('Create peer with', rtcConfig)
     const p = new SimplePeer({
       initiator: true,
+      stream: mineMedia ? mineMedia : false,
       ...rtcConfig
     })
 
@@ -71,7 +80,7 @@ export default props => {
       type: CONSTANT.EACTION.updateConenction,
       value: p
     })
-  }, [dispatch, rtcConfig])
+  }, [dispatch, mineMedia, rtcConfig])
 
   // Effect - update answer from firebase
   useEffect(() => {

@@ -10,6 +10,7 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
   useEffect(() => {
     if (!connection) return
     const intervalTicket = setInterval(async () => {
+      if (!connection) return clearInterval(intervalTicket)
       connection.getStats((err, stats = []) => {
         setRtcStats(
           stats.map(({ type, id, timestamp, ...others }) => ({

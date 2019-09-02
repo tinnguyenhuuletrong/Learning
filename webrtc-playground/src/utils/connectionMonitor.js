@@ -26,6 +26,8 @@ export default (connection, eventSource, dispatch) => {
     connection.on('connect', connectHandler)
     connection.on('data', dataHandler)
     connection.on('close', closeHandler)
+    connection.on('stream', stream => console.log('stream', stream))
+
     return () => {
       connection.off('error', errorHandler)
       connection.off('connect', connectHandler)

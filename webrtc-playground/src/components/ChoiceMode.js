@@ -1,6 +1,9 @@
 import React, { useCallback } from 'react'
 import DisplayIfStep from '../containers/DisplayIfStep'
 import { useStateValue, CONSTANT } from '../AppContext'
+import { toast } from 'bulma-toast'
+
+const MediaOptions = { video: true }
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
   const [{ appStep, mode, roomId, connection }, dispatch] = useStateValue()
@@ -36,6 +39,23 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     [dispatch]
   )
 
+  const onGatherVideoCallback = useCallback(() => {
+    const gotMedia = stream => {
+      dispatch({
+        type: CONSTANT.EACTION.setMineMedia,
+        value: stream
+      })
+    }
+    // get video/voice stream
+    navigator.getUserMedia(MediaOptions, gotMedia, err => {
+      toast({
+        message: `error - ${err.message}`,
+        type: 'is-error',
+        animate: { in: 'fadeIn', out: 'fadeOut' }
+      })
+    })
+  }, [dispatch])
+
   const stepLock =
     appStep === CONSTANT.ESTEP.CHOICE_MODE
       ? { disabled: false }
@@ -52,6 +72,18 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
             onChange={e => updateRoomId(e.target.value)}
             placeholder="Room Id"
           />
+        </fieldset>
+      </div>
+      <div className="column is-full">
+        <fieldset {...stepLock}>
+          <div className="field is-grouped is-grouped-centered">
+            <button
+              className="button is-success"
+              onClick={onGatherVideoCallback}
+            >
+              With Media
+            </button>
+          </div>
         </fieldset>
       </div>
       <div className="column is-full">

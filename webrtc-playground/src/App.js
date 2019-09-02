@@ -5,6 +5,7 @@ import WebRtcClient from './components/WebRtcClient'
 import WebRtcStatus from './components/WebRtcStatus'
 import WebRtcLog from './components/WebRtcLog'
 import WebRtcData from './components/WebRtcData'
+import WebRtcVideoCall from './components/WebRtcVideoCall'
 import WebRTCSupport from './containers/WebRTCSupport'
 import DisplayIfMode from './containers/DisplayIfMode'
 import { StateProvider, CONSTANT } from './AppContext'
@@ -55,6 +56,9 @@ function App() {
               </div>
               <div className="box">
                 <WebRtcData />
+              </div>
+              <div className="box">
+                <WebRtcVideoCall />
               </div>
             </div>
           </WebRTCSupport>

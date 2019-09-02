@@ -12,6 +12,7 @@ export const EACTION = {
   setAppStep: 'setAppStep',
   setRoomId: 'setRoomId',
   setAppMode: 'setAppMode',
+  setMineMedia: 'setMineMedia',
   updateConenction: 'updateConenction',
   updateWebRTCSupport: 'updateWebRTCSupport'
 }

@@ -25,7 +25,15 @@ const copyClipboard = data => {
 
 export default props => {
   const [
-    { appStep, mode, roomId, connection, eventSource, firebaseDatabase },
+    {
+      appStep,
+      mode,
+      mineMedia,
+      roomId,
+      connection,
+      eventSource,
+      firebaseDatabase
+    },
     dispatch
   ] = useStateValue()
 
@@ -81,6 +89,7 @@ export default props => {
     console.log('begin connect ', inputSignalData)
     const p = new SimplePeer({
       initiator: false,
+      stream: mineMedia ? mineMedia : false,
       ...rtcConfig
     })
 
@@ -104,7 +113,14 @@ export default props => {
     } catch (error) {
       console.error(error)
     }
-  }, [inputSignalData, dispatchAnswerToHost, setSubStep, dispatch, rtcConfig])
+  }, [
+    inputSignalData,
+    dispatchAnswerToHost,
+    setSubStep,
+    dispatch,
+    mineMedia,
+    rtcConfig
+  ])
 
   const copyAnswerDataClipboard = useCallback(() => {
     const answerStr = JSON.stringify(answerToHost)

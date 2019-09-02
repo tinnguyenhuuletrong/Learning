@@ -16,6 +16,7 @@ export const initialState = {
   appStep: ESTEP.CHOICE_MODE,
   roomId: `room-${Date.now()}`,
   mode: '',
+  mineMedia: null,
   connection: null,
   eventSource: new EventEmitter(),
   firebaseDatabase: Firebase.database()
@@ -25,8 +26,13 @@ const mainReducer = (state, action) => {
   console.log('action', action)
   switch (action.type) {
     case EACTION.reset:
+      const previousMedia = state.mineMedia
+      if (previousMedia) {
+        previousMedia.getTracks().forEach(track => track.stop())
+      }
       return {
         ...initialState,
+        mineMedia: null,
         eventSource: new EventEmitter(),
         supportWebRTC: DetectRTC.isWebRTCSupported
       }
@@ -49,6 +55,11 @@ const mainReducer = (state, action) => {
       return {
         ...state,
         appStep: action.value
+      }
+    case EACTION.setMineMedia:
+      return {
+        ...state,
+        mineMedia: action.value
       }
     case EACTION.updateConenction:
       return {
