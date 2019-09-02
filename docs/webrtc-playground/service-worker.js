@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/Learning/webrtc-playground/precache-manifest.05396048a69e94a3f56a791549a62df5.js"
+  "/Learning/webrtc-playground/precache-manifest.1e66baefd4ad771b6b3e35484e676eec.js"
 );
 
 self.addEventListener('message', (event) => {
