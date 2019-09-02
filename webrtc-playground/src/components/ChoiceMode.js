@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import DisplayIfStep from '../containers/DisplayIfStep'
 import { useStateValue, CONSTANT } from '../AppContext'
 import { toast } from 'bulma-toast'
@@ -8,6 +8,19 @@ const MediaOptions = { video: true }
 export default ({ defaultIndex = 0, tabs = [] }) => {
   const [{ appStep, mode, roomId, connection }, dispatch] = useStateValue()
 
+  useEffect(() => {
+    const pageUnload = () => {
+      dispatch({
+        type: CONSTANT.EACTION.reset
+      })
+    }
+    window.addEventListener('beforeunload', pageUnload, false)
+    return () => {
+      window.removeEventListener('beforeunload', pageUnload)
+    }
+  }, [dispatch, connection])
+
+  // Set app mode
   const setMode = useCallback(
     mode => {
       dispatch({
@@ -29,6 +42,7 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     })
   }, [dispatch, connection])
 
+  // Set room Id
   const updateRoomId = useCallback(
     roomId => {
       dispatch({
@@ -39,11 +53,19 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     [dispatch]
   )
 
+  // Gather Media
   const onGatherVideoCallback = useCallback(() => {
     const gotMedia = stream => {
       dispatch({
         type: CONSTANT.EACTION.setMineMedia,
         value: stream
+      })
+    }
+    if (!navigator) {
+      return toast({
+        message: `error - navigator not support`,
+        type: 'is-error',
+        animate: { in: 'fadeIn', out: 'fadeOut' }
       })
     }
     // get video/voice stream

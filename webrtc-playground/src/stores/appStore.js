@@ -27,12 +27,15 @@ const mainReducer = (state, action) => {
   switch (action.type) {
     case EACTION.reset:
       const previousMedia = state.mineMedia
+      const previousConnection = state.connection
       if (previousMedia) {
         previousMedia.getTracks().forEach(track => track.stop())
       }
+      if (previousConnection) {
+        previousConnection.destroy && previousConnection.destroy()
+      }
       return {
         ...initialState,
-        mineMedia: null,
         eventSource: new EventEmitter(),
         supportWebRTC: DetectRTC.isWebRTCSupported
       }

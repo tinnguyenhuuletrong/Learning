@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { useStateValue, CONSTANT } from '../AppContext'
+import { useStateValue } from '../AppContext'
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
   const [{ eventSource, connection }] = useStateValue()

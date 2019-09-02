@@ -9,18 +9,20 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
   // Refresh connection stats
   useEffect(() => {
     if (!connection) return
-    const intervalTicket = setInterval(async () => {
-      if (!connection) return clearInterval(intervalTicket)
-      connection.getStats((err, stats = []) => {
-        setRtcStats(
-          stats.map(({ type, id, timestamp, ...others }) => ({
-            type,
-            id,
-            timestamp,
-            others
-          }))
-        )
-      })
+    const intervalTicket = setInterval(() => {
+      try {
+        if (!connection) return clearInterval(intervalTicket)
+        connection.getStats((err, stats = []) => {
+          setRtcStats(
+            stats.map(({ type, id, timestamp, ...others }) => ({
+              type,
+              id,
+              timestamp,
+              others
+            }))
+          )
+        })
+      } catch (error) {}
     }, 1000)
     return () => clearInterval(intervalTicket)
   }, [connection])

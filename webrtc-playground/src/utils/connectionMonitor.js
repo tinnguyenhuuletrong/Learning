@@ -34,5 +34,5 @@ export default (connection, eventSource, dispatch) => {
       connection.off('data', dataHandler)
       connection.off('close', closeHandler)
     }
-  }, [connection, eventSource])
+  }, [connection, eventSource, dispatch])
 }

@@ -1,25 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useStateValue } from '../AppContext'
 import { toast } from 'bulma-toast'
 import VideoPlayer from './VideoPlayer'
 
 export default props => {
-  const [{ eventSource, mineMedia, connection }] = useStateValue()
-  const [enable, setEnable] = useState(false)
+  const [{ mineMedia, connection }] = useStateValue()
   const [otherStream, setOtherStream] = useState(null)
-
-  useEffect(() => {
-    const msgLogConnect = () => setEnable(true)
-    const msgLogClose = () => setEnable(false)
-
-    eventSource.on('connect', msgLogConnect)
-    eventSource.on('close', msgLogClose)
-
-    return () => {
-      eventSource.off('connect', msgLogConnect)
-      eventSource.off('close', msgLogClose)
-    }
-  }, [eventSource, setEnable])
 
   // Other stream
   useEffect(() => {
@@ -34,6 +20,7 @@ export default props => {
     }
     connection.on('stream', incomingStream)
     return () => {
+      setOtherStream(null)
       connection.off('stream', incomingStream)
     }
   }, [connection, setOtherStream])
