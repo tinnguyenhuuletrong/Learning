@@ -1,134 +1,17 @@
-import React, {
-  useCallback,
-  useState,
-  useMemo,
-  useReducer,
-  useEffect
-} from 'react'
-import SimplePeer from 'simple-peer'
-import { toast } from 'bulma-toast'
-import copy from 'copy-to-clipboard'
+import React, { useCallback, useReducer } from 'react'
 
 import WebRtcConfig from './WebRtcConfig'
 
-import { useStateValue, CONSTANT } from '../AppContext'
-import connectionMonitor from '../utils/connectionMonitor'
-
-const copyClipboard = data => {
-  copy(data)
-  toast({
-    message: 'copied - sync with firebase',
-    type: 'is-info',
-    animate: { in: 'fadeIn', out: 'fadeOut' }
-  })
-}
+import { useStateValue } from '../AppContext'
 
 export default props => {
-  const [
-    {
-      appStep,
-      mode,
-      mineMedia,
-      roomId,
-      connection,
-      eventSource,
-      firebaseDatabase
-    },
-    dispatch
-  ] = useStateValue()
-
-  const [subStep, setSubStep] = useState(1)
-  const [inputSignalData, setInputSignalData] = useState('')
-  const [answerToHost, dispatchAnswerToHost] = useReducer((state, val) => {
-    return [...state, val]
-  }, [])
+  const [{ roomId, mode, connection }] = useStateValue()
   const [rtcConfig, dispatchRtcConfig] = useReducer((state, val) => {
     return {
       ...state,
       ...val
     }
   }, {})
-
-  const stepLock = useMemo(() => {
-    const isEnable =
-      appStep === CONSTANT.ESTEP.NOT_CONNECT &&
-      mode === CONSTANT.ECLIENT_MODE.PEER
-    return { disabled: !isEnable }
-  }, [appStep, mode])
-
-  // Effect
-  connectionMonitor(connection, eventSource, dispatch)
-
-  // Effect - update hostSignal from firebase
-  useEffect(() => {
-    const roomRef = `/room/${roomId}/hostSignal`
-    const hostSignalRef = firebaseDatabase.ref(roomRef)
-
-    const updateHostSignalFromFirebase = value => {
-      console.log('aaaa', value)
-      const { data } = value.val() || {}
-      if (data) {
-        setInputSignalData(data)
-        toast({
-          message: 'host - sync from firebase',
-          type: 'is-info',
-          animate: { in: 'fadeIn', out: 'fadeOut' }
-        })
-      }
-    }
-
-    hostSignalRef.on('value', updateHostSignalFromFirebase)
-    return () => {
-      hostSignalRef.off('value', updateHostSignalFromFirebase)
-    }
-  }, [roomId, firebaseDatabase, setInputSignalData])
-
-  // UI Callback
-  const doConnect = useCallback(() => {
-    console.log('Create peer with', rtcConfig)
-    console.log('begin connect ', inputSignalData)
-    const p = new SimplePeer({
-      initiator: false,
-      stream: mineMedia ? mineMedia : false,
-      ...rtcConfig
-    })
-
-    const signalHandler = data => {
-      const newSignalData = data
-      dispatchAnswerToHost(newSignalData)
-    }
-    p.on('signal', signalHandler)
-
-    try {
-      const arr = JSON.parse(inputSignalData)
-      if (!Array.isArray(arr)) throw new Error('Input signal must be aray')
-
-      arr.forEach(itm => p.signal(itm))
-
-      setSubStep(2)
-      dispatch({
-        type: CONSTANT.EACTION.updateConenction,
-        value: p
-      })
-    } catch (error) {
-      console.error(error)
-    }
-  }, [
-    inputSignalData,
-    dispatchAnswerToHost,
-    setSubStep,
-    dispatch,
-    mineMedia,
-    rtcConfig
-  ])
-
-  const copyAnswerDataClipboard = useCallback(() => {
-    const answerStr = JSON.stringify(answerToHost)
-    copyClipboard(answerStr)
-
-    const roomRef = `/room/${roomId}/answer`
-    firebaseDatabase.ref(roomRef).set({ data: answerStr })
-  }, [answerToHost, firebaseDatabase, roomId])
 
   const onRtcConfigChange = useCallback(
     val => {
@@ -137,46 +20,22 @@ export default props => {
     [dispatchRtcConfig]
   )
 
+  // UI Callback
+  const onStart = useCallback(() => {
+    console.log('Create peer with', rtcConfig)
+    connection.start({ mode, simplePeerConfig: rtcConfig, signalRoom: roomId })
+  }, [connection, rtcConfig, mode, roomId])
+
   return (
-    <fieldset {...stepLock}>
+    <fieldset>
       <WebRtcConfig onChange={onRtcConfigChange} />
       <div className="field">
-        <label className="label">SignalData from Host</label>
-        <div className={['control'].join(' ')}>
-          <textarea
-            className={['textarea', 'is-small'].join(' ')}
-            value={inputSignalData}
-            onChange={e => setInputSignalData(e.target.value)}
-          />
-        </div>
-      </div>
-      {subStep === 1 && (
         <div className="field">
-          <button className="button is-primary" onClick={doConnect}>
-            Connect
+          <button className="button is-primary" onClick={onStart}>
+            Start
           </button>
         </div>
-      )}
-      {subStep === 2 && (
-        <div className="field">
-          <label className="label">
-            Answer To Host{' '}
-            <a
-              className="button is-rounded is-small"
-              onClick={copyAnswerDataClipboard}
-            >
-              <i className="far fa-clipboard" />
-            </a>
-          </label>
-          <div className={['control'].join(' ')}>
-            <textarea
-              className={['textarea', 'is-small'].join(' ')}
-              readOnly
-              value={JSON.stringify(answerToHost)}
-            />
-          </div>
-        </div>
-      )}
+      </div>
     </fieldset>
   )
 }

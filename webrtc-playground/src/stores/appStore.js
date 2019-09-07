@@ -4,6 +4,8 @@ import Firebase from 'firebase/app'
 import 'firebase/database'
 
 import { ESTEP, EACTION } from './constant'
+import WebRTCPeer from './libs/WebRTCPeer'
+import FirebaseSignalChannel from './libs/FirebaseSignalChannel'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ',
@@ -17,9 +19,8 @@ export const initialState = {
   roomId: `room-${Date.now()}`,
   mode: '',
   mineMedia: null,
-  connection: null,
-  eventSource: new EventEmitter(),
-  firebaseDatabase: Firebase.database()
+  connection: new WebRTCPeer(new FirebaseSignalChannel(Firebase.database())),
+  eventSource: new EventEmitter()
 }
 
 const mainReducer = (state, action) => {
@@ -32,7 +33,7 @@ const mainReducer = (state, action) => {
         previousMedia.getTracks().forEach(track => track.stop())
       }
       if (previousConnection) {
-        previousConnection.destroy && previousConnection.destroy()
+        previousConnection.reset()
       }
       return {
         ...initialState,

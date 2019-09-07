@@ -1,27 +1,38 @@
 import React, { useEffect, useState } from 'react'
+
 import { useStateValue } from '../AppContext'
 
+function transformSignalLog(item) {
+  const { from, data, _t } = item
+  return {
+    _time: _t,
+    title: `[SIGNAL] ${from}`,
+    content: `${JSON.stringify(data)}`
+  }
+}
+
 export default ({ defaultIndex = 0, tabs = [] }) => {
-  const [{ eventSource, connection }] = useStateValue()
-  const [logs, setLogs] = useState([])
+  const [{ connection, eventSource }] = useStateValue()
+  const [logs, setLogs] = useState(
+    connection.signalLogs.map(itm => transformSignalLog(itm))
+  )
   const [rtcStats, setRtcStats] = useState([])
 
   // Refresh connection stats
   useEffect(() => {
-    if (!connection) return
-    const intervalTicket = setInterval(() => {
+    const intervalTicket = setInterval(async () => {
       try {
-        if (!connection) return clearInterval(intervalTicket)
-        connection.getStats((err, stats = []) => {
+        const stats = await connection.getPeerStats()
+        if (stats) {
           setRtcStats(
-            stats.map(({ type, id, timestamp, ...others }) => ({
+            stats.reverse().map(({ type, id, timestamp, ...others }) => ({
               type,
               id,
               timestamp,
               others
             }))
           )
-        })
+        }
       } catch (error) {}
     }, 1000)
     return () => clearInterval(intervalTicket)
@@ -29,15 +40,21 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
 
   // Subcrible events
   useEffect(() => {
-    const msgLog = msg => () => {
+    const msgLog = (msg, title = '') => () => {
       setLogs([
-        ...logs,
         {
           _time: new Date(),
+          title,
           content: msg
-        }
+        },
+        ...logs
       ])
     }
+
+    const signalLog = msg => {
+      setLogs([transformSignalLog(msg), ...logs])
+    }
+
     const msgLogConnect = msgLog('connected')
     const msgLogError = msgLog('error')
     const msgLogClose = msgLog('disconnected')
@@ -45,20 +62,24 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     const msgSendTextMsg = textMsg => msgLog(`Send -> ${textMsg}`)()
     const msgLogWithData = msg => msgLog(`Recv -> ${msg}`)()
 
-    eventSource.on('connect', msgLogConnect)
-    eventSource.on('error', msgLogError)
-    eventSource.on('data', msgLogWithData)
-    eventSource.on('close', msgLogClose)
+    connection.on('connect', msgLogConnect)
+    connection.on('error', msgLogError)
+    connection.on('data', msgLogWithData)
+    connection.on('close', msgLogClose)
 
+    connection.on('signalLog', signalLog)
     eventSource.on('action-send-text', msgSendTextMsg)
 
     return () => {
-      eventSource.off('connect', msgLogConnect)
-      eventSource.off('error', msgLogError)
-      eventSource.off('data', msgLogWithData)
-      eventSource.off('close', msgLogClose)
+      connection.off('connect', msgLogConnect)
+      connection.off('error', msgLogError)
+      connection.off('data', msgLogWithData)
+      connection.off('close', msgLogClose)
+
+      connection.off('signalLog', signalLog)
+      eventSource.off('action-send-text', msgSendTextMsg)
     }
-  }, [logs, setLogs, eventSource])
+  }, [logs, setLogs, connection, eventSource])
 
   return (
     <div className="column is-full">
@@ -97,10 +118,13 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
           padding: '5px 10px'
         }}
       >
-        {logs.map(({ content, _time }, index) => (
-          <p key={index}>
-            {String(_time)} - {String(content)}
-          </p>
+        {logs.map(({ content, title = '', _time }, index) => (
+          <div className="content" key={index}>
+            <p>
+              - {_time.toISOString()} <strong>{String(title)}</strong> -{' '}
+              <small>{String(content)}</small>
+            </p>
+          </div>
         ))}
       </div>
     </div>

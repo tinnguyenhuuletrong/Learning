@@ -57,9 +57,9 @@ function App() {
               <div className="box">
                 <WebRtcData />
               </div>
-              <div className="box">
+              {/*<div className="box">
                 <WebRtcVideoCall />
-              </div>
+              </div> */}
             </div>
           </WebRTCSupport>
         </div>

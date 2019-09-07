@@ -9,15 +9,15 @@ const COLOR_MAP = {
 }
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
-  const [{ eventSource }] = useStateValue()
+  const [{ connection }] = useStateValue()
   const [status, setStatus] = useState('connecting')
 
   useEffect(() => {
     const onChangeStatus = status => setStatus(status)
-    eventSource.on('connect', e => onChangeStatus('connected'))
-    eventSource.on('close', e => onChangeStatus('disconnected'))
-    eventSource.on('error', e => onChangeStatus('error'))
-  }, [eventSource])
+    connection.on('connect', e => onChangeStatus('connected'))
+    connection.on('close', e => onChangeStatus('disconnected'))
+    connection.on('error', e => onChangeStatus('error'))
+  }, [connection])
 
   return (
     <article className={['message', COLOR_MAP[status]].join(' ')}>

@@ -96,7 +96,7 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
           />
         </fieldset>
       </div>
-      <div className="column is-full">
+      {/* <div className="column is-full">
         <fieldset {...stepLock}>
           <div className="field is-grouped is-grouped-centered">
             <button
@@ -107,7 +107,7 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
             </button>
           </div>
         </fieldset>
-      </div>
+      </div> */}
       <div className="column is-full">
         <fieldset {...stepLock}>
           <div className="field is-grouped is-grouped-centered">

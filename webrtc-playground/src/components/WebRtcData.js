@@ -10,14 +10,14 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     const msgLogConnect = () => setEnable(true)
     const msgLogClose = () => setEnable(false)
 
-    eventSource.on('connect', msgLogConnect)
-    eventSource.on('close', msgLogClose)
+    connection.on('connect', msgLogConnect)
+    connection.on('close', msgLogClose)
 
     return () => {
-      eventSource.off('connect', msgLogConnect)
-      eventSource.off('close', msgLogClose)
+      connection.off('connect', msgLogConnect)
+      connection.off('close', msgLogClose)
     }
-  }, [eventSource, setEnable])
+  }, [connection, setEnable])
 
   const onMsgChangeCallback = useCallback(val => setInputMsg(val), [
     setInputMsg
