@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { useStateValue } from '../AppContext'
+import React, { useEffect, useState, useCallback } from 'react'
+import { useStateValue, CONSTANT } from '../AppContext'
 import { toast } from 'bulma-toast'
 import VideoPlayer from './VideoPlayer'
 
+const MediaOptions = { video: true }
+
 export default props => {
-  const [{ mineMedia, connection }] = useStateValue()
+  const [{ mineMedia, connection, appStep }, dispatch] = useStateValue()
   const [otherStream, setOtherStream] = useState(null)
 
   // Other stream
@@ -24,9 +26,52 @@ export default props => {
     }
   }, [connection, setOtherStream])
 
+  // Gather Media
+  const onGatherVideoCallback = useCallback(() => {
+    const gotMedia = stream => {
+      // Add Stream
+      connection.peer.addStream(stream)
+
+      dispatch({
+        type: CONSTANT.EACTION.setMineMedia,
+        value: stream
+      })
+    }
+    if (!navigator) {
+      return toast({
+        message: `error - navigator not support`,
+        type: 'is-error',
+        animate: { in: 'fadeIn', out: 'fadeOut' }
+      })
+    }
+    // get video/voice stream
+    navigator.getUserMedia(MediaOptions, gotMedia, err => {
+      toast({
+        message: `error - ${err.message}`,
+        type: 'is-error',
+        animate: { in: 'fadeIn', out: 'fadeOut' }
+      })
+    })
+  }, [dispatch, connection.peer])
+
+  const enable = appStep === CONSTANT.ESTEP.CONNECTED
+
   return (
-    <fieldset>
+    <fieldset disabled={!enable}>
       <div className="columns is-multiline is-centered">
+        <div className="column is-full">
+          <fieldset>
+            <div className="field is-grouped is-grouped-centered">
+              <button
+                className="button is-success"
+                onClick={onGatherVideoCallback}
+              >
+                With Media
+              </button>
+            </div>
+          </fieldset>
+        </div>
+        <hr />
         <div className="column is-12">
           <div className="columns is-centered">
             <div className="column is-6">

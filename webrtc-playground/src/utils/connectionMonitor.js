@@ -17,7 +17,7 @@ export default (connection, eventSource, dispatch) => {
       eventSource.emit('close')
       dispatch({
         type: CONSTANT.EACTION.setAppStep,
-        value: CONSTANT.ESTEP.NOT_CONNECT
+        value: CONSTANT.ESTEP.DISCONNECT
       })
     }
     const dataHandler = data => eventSource.emit('data', data)

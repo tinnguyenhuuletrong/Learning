@@ -52,32 +52,6 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     },
     [dispatch]
   )
-
-  // Gather Media
-  const onGatherVideoCallback = useCallback(() => {
-    const gotMedia = stream => {
-      dispatch({
-        type: CONSTANT.EACTION.setMineMedia,
-        value: stream
-      })
-    }
-    if (!navigator) {
-      return toast({
-        message: `error - navigator not support`,
-        type: 'is-error',
-        animate: { in: 'fadeIn', out: 'fadeOut' }
-      })
-    }
-    // get video/voice stream
-    navigator.getUserMedia(MediaOptions, gotMedia, err => {
-      toast({
-        message: `error - ${err.message}`,
-        type: 'is-error',
-        animate: { in: 'fadeIn', out: 'fadeOut' }
-      })
-    })
-  }, [dispatch])
-
   const stepLock =
     appStep === CONSTANT.ESTEP.CHOICE_MODE
       ? { disabled: false }
@@ -96,18 +70,6 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
           />
         </fieldset>
       </div>
-      {/* <div className="column is-full">
-        <fieldset {...stepLock}>
-          <div className="field is-grouped is-grouped-centered">
-            <button
-              className="button is-success"
-              onClick={onGatherVideoCallback}
-            >
-              With Media
-            </button>
-          </div>
-        </fieldset>
-      </div> */}
       <div className="column is-full">
         <fieldset {...stepLock}>
           <div className="field is-grouped is-grouped-centered">
@@ -135,6 +97,7 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
           <DisplayIfStep
             expectedAppStep={[
               CONSTANT.ESTEP.CONNECTED,
+              CONSTANT.ESTEP.DISCONNECT,
               CONSTANT.ESTEP.NOT_CONNECT
             ]}
           >

@@ -22,17 +22,15 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
   useEffect(() => {
     const intervalTicket = setInterval(async () => {
       try {
-        const stats = await connection.getPeerStats()
-        if (stats) {
-          setRtcStats(
-            stats.reverse().map(({ type, id, timestamp, ...others }) => ({
-              type,
-              id,
-              timestamp,
-              others
-            }))
-          )
-        }
+        const stats = (await connection.getPeerStats()) || []
+        setRtcStats(
+          stats.reverse().map(({ type, id, timestamp, ...others }) => ({
+            type,
+            id,
+            timestamp,
+            others
+          }))
+        )
       } catch (error) {}
     }, 1000)
     return () => clearInterval(intervalTicket)

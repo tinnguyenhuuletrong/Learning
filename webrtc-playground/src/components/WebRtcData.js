@@ -1,23 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react'
-import { useStateValue } from '../AppContext'
+import React, { useState, useCallback } from 'react'
+import { useStateValue, CONSTANT } from '../AppContext'
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
-  const [{ eventSource, connection }] = useStateValue()
-  const [enable, setEnable] = useState(false)
+  const [{ eventSource, connection, appStep }] = useStateValue()
   const [inputMsg, setInputMsg] = useState([])
-
-  useEffect(() => {
-    const msgLogConnect = () => setEnable(true)
-    const msgLogClose = () => setEnable(false)
-
-    connection.on('connect', msgLogConnect)
-    connection.on('close', msgLogClose)
-
-    return () => {
-      connection.off('connect', msgLogConnect)
-      connection.off('close', msgLogClose)
-    }
-  }, [connection, setEnable])
 
   const onMsgChangeCallback = useCallback(val => setInputMsg(val), [
     setInputMsg
@@ -28,6 +14,8 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     eventSource.emit('action-send-text', inputMsg)
     onMsgChangeCallback('')
   }, [inputMsg, connection, eventSource, onMsgChangeCallback])
+
+  const enable = appStep === CONSTANT.ESTEP.CONNECTED
 
   return (
     <fieldset disabled={!enable}>

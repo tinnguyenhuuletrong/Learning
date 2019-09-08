@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useStateValue } from '../AppContext'
+import { useStateValue, CONSTANT } from '../AppContext'
 
 const COLOR_MAP = {
   connecting: 'is-link',
@@ -9,20 +9,49 @@ const COLOR_MAP = {
 }
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
-  const [{ connection }] = useStateValue()
+  const [{ connection }, dispatch] = useStateValue()
   const [status, setStatus] = useState('connecting')
+  const [connectionInfo, setConnectionInfo] = useState({})
 
   useEffect(() => {
     const onChangeStatus = status => setStatus(status)
-    connection.on('connect', e => onChangeStatus('connected'))
-    connection.on('close', e => onChangeStatus('disconnected'))
+    connection.on('connect', e => {
+      onChangeStatus('connected')
+      const { peer } = connection
+      const { localAddress = '', localFamily = '', localPort = '' } = peer
+      const { remoteAddress = '', remoteFamily = '', remotePort = '' } = peer
+
+      setConnectionInfo({
+        local: `${localFamily} - ${localAddress}:${localPort}`,
+        remote: `${remoteFamily} - ${remoteAddress}:${remotePort}`
+      })
+
+      dispatch({
+        type: CONSTANT.EACTION.setAppStep,
+        value: CONSTANT.ESTEP.CONNECTED
+      })
+    })
+    connection.on('close', e => {
+      onChangeStatus('disconnected')
+      setConnectionInfo({})
+      dispatch({
+        type: CONSTANT.EACTION.setAppStep,
+        value: CONSTANT.ESTEP.DISCONNECT
+      })
+    })
     connection.on('error', e => onChangeStatus('error'))
-  }, [connection])
+  }, [connection, setConnectionInfo, dispatch])
 
   return (
     <article className={['message', COLOR_MAP[status]].join(' ')}>
       <div className="message-body">
         <p className="is-capitalized">{status}</p>
+        <p className="is-size-7 is-italic	">
+          Local: {connectionInfo.local && `${connectionInfo.local}`}
+        </p>
+        <p className="is-size-7 is-italic	">
+          Remote: {connectionInfo.remote && `${connectionInfo.remote}`}
+        </p>
       </div>
     </article>
   )

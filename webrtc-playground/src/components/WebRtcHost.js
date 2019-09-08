@@ -2,10 +2,10 @@ import React, { useCallback, useReducer } from 'react'
 
 import WebRtcConfig from './WebRtcConfig'
 
-import { useStateValue } from '../AppContext'
+import { useStateValue, CONSTANT } from '../AppContext'
 
 export default props => {
-  const [{ roomId, mode, connection }] = useStateValue()
+  const [{ roomId, mode, connection, appStep }, dispatch] = useStateValue()
   const [rtcConfig, dispatchRtcConfig] = useReducer((state, val) => {
     return {
       ...state,
@@ -24,10 +24,16 @@ export default props => {
   const onStart = useCallback(() => {
     console.log('Create peer with', rtcConfig)
     connection.start({ mode, simplePeerConfig: rtcConfig, signalRoom: roomId })
-  }, [connection, rtcConfig, mode, roomId])
+    dispatch({
+      type: CONSTANT.EACTION.setAppStep,
+      value: CONSTANT.ESTEP.CONNECTING
+    })
+  }, [connection, rtcConfig, mode, roomId, dispatch])
+
+  const enable = appStep === CONSTANT.ESTEP.NOT_CONNECT
 
   return (
-    <fieldset>
+    <fieldset disabled={!enable}>
       <WebRtcConfig onChange={onRtcConfigChange} />
       <div className="field">
         <div className="field">
