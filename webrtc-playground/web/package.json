@@ -18,7 +18,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "sync": "rsync -ah --progress build/ ../docs/webrtc-playground/"
+    "sync": "rsync -ah --progress build/ ../../docs/webrtc-playground/"
   },
   "eslintConfig": {
     "extends": "react-app"
