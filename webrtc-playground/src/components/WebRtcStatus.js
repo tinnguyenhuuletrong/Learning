@@ -17,19 +17,21 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
     const onChangeStatus = status => setStatus(status)
     connection.on('connect', e => {
       onChangeStatus('connected')
-      const { peer } = connection
-      const { localAddress = '', localFamily = '', localPort = '' } = peer
-      const { remoteAddress = '', remoteFamily = '', remotePort = '' } = peer
+      setTimeout(() => {
+        const { peer } = connection
+        const { localAddress = '', localFamily = '', localPort = '' } = peer
+        const { remoteAddress = '', remoteFamily = '', remotePort = '' } = peer
 
-      setConnectionInfo({
-        local: `${localFamily} - ${localAddress}:${localPort}`,
-        remote: `${remoteFamily} - ${remoteAddress}:${remotePort}`
-      })
+        setConnectionInfo({
+          local: `${localFamily} - ${localAddress}:${localPort}`,
+          remote: `${remoteFamily} - ${remoteAddress}:${remotePort}`
+        })
 
-      dispatch({
-        type: CONSTANT.EACTION.setAppStep,
-        value: CONSTANT.ESTEP.CONNECTED
-      })
+        dispatch({
+          type: CONSTANT.EACTION.setAppStep,
+          value: CONSTANT.ESTEP.CONNECTED
+        })
+      }, 1000)
     })
     connection.on('close', e => {
       onChangeStatus('disconnected')
