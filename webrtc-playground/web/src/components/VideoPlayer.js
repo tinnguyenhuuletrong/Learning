@@ -9,7 +9,11 @@ export default ({ stream }) => {
     } else {
       video.src = window.URL.createObjectURL(stream) // for older browsers
     }
-    video.play()
+    try {
+      video.play()
+    } catch (error) {
+      console.error(error)
+    }
   }, [stream])
   return (
     <>

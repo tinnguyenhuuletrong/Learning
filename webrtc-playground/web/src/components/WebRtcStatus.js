@@ -34,6 +34,7 @@ export default ({ defaultIndex = 0, tabs = [] }) => {
       }, 1000)
     })
     connection.on('close', e => {
+      connection.reset()
       onChangeStatus('disconnected')
       setConnectionInfo({})
       dispatch({

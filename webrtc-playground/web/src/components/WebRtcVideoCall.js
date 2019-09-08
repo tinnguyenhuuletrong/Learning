@@ -45,7 +45,7 @@ export default props => {
       })
     }
     // get video/voice stream
-    navigator.getUserMedia(MediaOptions, gotMedia, err => {
+    navigator.mediaDevices.getUserMedia(MediaOptions, gotMedia, err => {
       toast({
         message: `error - ${err.message}`,
         type: 'is-error',
