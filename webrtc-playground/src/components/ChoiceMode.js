@@ -1,9 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
 import DisplayIfStep from '../containers/DisplayIfStep'
 import { useStateValue, CONSTANT } from '../AppContext'
-import { toast } from 'bulma-toast'
-
-const MediaOptions = { video: true }
 
 export default ({ defaultIndex = 0, tabs = [] }) => {
   const [{ appStep, mode, roomId, connection }, dispatch] = useStateValue()
