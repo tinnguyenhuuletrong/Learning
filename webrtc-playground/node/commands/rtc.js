@@ -70,7 +70,11 @@ function monitorLogs(store) {
 
   const msgLogConnect = msgLog('connected')
   const msgLogError = msgLog('error')
-  const msgLogClose = msgLog('disconnected')
+  const msgLogClose = () => {
+    msgLog('disconnected')
+    connection.reset()
+    msgLog('... reset done')
+  }
 
   const msgSendTextMsg = textMsg => msgLog(`Send -> ${textMsg}`)()
   const msgLogWithData = msg => msgLog(`Recv -> ${msg}`)()
