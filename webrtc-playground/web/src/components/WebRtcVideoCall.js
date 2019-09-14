@@ -3,7 +3,7 @@ import { useStateValue, CONSTANT } from '../AppContext'
 import { toast } from 'bulma-toast'
 import VideoPlayer from './VideoPlayer'
 
-const MediaOptions = { video: true }
+const MediaOptions = { video: { width: 320 } }
 
 export default props => {
   const [{ mineMedia, connection, appStep }, dispatch] = useStateValue()
@@ -27,8 +27,9 @@ export default props => {
   }, [connection, setOtherStream])
 
   // Gather Media
-  const onGatherVideoCallback = useCallback(() => {
+  const onGatherVideoCallback = useCallback(async () => {
     const gotMedia = stream => {
+      console.log('got media', stream)
       // Add Stream
       connection.peer.addStream(stream)
 
@@ -45,13 +46,16 @@ export default props => {
       })
     }
     // get video/voice stream
-    navigator.mediaDevices.getUserMedia(MediaOptions, gotMedia, err => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(MediaOptions)
+      gotMedia(stream)
+    } catch (err) {
       toast({
         message: `error - ${err.message}`,
         type: 'is-error',
         animate: { in: 'fadeIn', out: 'fadeOut' }
       })
-    })
+    }
   }, [dispatch, connection.peer])
 
   const enable = appStep === CONSTANT.ESTEP.CONNECTED

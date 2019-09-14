@@ -9,15 +9,10 @@ export default ({ stream }) => {
     } else {
       video.src = window.URL.createObjectURL(stream) // for older browsers
     }
-    try {
-      video.play()
-    } catch (error) {
-      console.error(error)
-    }
   }, [stream])
   return (
     <>
-      <video ref={videoRef} />
+      <video ref={videoRef} controls autoPlay playsInline />
     </>
   )
 }
