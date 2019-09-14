@@ -15,6 +15,15 @@ import {
   Text,
   StatusBar,
 } from 'react-native';
+import {
+  RTCPeerConnection,
+  RTCIceCandidate,
+  RTCSessionDescription,
+  RTCView,
+  MediaStream,
+  MediaStreamTrack,
+  mediaDevices,
+} from 'react-native-webrtc';
 
 import {
   Header,
@@ -23,6 +32,37 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+// Dev test
+window.store = {
+  test: async () => {
+    mediaDevices.enumerateDevices().then(sourceInfos => {
+      console.log(sourceInfos);
+    });
+  },
+  test1: async () => {
+    const isFront = true;
+    mediaDevices
+      .getUserMedia({
+        audio: true,
+        video: {
+          mandatory: {
+            minWidth: 500, // Provide your own width, height and frame rate here
+            minHeight: 300,
+            minFrameRate: 30,
+          },
+          facingMode: isFront ? 'user' : 'environment',
+          optional: [],
+        },
+      })
+      .then(stream => {
+        console.log('aaaa', stream);
+      })
+      .catch(error => {
+        console.log('bbbb', error);
+      });
+  },
+};
 
 const App = () => {
   return (

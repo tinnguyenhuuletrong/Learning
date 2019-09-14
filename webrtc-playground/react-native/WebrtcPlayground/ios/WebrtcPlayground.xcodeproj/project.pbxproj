@@ -19,6 +19,7 @@
 		355492CB746DE9F41C324B95 /* libPods-WebrtcPlayground-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C0A9093614863179B992D8F /* libPods-WebrtcPlayground-tvOS.a */; };
 		7AB2C3AA088DD1D396295B40 /* libPods-WebrtcPlayground.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B34B78B20A9AF73452EDB46 /* libPods-WebrtcPlayground.a */; };
 		845E3799232CCD1100DF5EB7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 845E3798232CCD1100DF5EB7 /* GoogleService-Info.plist */; };
+		84A380BE232CE04C003A1097 /* WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A380B7232CE04C003A1097 /* WebRTC.framework */; };
 		A0DD829271806C8F51F04338 /* libPods-WebrtcPlaygroundTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 16E3AF7ABA1F568EA2AF457A /* libPods-WebrtcPlaygroundTests.a */; };
 		B85573C5BB6CDD18522BBDC8 /* libPods-WebrtcPlayground-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 916B7228FDC3C0127F417218 /* libPods-WebrtcPlayground-tvOSTests.a */; };
 /* End PBXBuildFile section */
@@ -37,6 +38,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 2D02E47A1E0B4A5D006451C7;
 			remoteInfo = "WebrtcPlayground-tvOS";
+		};
+		84A380BC232CE04C003A1097 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84A380B8232CE04C003A1097 /* RCTWebRTC.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 35A2221F1CB493700015FD5C;
+			remoteInfo = RCTWebRTC;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -62,6 +70,8 @@
 		2D02E4901E0B4A5D006451C7 /* WebrtcPlayground-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "WebrtcPlayground-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		712C6103556921D6F786AE84 /* Pods-WebrtcPlayground.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WebrtcPlayground.release.xcconfig"; path = "Target Support Files/Pods-WebrtcPlayground/Pods-WebrtcPlayground.release.xcconfig"; sourceTree = "<group>"; };
 		845E3798232CCD1100DF5EB7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		84A380B7232CE04C003A1097 /* WebRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebRTC.framework; path = "../node_modules/react-native-webrtc/ios/WebRTC.framework"; sourceTree = "<group>"; };
+		84A380B8232CE04C003A1097 /* RCTWebRTC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTWebRTC.xcodeproj; path = "../node_modules/react-native-webrtc/ios/RCTWebRTC.xcodeproj"; sourceTree = "<group>"; };
 		916B7228FDC3C0127F417218 /* libPods-WebrtcPlayground-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WebrtcPlayground-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		96BB59A8D1339B1007203C1C /* Pods-WebrtcPlayground.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WebrtcPlayground.debug.xcconfig"; path = "Target Support Files/Pods-WebrtcPlayground/Pods-WebrtcPlayground.debug.xcconfig"; sourceTree = "<group>"; };
 		B03F9431FD74C6CD2E743C02 /* Pods-WebrtcPlayground-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WebrtcPlayground-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-WebrtcPlayground-tvOSTests/Pods-WebrtcPlayground-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -85,6 +95,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7AB2C3AA088DD1D396295B40 /* libPods-WebrtcPlayground.a in Frameworks */,
+				84A380BE232CE04C003A1097 /* WebRTC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,6 +181,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				84A380B8232CE04C003A1097 /* RCTWebRTC.xcodeproj */,
+				84A380B7232CE04C003A1097 /* WebRTC.framework */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -196,6 +209,14 @@
 				00E356EE1AD99517003FC87E /* WebrtcPlaygroundTests.xctest */,
 				2D02E47B1E0B4A5D006451C7 /* WebrtcPlayground-tvOS.app */,
 				2D02E4901E0B4A5D006451C7 /* WebrtcPlayground-tvOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		84A380B9232CE04C003A1097 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				84A380BD232CE04C003A1097 /* libRCTWebRTC.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -232,6 +253,7 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				9259B0D4B8D84DEEC5FA5A9C /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -320,6 +342,12 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 84A380B9232CE04C003A1097 /* Products */;
+					ProjectRef = 84A380B8232CE04C003A1097 /* RCTWebRTC.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* WebrtcPlayground */,
@@ -329,6 +357,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		84A380BD232CE04C003A1097 /* libRCTWebRTC.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTWebRTC.a;
+			remoteRef = 84A380BC232CE04C003A1097 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		00E356EC1AD99517003FC87E /* Resources */ = {
@@ -458,6 +496,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9259B0D4B8D84DEEC5FA5A9C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WebrtcPlayground/Pods-WebrtcPlayground-frameworks.sh",
+				"${PODS_ROOT}/../../node_modules/react-native-webrtc/ios/WebRTC.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/WebRTC.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WebrtcPlayground/Pods-WebrtcPlayground-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FB63C7EC040A7CEE2CF41CD5 /* [CP] Check Pods Manifest.lock */ = {
@@ -636,8 +692,48 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 96F2K9SNG2;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/../../node_modules/react-native-webrtc/ios\"",
+					"\"${PODS_ROOT}/FirebaseAnalytics/Frameworks\"",
+					"\"${PODS_ROOT}/GoogleAppMeasurement/Frameworks\"",
+					"\"$(SRCROOT)/../node_modules/react-native-webrtc/ios\"/**",
+				);
 				INFOPLIST_FILE = WebrtcPlayground/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/DoubleConversion\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseDatabase\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstanceID\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Folly\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNFBApp\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNFBDatabase\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-Core\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-DevSupport\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTActionSheet\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTAnimation\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTBlob\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTImage\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTLinking\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTNetwork\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTSettings\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTText\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTVibration\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTWebSocket\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsi\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsiexecutor\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsinspector\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/glog\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/leveldb-library\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/nanopb\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-webrtc\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/yoga\"",
+					"\"$(SRCROOT)/../node_modules/react-native-webrtc/ios\"/**",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -656,8 +752,48 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 96F2K9SNG2;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/../../node_modules/react-native-webrtc/ios\"",
+					"\"${PODS_ROOT}/FirebaseAnalytics/Frameworks\"",
+					"\"${PODS_ROOT}/GoogleAppMeasurement/Frameworks\"",
+					"\"$(SRCROOT)/../node_modules/react-native-webrtc/ios\"/**",
+				);
 				INFOPLIST_FILE = WebrtcPlayground/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/DoubleConversion\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseDatabase\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstanceID\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Folly\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNFBApp\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNFBDatabase\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-Core\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-DevSupport\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTActionSheet\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTAnimation\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTBlob\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTImage\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTLinking\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTNetwork\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTSettings\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTText\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTVibration\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTWebSocket\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsi\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsiexecutor\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsinspector\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/glog\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/leveldb-library\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/nanopb\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-webrtc\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/yoga\"",
+					"\"$(SRCROOT)/../node_modules/react-native-webrtc/ios\"/**",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

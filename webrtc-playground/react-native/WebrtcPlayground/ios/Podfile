@@ -1,4 +1,4 @@
-platform :ios, '9.0'
+platform :ios, '10.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
 target 'WebrtcPlayground' do
@@ -29,6 +29,8 @@ target 'WebrtcPlayground' do
 
 
   pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+
+  pod 'react-native-webrtc', :path => '../node_modules/react-native-webrtc'
 
   target 'WebrtcPlaygroundTests' do
     inherit! :search_paths

@@ -11,7 +11,8 @@
     "@react-native-firebase/app": "^0.3.0",
     "@react-native-firebase/database": "^0.3.0",
     "react": "16.8.6",
-    "react-native": "0.60.5"
+    "react-native": "0.60.5",
+    "react-native-webrtc": "^1.75.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",
