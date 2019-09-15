@@ -15,110 +15,56 @@ import {
   Text,
   StatusBar,
 } from 'react-native';
-import {
-  RTCPeerConnection,
-  RTCIceCandidate,
-  RTCSessionDescription,
-  RTCView,
-  MediaStream,
-  MediaStreamTrack,
-  mediaDevices,
-} from 'react-native-webrtc';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import Header from './src/components/Header';
+import ChoiceMode from './src/components/ChoiceMode/ChoiceMode';
+import WebRtcHost from './src/components/WebRTC/WebRtcHost';
+import WebRtcClient from './src/components/WebRTC/WebRtcClient';
+import WebRtcStatus from './src/components/WebRTC/WebRtcStatus';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-// Dev test
-window.store = {
-  test: async () => {
-    mediaDevices.enumerateDevices().then(sourceInfos => {
-      console.log(sourceInfos);
-    });
-  },
-  test1: async () => {
-    const isFront = true;
-    mediaDevices
-      .getUserMedia({
-        audio: true,
-        video: {
-          mandatory: {
-            minWidth: 500, // Provide your own width, height and frame rate here
-            minHeight: 300,
-            minFrameRate: 30,
-          },
-          facingMode: isFront ? 'user' : 'environment',
-          optional: [],
-        },
-      })
-      .then(stream => {
-        console.log('aaaa', stream);
-      })
-      .catch(error => {
-        console.log('bbbb', error);
-      });
-  },
-};
+import SectionContainer from './src/containers/Section';
+import DisplayIfMode from './src/containers/DisplayIfMode';
+import {StateProvider, CONSTANT} from './AppContext';
 
 const App = () => {
   return (
-    <Fragment>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
+    <StateProvider>
+      <Fragment>
+        <StatusBar barStyle="dark-content" />
+        <SafeAreaView>
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={styles.scrollView}>
+            <Header />
+            <View style={styles.body}>
+              <SectionContainer titleText="Step 1">
+                <ChoiceMode />
+              </SectionContainer>
+
+              <DisplayIfMode expectedMode={CONSTANT.ECLIENT_MODE.HOST}>
+                <SectionContainer titleText="Host">
+                  <WebRtcHost />
+                </SectionContainer>
+              </DisplayIfMode>
+
+              <DisplayIfMode expectedMode={CONSTANT.ECLIENT_MODE.PEER}>
+                <SectionContainer titleText="Peer">
+                  <WebRtcClient />
+                </SectionContainer>
+              </DisplayIfMode>
+
+              <WebRtcStatus />
             </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step 1</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Fragment>
+          </ScrollView>
+        </SafeAreaView>
+      </Fragment>
+    </StateProvider>
   );
 };
 
 const styles = StyleSheet.create({
   scrollView: {
     backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
   },
   body: {
     backgroundColor: Colors.white,
@@ -127,27 +73,13 @@ const styles = StyleSheet.create({
     marginTop: 32,
     paddingHorizontal: 24,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
   sectionDescription: {
-    marginTop: 8,
     fontSize: 18,
     fontWeight: '400',
     color: Colors.dark,
   },
   highlight: {
     fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
   },
 });
 
