@@ -1,0 +1,17 @@
+{
+  "name": "rxdb-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsondown": "^1.0.0",
+    "pouchdb-adapter-leveldb": "^7.1.1",
+    "rxdb": "^8.5.0",
+    "rxjs": "^6.5.3"
+  }
+}
