@@ -1,0 +1,11 @@
+{
+  "name": "napi-2019-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "author": "",
+  "license": "ISC"
+}
