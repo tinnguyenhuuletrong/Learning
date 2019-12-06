@@ -16,7 +16,9 @@ es.on("disconnect", function() {
   console.log("connection to storage is gone");
 });
 
-es.init(console.log);
+es.init(() => {
+  printHelp();
+});
 
 const streamId = "client_id_1";
 
@@ -97,10 +99,10 @@ function updateSnapshot(save = false) {
       aggregateId: streamId
     },
     function(err, snapshot, stream) {
-      var snap = snapshot && snapshot.data;
+      var snap = (snapshot && snapshot.data) || {};
       var history = stream.events; // events history from given snapshot
-      console.log("lastSnap", snap);
-      console.log("history", history);
+      console.log("LastSnap: \n", snap);
+      console.log("NewEvents: \n", history);
 
       const priceAggr = new PriceAggerate();
       priceAggr.loadSnapshot(snap && snap.priceAggr);
@@ -117,7 +119,7 @@ function updateSnapshot(save = false) {
         updatedAt: new Date()
       };
 
-      console.log("latest snapshot", snapShotData);
+      console.log("Updated snapshot \n", snapShotData);
 
       if (history.length > 0 && save) {
         es.createSnapshot(
@@ -133,4 +135,10 @@ function updateSnapshot(save = false) {
       }
     }
   );
+}
+
+function printHelp() {
+  console.log("supported:");
+  console.log('-  addEvent("certA"|"certB"|"...")');
+  console.log("-  updateSnapshot()");
 }
