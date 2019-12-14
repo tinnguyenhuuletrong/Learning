@@ -31,12 +31,11 @@ def shape_to_np(shape, dtype="int"):
 
 
 class DlibDetectFaces(Pipeline):
-    def __init__(self, src, dest_faces='faces'):
+    def __init__(self, src, dest_faces='faces', data_path="shape_predictor_68_face_landmarks.dat"):
         self.src = src
         self.dest_faces = dest_faces
-        p = "shape_predictor_68_face_landmarks.dat"
         self.detector = dlib.get_frontal_face_detector()
-
+        self.predictor = dlib.shape_predictor(data_path)
         super(DlibDetectFaces, self).__init__()
 
     def map(self, data):
@@ -44,13 +43,15 @@ class DlibDetectFaces(Pipeline):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         rects = self.detector(gray, 0)
         for (i, rect) in enumerate(rects):
+            shape = self.predictor(gray, rect)
+            shape = shape_to_np(shape)
 
             # Annotate face rect
             cv2.rectangle(image, rect_to_bb(rect), (0, 255, 0), thickness=5)
 
             # # Annotate landmarks
-            # for (x, y) in shape:
-            #     cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
+            for (x, y) in shape:
+                cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 
         data[self.dest_faces] = rects
         return data

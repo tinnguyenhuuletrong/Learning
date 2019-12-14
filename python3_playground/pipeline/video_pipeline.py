@@ -8,7 +8,8 @@ from lib.display_video import DisplayVideo
 def main(args={}):
     capture_video = CaptureVideo(0)
     process_grayscale = ProcessGrayscale('input', 'grayscale')
-    detect_faces = DlibDetectFaces('input')
+    detect_faces = DlibDetectFaces(
+        'input', data_path="./data/shape_predictor_68_face_landmarks.dat")
     combine_hstack = CombineHStack(['input', 'grayscale', 'hog'], 'output')
     display_video = DisplayVideo(src="input")
 
