@@ -101,9 +101,11 @@ function updateSnapshot(save = false) {
     function(err, snapshot, stream) {
       var snap = (snapshot && snapshot.data) || {};
       var history = stream.events; // events history from given snapshot
+
       console.log("LastSnap: \n", snap);
       console.log("NewEvents: \n", history);
 
+      // Init value for Aggerate
       const priceAggr = new PriceAggerate();
       priceAggr.loadSnapshot(snap && snap.priceAggr);
       priceAggr.loadFromHistory(history);
@@ -112,6 +114,7 @@ function updateSnapshot(save = false) {
       countAggr.loadSnapshot(snap && snap.countAggr);
       countAggr.loadFromHistory(history);
 
+      // Saved snapshot object
       const snapShotData = {
         priceAggr: priceAggr.getSnap(),
         countAggr: countAggr.getSnap(),
@@ -140,5 +143,5 @@ function updateSnapshot(save = false) {
 function printHelp() {
   console.log("supported:");
   console.log('-  addEvent("certA"|"certB"|"...")');
-  console.log("-  updateSnapshot()");
+  console.log("-  updateSnapshot(true)");
 }
