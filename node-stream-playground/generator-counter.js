@@ -1,19 +1,48 @@
-function* counterGenerator() {
-  let count = 0
-  while (true) {
-    count += 1
-    console.log('\t reading:', count)
-    yield count
+const { promisify } = require("util");
+const waitMs = promisify(setTimeout);
+const compose = (arrFunc = []) =>
+  arrFunc.reduce((acc, func) => func(acc), null);
+
+async function* counterGenerator() {
+  let count = 0;
+  while (count < 100) {
+    count += 1;
+    yield count;
   }
 }
 
-const counterIterator = counterGenerator()
-
-const logIterator = async iterator => {
-  for (const item of iterator) {
-    await new Promise(r => setTimeout(r, 100))
-    console.log('writing:', item)
+async function* powerOfTwo(source) {
+  for await (const item of source) {
+    yield item * item;
   }
 }
 
-logIterator(counterIterator)
+async function* log(source) {
+  for await (const item of source) {
+    console.log(item);
+  }
+}
+
+function waitForMs(val) {
+  return async function* wait(source) {
+    for await (const item of source) {
+      await waitMs(val);
+      yield item;
+    }
+  };
+}
+
+const counterIterator = compose([
+  counterGenerator,
+  waitForMs(100),
+  powerOfTwo,
+  log
+]);
+
+const exe = async iterator => {
+  for await (const itm of iterator) {
+  }
+  console.log("done");
+};
+
+exe(counterIterator);
