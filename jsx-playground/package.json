@@ -1,0 +1,21 @@
+{
+  "name": "jsx-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "example_binaryTree": "DEBUG=dev node node-boostrap ./src/example_binaryTree",
+    "example_express": "DEBUG=dev node node-boostrap ./src/example_express",
+    "build": "babel src -d output"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "@babel/register": "^7.8.3",
+    "debug": "^4.1.1",
+    "express": "^4.17.1"
+  }
+}
