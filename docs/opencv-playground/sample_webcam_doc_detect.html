@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello OpenCV.js</title>
+    <script src="./js/imgDocBounary.js"></script>
+    <script src="./js/webcam.js"></script>
+  </head>
+  <body>
+    <h2>Hello OpenCV.js</h2>
+    <p id="status">OpenCV.js is loading...</p>
+    <div>
+      <table cellpadding="0" cellspacing="0" width="0" border="0">
+        <tr>
+          <td>
+            <video
+              id="videoInput"
+              width="320"
+              height="240"
+              muted
+              loop
+              playsinline
+            ></video>
+          </td>
+          <td>
+            <canvas id="canvasOutput"></canvas>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="caption">videoInput</div>
+          </td>
+          <td>
+            <div class="caption">canvasOutput</div>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+    <script type="text/javascript">
+      function main() {
+        let video = document.getElementById("videoInput");
+        let canvasOutputElement = document.getElementById("canvasOutput");
+
+        let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+        let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+        let cap = new cv.VideoCapture(video);
+
+        const FPS = 60;
+
+        function animate() {
+          requestAnimationFrame(animate);
+
+          now = Date.now();
+          elapsed = now - then;
+
+          if (elapsed > fpsInterval) {
+            then = now - (elapsed % fpsInterval);
+
+            // Put your drawing code here
+            cap.read(src);
+            processImage(src);
+          }
+        }
+        function startAnimating(fps) {
+          fpsInterval = 1000 / fps;
+          then = Date.now();
+          startTime = then;
+          animate();
+        }
+
+        navigator.mediaDevices
+          .getUserMedia({
+            video: {
+              facingMode: {
+                ideal: "environment"
+              }
+            }
+          })
+          .then(function(stream) {
+            // Older browsers may not have srcObject
+            if ("srcObject" in video) {
+              video.srcObject = stream;
+            } else {
+              // Avoid using this in new browsers, as it is going away.
+              video.src = window.URL.createObjectURL(stream);
+            }
+            video.onloadedmetadata = function(e) {
+              video.play();
+              startAnimating(FPS);
+            };
+          })
+          .catch(function(err) {
+            console.log(err.name + ": " + err.message);
+          });
+      }
+
+      function onOpenCvReady() {
+        if (cv.getBuildInformation) {
+          document.getElementById("status").innerHTML = "OpenCV.js is ready.";
+          console.log(cv.getBuildInformation());
+          main();
+        } else {
+          // WASM
+          cv["onRuntimeInitialized"] = () => {
+            document.getElementById("status").innerHTML = "OpenCV.js is ready.";
+            console.log(cv.getBuildInformation());
+            main();
+          };
+        }
+      }
+    </script>
+    <script
+      async
+      src="./build/bin/wasm/opencv.js"
+      onload="onOpenCvReady();"
+      type="text/javascript"
+    ></script>
+  </body>
+</html>

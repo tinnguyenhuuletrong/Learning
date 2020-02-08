@@ -1,0 +1,15 @@
+{
+  "name": "opencv-webasm-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "http-server ./",
+    "ssl": "http-server -S -C cert.pem"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.12.1"
+  }
+}
