@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "http-server ./"
+    "dev": "http-server ./",
+    "ssl": "http-server -S -C cert.pem"
   },
   "author": "",
   "license": "ISC",

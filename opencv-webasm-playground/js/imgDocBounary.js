@@ -1,29 +1,29 @@
 function processImage(src) {
   const begin = Date.now();
-  console.log("1");
+  //console.log("1");
   const gray = new cv.Mat();
   const blur = new cv.Mat();
   const canny = new cv.Mat();
   const contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
 
-  console.log("2", Date.now() - begin);
+  //console.log("2", Date.now() - begin);
 
   // Gray scale
   cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
 
-  console.log("3", Date.now() - begin);
+  //console.log("3", Date.now() - begin);
 
   // Blur
   const ksize = new cv.Size(5, 5);
   cv.GaussianBlur(gray, blur, ksize, 0, 0, cv.BORDER_DEFAULT);
 
-  console.log("4", Date.now() - begin);
+  //console.log("4", Date.now() - begin);
 
   // Cany
   cv.Canny(blur, canny, 75, 200);
 
-  console.log("5", Date.now() - begin);
+  //console.log("5", Date.now() - begin);
 
   // Contours
   cv.findContours(
@@ -34,7 +34,7 @@ function processImage(src) {
     cv.CHAIN_APPROX_SIMPLE
   );
 
-  console.log("6", Date.now() - begin);
+  //console.log("6", Date.now() - begin);
 
   const docRegion = filtercontours(contours);
 
@@ -51,7 +51,6 @@ function processImage(src) {
 
   showImg(src);
 
-  src.delete();
   gray.delete();
   blur.delete();
   canny.delete();
@@ -73,6 +72,8 @@ function filtercontours(contours, hierarchy) {
   const TOP = 5;
   let poly = new cv.MatVector();
   for (let i = 0; i < TOP; i++) {
+    if (!tmp[i]) continue;
+
     const element = contours.get(tmp[i].i);
     const approxCurve = new cv.Mat();
 
