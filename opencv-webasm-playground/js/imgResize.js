@@ -26,7 +26,7 @@ function resizeKeepWitdh(mat, maxWidth, revertObj = {}) {
   return dst;
 }
 
-function resizeKeepHeight(mat, maxHeight) {
+function resizeKeepHeight(mat, maxHeight, revertObj = {}) {
   const { width, height } = mat.size();
 
   const dst = new cv.Mat();
