@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello OpenCV.js</title>
+    <script src="./js/imgResize.js"></script>
+    <script src="./js/imgMrzDetect.js"></script>
+  </head>
+  <body>
+    <h2>Hello OpenCV.js</h2>
+    <p id="status">OpenCV.js is loading...</p>
+    <div>
+      <div class="inputoutput">
+        <img
+          id="imageSrc"
+          alt="No Image"
+          width="300"
+          src="./asset/documents/mrz_original.jpg"
+        />
+        <div class="caption">
+          imageSrc <input type="file" id="fileInput" name="file" />
+        </div>
+      </div>
+      <div class="inputoutput">
+        <canvas id="canvasOutput"></canvas>
+        <div class="caption">canvasOutput</div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      function main(params) {
+        let imgElement = document.getElementById("imageSrc");
+        let inputElement = document.getElementById("fileInput");
+        inputElement.addEventListener(
+          "change",
+          e => {
+            imgElement.src = URL.createObjectURL(e.target.files[0]);
+          },
+          false
+        );
+        imgElement.onload = function() {
+          processImage(cv.imread(imgElement));
+        };
+
+        processImage(cv.imread(imgElement));
+      }
+
+      function onOpenCvReady() {
+        if (cv.getBuildInformation) {
+          document.getElementById("status").innerHTML = "OpenCV.js is ready.";
+          // console.log(cv.getBuildInformation());
+          main();
+        } else {
+          // WASM
+          cv["onRuntimeInitialized"] = () => {
+            document.getElementById("status").innerHTML = "OpenCV.js is ready.";
+            // console.log(cv.getBuildInformation());
+            main();
+          };
+        }
+      }
+    </script>
+    <script
+      async
+      src="./build/bin/wasm/opencv.js"
+      onload="onOpenCvReady();"
+      type="text/javascript"
+    ></script>
+  </body>
+</html>
