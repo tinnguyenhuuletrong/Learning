@@ -73,8 +73,8 @@ function processImage(
   cv.morphologyEx(gradX, gradX, cv.MORPH_CLOSE, rectKernel);
   cv.threshold(gradX, thresh, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
   cv.morphologyEx(thresh, thresh, cv.MORPH_CLOSE, sqKernel);
-  let M = cv.Mat.ones(a, a, cv.CV_8U);
-  cv.erode(thresh, thresh, M, new cv.Point(-1, -1), b);
+  let M = cv.Mat.ones(3, 3, cv.CV_8U);
+  cv.erode(thresh, thresh, M, new cv.Point(-1, -1), 4);
 
   //console.log("6", Date.now() - begin);
 
@@ -152,12 +152,12 @@ function filtercontours(contours, { width, height }) {
     const rect = cv.boundingRect(element);
     const ar = rect.width / rect.height;
     const crWidth = rect.width / width;
-    console.log(tmp[i], rect, ar, crWidth);
+    // console.log(tmp[i], rect, ar, crWidth);
 
     // check to see if the aspect ratio and coverage width are within
     // acceptable criteria
     if (ar > 5 && crWidth > 0.6) {
-      console.log("\t pick", tmp[i]);
+      // console.log("\t pick", tmp[i]);
       return {
         index: tmp[i].i,
         ar,

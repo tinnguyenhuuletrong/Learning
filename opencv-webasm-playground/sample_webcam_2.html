@@ -21,6 +21,7 @@
     <script src="./js/webcam_template/adapter.min.js"></script>
     <script src="./js/webcam_template/screenfull.min.js"></script>
     <script src="./js/webcam_template/stats.min.js"></script>
+    <script src="./js/webcam_template/fileSaver.min.js"></script>
     <script src="./js/webcam_template/boostrap.js"></script>
   </head>
   <body>
@@ -64,15 +65,7 @@
       // Capture video
       window.onWebcamCapture = function(blob) {
         const fileName = "screenshot.jpg";
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
+        saveAs(blob, fileName);
       };
 
       function animate() {
