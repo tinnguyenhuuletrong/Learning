@@ -41,7 +41,9 @@
           processImage(cv.imread(imgElement));
         };
 
-        processImage(cv.imread(imgElement));
+        processImage(cv.imread(imgElement), {
+          shouldResize: true
+        });
       }
 
       function onOpenCvReady() {

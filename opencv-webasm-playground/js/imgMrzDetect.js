@@ -5,11 +5,28 @@ function _lazyInit() {
   sqKernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(21, 21));
 }
 
-function processImage(inp) {
+function clone(mat) {
+  const n = new cv.Mat();
+  mat.copyTo(n);
+  return n;
+}
+
+function processImage(
+  inp,
+  options = {
+    shouldResize: true
+  }
+) {
   const begin = Date.now();
 
-  const revertConverter = {};
-  const src = resizeKeepWitdh(inp, 600, revertConverter);
+  const revertConverter = {
+    revertPoint: (x, y) => ({ x, y }),
+    revertRangeX: x => x,
+    revertRangeY: y => y
+  };
+  const src = options.shouldResize
+    ? resizeKeepWitdh(inp, 400, revertConverter)
+    : clone(inp);
 
   const gray = new cv.Mat();
   const blur = new cv.Mat();
@@ -19,7 +36,7 @@ function processImage(inp) {
   const contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
 
-  console.log("1", Date.now() - begin);
+  //console.log("1", Date.now() - begin);
 
   // lazy init
   if (!rectKernel) {
@@ -29,17 +46,17 @@ function processImage(inp) {
   // Gray scale
   cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
 
-  console.log("2", Date.now() - begin);
+  //console.log("2", Date.now() - begin);
 
   // Blur
   const ksize = new cv.Size(3, 3);
   cv.GaussianBlur(gray, blur, ksize, 0);
 
-  console.log("3", Date.now() - begin);
+  //console.log("3", Date.now() - begin);
 
   cv.morphologyEx(gray, blackhat, cv.MORPH_BLACKHAT, rectKernel);
 
-  console.log("4", Date.now() - begin);
+  //console.log("4", Date.now() - begin);
 
   // Sobel - Highpass filter
   // cv.Sobel (src, dst, ddepth, dx, dy, ksize = 3, scale = 1, delta = 0, borderType = cv.BORDER_DEFAULT)
@@ -50,16 +67,16 @@ function processImage(inp) {
   const d = maxVal - minVal;
   cv.convertScaleAbs(gradX, gradX, 255 / d, -minVal / d);
 
-  console.log("5", Date.now() - begin);
+  //console.log("5", Date.now() - begin);
 
   // apply a closing operation using the rectangular kernel to close gaps in between letters -- then apply Otsu's thresholding method
   cv.morphologyEx(gradX, gradX, cv.MORPH_CLOSE, rectKernel);
   cv.threshold(gradX, thresh, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
   cv.morphologyEx(thresh, thresh, cv.MORPH_CLOSE, sqKernel);
-  let M = cv.Mat.ones(3, 3, cv.CV_8U);
-  cv.erode(thresh, thresh, M, new cv.Point(-1, -1), 4);
+  let M = cv.Mat.ones(a, a, cv.CV_8U);
+  cv.erode(thresh, thresh, M, new cv.Point(-1, -1), b);
 
-  console.log("6", Date.now() - begin);
+  //console.log("6", Date.now() - begin);
 
   // Contours
   cv.findContours(
@@ -80,7 +97,7 @@ function processImage(inp) {
     const width = revertConverter.revertRangeX(docRegion.rect.width);
     const height = revertConverter.revertRangeY(docRegion.rect.height);
 
-    // console.log(docRegion.rect, "->", { x, y, width, height });
+    //  // console.log(docRegion.rect, "->", { x, y, width, height });
 
     cv.rectangle(
       inp,
@@ -91,7 +108,7 @@ function processImage(inp) {
     );
   }
 
-  console.log("7", Date.now() - begin);
+  //console.log("7", Date.now() - begin);
 
   //  window.tmp = { blackhat, gradX, thresh };
 

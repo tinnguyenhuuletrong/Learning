@@ -14,6 +14,7 @@ var switchCameraButton;
 var amountOfCameras = 0;
 var currentFacingMode = "environment";
 var _boostrapResolve;
+window.onWebcamCapture = null;
 window.boostrapWebcam = new Promise(resolve => (_boostrapResolve = resolve));
 window.initWebcam = function() {
   DetectRTC.load(function() {
@@ -237,18 +238,10 @@ function takeSnapshot() {
   }
 
   // some API's (like Azure Custom Vision) need a blob with image data
-  // const fileName = "screenshot.jpg";
-  // getCanvasBlob(canvas).then(function(blob) {
-  //   // do something with the image blob
-  //   var a = document.createElement("a");
-  //   document.body.appendChild(a);
-  //   a.style = "display: none";
-  //   url = window.URL.createObjectURL(blob);
-  //   a.href = url;
-  //   a.download = fileName;
-  //   a.click();
-  //   window.URL.revokeObjectURL(url);
-  // });
+  getCanvasBlob(canvas).then(function(blob) {
+    window.onWebcamCapture && window.onWebcamCapture(blob);
+    // do something with the image blob
+  });
 }
 
 // https://hackernoon.com/how-to-use-javascript-closures-with-confidence-85cd1f841a6b
