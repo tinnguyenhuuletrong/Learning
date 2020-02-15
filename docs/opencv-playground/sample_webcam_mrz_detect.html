@@ -23,6 +23,7 @@
     <script src="./js/webcam_template/stats.min.js"></script>
     <script src="./js/webcam_template/fileSaver.min.js"></script>
     <script src="./js/webcam_template/boostrap.js"></script>
+    <script src="./js/imgMrzDetect.js"></script>
   </head>
   <body>
     <p id="status" style="color: white;position:absolute;z-index: 1; ">
@@ -54,8 +55,8 @@
     </div>
 
     <script>
-      const FPS = 60;
-      let width = 320;
+      const FPS = 5;
+      let width = 600;
       let height = 0;
       let src, dst, cap;
       var stats = new Stats();
@@ -73,15 +74,16 @@
         stats.begin();
         now = Date.now();
         elapsed = now - then;
-
+        cap.read(src);
         if (elapsed > fpsInterval) {
           then = now - (elapsed % fpsInterval);
 
           // Put your drawing code here
-          cap.read(src);
-          cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-          cv.imshow("video_output", dst);
-        }
+
+          processImage(src, {
+            shouldResize: false
+          });
+        } else showImg(src);
         stats.end();
       }
       function startAnimating(fps) {
@@ -90,6 +92,10 @@
         startTime = then;
         animate();
       }
+
+      window.showImg = function(mat) {
+        cv.imshow("video_output", mat);
+      };
 
       function main({ video, stream }) {
         console.log("start here", { video, stream });
