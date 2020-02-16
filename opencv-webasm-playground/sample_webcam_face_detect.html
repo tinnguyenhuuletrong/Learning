@@ -18,7 +18,8 @@
       href="./css/webcam_template/style.css"
     />
     <script>
-      window.webcamSize = 600;
+      window.facingMode = "user";
+      window.webcamSize = 320;
     </script>
     <script src="./js/webcam_template/DetectRTC.min.js"></script>
     <script src="./js/webcam_template/adapter.min.js"></script>
@@ -26,7 +27,7 @@
     <script src="./js/webcam_template/stats.min.js"></script>
     <script src="./js/webcam_template/fileSaver.min.js"></script>
     <script src="./js/webcam_template/boostrap.js"></script>
-    <script src="./js/imgMrzDetect.js"></script>
+    <script src="./js/imgFaceDetect.js"></script>
   </head>
   <body>
     <p id="status" style="color: white;position:absolute;z-index: 1; ">
@@ -58,10 +59,10 @@
     </div>
 
     <script>
-      const FPS = 5;
-      let width = 600;
+      const FPS = 10;
+      let width = 320;
       let height = 0;
-      let src, dst, cap;
+      let src, cap;
       var stats = new Stats();
       stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
       document.body.appendChild(stats.dom);
@@ -73,21 +74,19 @@
       };
 
       function animate() {
-        requestAnimationFrame(animate);
         stats.begin();
         now = Date.now();
         elapsed = now - then;
         cap.read(src);
         if (elapsed > fpsInterval) {
-          then = now - (elapsed % fpsInterval);
-
           // Put your drawing code here
-
           processImage(src, {
             shouldResize: false
           });
+          then = now - (elapsed % fpsInterval);
         } else showImg(src);
         stats.end();
+        requestAnimationFrame(animate);
       }
       function startAnimating(fps) {
         fpsInterval = 1000 / fps;
@@ -111,7 +110,6 @@
           video.play();
 
           src = new cv.Mat(height, width, cv.CV_8UC4);
-          dst = new cv.Mat(height, width, cv.CV_8UC1);
           cap = new cv.VideoCapture(video);
 
           document.getElementById(
@@ -123,19 +121,19 @@
       function onOpenCvReady() {
         if (cv.getBuildInformation) {
           document.getElementById("status").innerHTML = "OpenCV.js is ready.";
-          console.log(cv.getBuildInformation());
+          // console.log(cv.getBuildInformation());
           window.initWebcam();
           window.boostrapWebcam.then(({ video, stream }) => {
-            main({ video, stream });
+            faceDetectInit().then(() => main({ video, stream }));
           });
         } else {
           // WASM
           cv["onRuntimeInitialized"] = () => {
             document.getElementById("status").innerHTML = "OpenCV.js is ready.";
-            console.log(cv.getBuildInformation());
+            // console.log(cv.getBuildInformation());
             window.initWebcam();
             window.boostrapWebcam.then(({ video, stream }) => {
-              main({ video, stream });
+              faceDetectInit().then(() => main({ video, stream }));
             });
           };
         }

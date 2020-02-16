@@ -78,6 +78,9 @@ async function processImage(inp, options = {}) {
   }
 
   showImg(inp);
+
+  src.delete();
+
   return results;
 }
 

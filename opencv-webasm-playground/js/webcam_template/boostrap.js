@@ -12,7 +12,8 @@ var takePhotoButton;
 var toggleFullScreenButton;
 var switchCameraButton;
 var amountOfCameras = 0;
-var currentFacingMode = "environment";
+var currentFacingMode = window.facingMode || "environment";
+var webcamSize = window.webcamSize || 1280;
 var _boostrapResolve;
 window.onWebcamCapture = null;
 window.boostrapWebcam = new Promise(resolve => (_boostrapResolve = resolve));
@@ -162,7 +163,7 @@ function initCameraStream() {
 
   // we ask for a square resolution, it will cropped on top (landscape)
   // or cropped at the sides (landscape)
-  var size = 1280;
+  var size = webcamSize;
 
   var constraints = {
     audio: false,
