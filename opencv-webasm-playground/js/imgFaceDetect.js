@@ -32,9 +32,7 @@ function createFileFromUrl(path, url) {
           cv.FS_createDataFile("/", path, data, true, false, false);
           resolve();
         } else {
-          self.printError(
-            "Failed to load " + url + " status: " + request.status
-          );
+          console.error("Failed to load " + url + " status: " + request.status);
         }
       }
     };
@@ -77,7 +75,7 @@ async function processImage(inp, options = {}) {
     cv.rectangle(inp, point1, point2, [0, 255, 0, 255]);
   }
 
-  showImg(inp);
+  !options.skipShowImg && showImg(inp);
 
   src.delete();
 
