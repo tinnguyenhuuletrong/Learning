@@ -96,7 +96,7 @@
           const dataFrame = cap.readDataDrame();
           const _t = Date.now();
           webWorkerRPCCall("cmd.detect_faces", dataFrame).then(res => {
-            if (res === null) return console.log("skip");
+            if (res === null) return;
             newFaceRect = res;
             latencyMetric.update(Date.now() - _t, 150);
           });
