@@ -4,12 +4,14 @@ async function processGrayScale(imgData) {
   await ready.promise;
   const inp = imgData2Mat(imgData);
   cv.cvtColor(inp, inp, cv.COLOR_RGBA2GRAY, 0);
-  return mat2ImgData(inp);
+  const dataFrame = mat2ImgData(inp);
+  inp.delete();
+  return dataFrame;
 }
 
 onmessage = async e => {
   const { id, cmd, extra } = e.data;
-  console.log(id, cmd, extra);
+
   try {
     switch (cmd) {
       case "cmd.process_grayscale":

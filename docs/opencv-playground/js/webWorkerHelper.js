@@ -1,4 +1,4 @@
-window._rpcCallMap = new Map();
+window._rpcCallMap = {};
 
 // Worker bridge
 window.onWorkerMsg = ({ namespace, ev, extra }) => {
@@ -13,7 +13,7 @@ window.onWorkerMsg = ({ namespace, ev, extra }) => {
     case "cmd.response": {
       const { id, response } = extra;
       const resolver = window._rpcCallMap[id];
-      window._rpcCallMap.delete(id);
+      delete window._rpcCallMap[id];
       resolver && resolver(response);
     }
 

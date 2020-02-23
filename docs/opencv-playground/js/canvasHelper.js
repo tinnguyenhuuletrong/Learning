@@ -45,9 +45,38 @@ function canvasHelperReadImgData(imageSource) {
 
 function canvasHelperShowImgData(canvasElement, imgData) {
   var canvas = canvasElement;
-  var ctx = canvas.getContext("2d");
+  var ctx = canvasElement._ctx;
+  if (!ctx) {
+    canvasElement._ctx = canvas.getContext("2d");
+    ctx = canvasElement._ctx;
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   canvas.width = imgData.width;
   canvas.height = imgData.height;
   ctx.putImageData(imgData, 0, 0);
+}
+
+function canvasHelperCreateVideoCapture(videoSource) {
+  var video = null;
+  if (typeof videoSource === "string") {
+    video = document.getElementById(videoSource);
+  } else {
+    video = videoSource;
+  }
+  if (!(video instanceof HTMLVideoElement)) {
+    throw new Error("Please input the valid video element or id.");
+    return;
+  }
+
+  var canvas = document.createElement("canvas");
+  canvas.width = video.width;
+  canvas.height = video.height;
+  var ctx = canvas.getContext("2d");
+
+  return {
+    readDataDrame: () => {
+      ctx.drawImage(video, 0, 0, video.width, video.height);
+      return ctx.getImageData(0, 0, video.width, video.height);
+    }
+  };
 }
