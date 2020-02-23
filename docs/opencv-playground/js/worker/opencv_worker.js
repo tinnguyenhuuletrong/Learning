@@ -13,7 +13,7 @@ class Deferred {
 
 let ready = new Deferred();
 let opencv;
-self.importScripts("/build/bin/wasm/opencv.js");
+self.importScripts("../../build/bin/wasm/opencv.js");
 
 function openCVReady() {
   console.log("opencv ready");
