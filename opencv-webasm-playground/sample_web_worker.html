@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello OpenCV.js</title>
+    <script>
+      window.openCVWorker = new Worker(
+        "./js/worker/opencv_grayscale_worker.js"
+      );
+      window.openCVWorker.onmessage = e => {
+        window.onWorkerMsg && window.onWorkerMsg(e.data);
+      };
+    </script>
+    <script src="./js/canvasHelper.js"></script>
+    <script src="./js/webWorkerHelper.js"></script>
+  </head>
+  <body>
+    <h2>Hello OpenCV.js - WebWorker version</h2>
+    <p id="status">OpenCV.js is loading...</p>
+    <div>
+      <div class="inputoutput">
+        <img
+          id="imageSrc"
+          alt="No Image"
+          width="300"
+          src="./asset/documents/mrz_passport_5.png"
+        />
+        <div class="caption">
+          imageSrc <input type="file" id="fileInput" name="file" />
+        </div>
+      </div>
+      <div class="inputoutput">
+        <canvas id="canvasOutput"></canvas>
+        <div class="caption">canvasOutput</div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      function main(params) {
+        let imgElement = document.getElementById("imageSrc");
+        let inputElement = document.getElementById("fileInput");
+        let canvasOutput = document.getElementById("canvasOutput");
+        inputElement.addEventListener(
+          "change",
+          e => {
+            imgElement.src = URL.createObjectURL(e.target.files[0]);
+          },
+          false
+        );
+        imgElement.onload = function() {
+          const imgData = canvasHelperReadImgData(imgElement);
+          webWorkerRPCCall("cmd.process_grayscale", imgData).then(res => {
+            canvasHelperShowImgData(canvasOutput, res);
+          });
+        };
+
+        const imgData = canvasHelperReadImgData(imgElement);
+        webWorkerRPCCall("cmd.process_grayscale", imgData).then(res => {
+          canvasHelperShowImgData(canvasOutput, res);
+        });
+      }
+    </script>
+  </body>
+</html>
