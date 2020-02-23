@@ -16,11 +16,23 @@ body {
   object-fit: cover;
   z-index: 0;
 }
+.video_contain {
+  object-fit: contain !important;
+}
 #video_output {
   width: 100%;
   height: 100%;
   object-fit: cover;
   z-index: 0;
+}
+#video_canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  top: 0;
+  left: 0;
 }
 
 #gui_controls {
