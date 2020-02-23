@@ -26,7 +26,7 @@ async function webWorkerRPCCall(cmdName, params) {
   const id = Date.now();
   window.openCVWorker.postMessage({
     id,
-    cmd: "cmd.process_grayscale",
+    cmd: cmdName,
     extra: params
   });
   return new Promise(resolve => {

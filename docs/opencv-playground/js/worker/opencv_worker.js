@@ -23,7 +23,7 @@ function openCVReady() {
 }
 
 function imgData2Mat(imgData) {
-  return new cv.matFromImageData(imgData);
+  return cv.matFromImageData(imgData);
 }
 function mat2ImgData(mat) {
   var img = new cv.Mat();
