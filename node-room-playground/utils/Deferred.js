@@ -1,13 +1,13 @@
 class Deferred {
   constructor() {
-    this.reset()
+    this.reset();
   }
 
   reset() {
     this.promise = new Promise((resolve, reject) => {
-      this.reject = reject
-      this.resolve = resolve
-    })
+      this.reject = reject;
+      this.resolve = resolve;
+    });
   }
 }
-module.exports = Deferred
+module.exports = Deferred;

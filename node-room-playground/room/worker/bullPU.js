@@ -1,15 +1,49 @@
-const { promisify } = require("util");
-
-const sleepMs = promisify(setTimeout);
+const chalk = require("chalk");
+const { createMutex } = require("../../utils/MemoryMutex");
 const Room = require("../Room");
 
-module.exports = async function(job) {
-  console.log("job begin", job.data);
-  const { roomId, batchCmds } = job.data;
-  const ins = new Room();
-  const res = await ins.exeCmd(batchCmds);
+class BullPU {
+  constructor(roomId) {
+    this.id = roomId;
+    this.roomIns = new Room(roomId);
+    this._queue = global.BullQueue.createQueue(`room_${roomId}`);
 
-  await sleepMs(10000);
-  console.log("job end", res);
-  return Promise.resolve(res);
+    this._bindMethods();
+    this.log("new ins created", process.pid);
+  }
+
+  log() {
+    console.log(chalk.blue(`[BullPU][${this.id}]`), ...arguments);
+  }
+
+  _bindMethods() {
+    // Total concurency: 11
+    this._queue.process("healthCheck", 10, this.healthCheck);
+    this._queue.process("exe", 1, this.exe);
+  }
+
+  healthCheck = async job => {
+    this.log("healthCheck");
+    return {
+      status: "success",
+      pid: process.pid
+    };
+  };
+
+  exe = async job => {
+    const { batchCmds } = job.data;
+    const _mutex = await createMutex(`room_${this.id}`, 100000);
+    this.log("exe begin", { id: job.id, batchCmds });
+    const res = await this.roomIns.exeCmd(batchCmds);
+    this.log("exe end", { db: this.roomIns.db, pid: process.pid });
+    _mutex.unlock();
+    return res;
+  };
+}
+
+module.exports = {
+  create: roomId => {
+    const ins = new BullPU(roomId);
+    return ins;
+  }
 };
