@@ -1,14 +1,15 @@
-import React from 'react'
-import ChoiceMode from './components/ChoiceMode'
-import WebRtcHost from './components/WebRtcHost'
-import WebRtcClient from './components/WebRtcClient'
-import WebRtcStatus from './components/WebRtcStatus'
-import WebRtcLog from './components/WebRtcLog'
-import WebRtcData from './components/WebRtcData'
-import WebRtcVideoCall from './components/WebRtcVideoCall'
-import WebRTCSupport from './containers/WebRTCSupport'
-import DisplayIfMode from './containers/DisplayIfMode'
-import { StateProvider, CONSTANT } from './AppContext'
+import React from "react";
+import Footer from "./components/Footer";
+import ChoiceMode from "./components/ChoiceMode";
+import WebRtcHost from "./components/WebRtcHost";
+import WebRtcClient from "./components/WebRtcClient";
+import WebRtcStatus from "./components/WebRtcStatus";
+import WebRtcLog from "./components/WebRtcLog";
+import WebRtcData from "./components/WebRtcData";
+import WebRtcVideoCall from "./components/WebRtcVideoCall";
+import WebRTCSupport from "./containers/WebRTCSupport";
+import DisplayIfMode from "./containers/DisplayIfMode";
+import { StateProvider, CONSTANT } from "./AppContext";
 
 function App() {
   return (
@@ -64,8 +65,9 @@ function App() {
           </WebRTCSupport>
         </div>
       </section>
+      <Footer />
     </StateProvider>
-  )
+  );
 }
 
-export default App
+export default App;
