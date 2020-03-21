@@ -1,7 +1,11 @@
-const { RTCVideoSink, RTCVideoSource } = require("wrtc").nonstandard;
-
+/*
+Required 
+  brew install ffmpeg
+  npm i fluent-ffmpeg
+*/
 const ffmpeg = require("fluent-ffmpeg");
 const { PassThrough } = require("stream");
+const { RTCVideoSink, RTCVideoSource } = require("wrtc").nonstandard;
 
 const VIDEO_OUTPUT_SIZE = "320x240";
 const VIDEO_OUTPUT_FILE = "./recording.mp4";
@@ -12,7 +16,7 @@ function recordRTCVideoTrack(videoTrack, options = {}) {
   const trackId = videoTrack.id;
   const kind = videoTrack.kind;
 
-  console.log({ trackId, kind });
+  console.log("\t[recordRTCVideoTrack]", { trackId, kind });
 
   function init(width, height) {
     if (stream) return;
@@ -38,11 +42,19 @@ function recordRTCVideoTrack(videoTrack, options = {}) {
         "30"
       ])
       .on("start", () => {
-        console.log("Start recording >> ", stream.recordPath);
+        console.log(
+          "\t[recordRTCVideoTrack]",
+          "Start recording >> ",
+          stream.recordPath
+        );
       })
       .on("end", () => {
         stream.recordEnd = true;
-        console.log("Stop recording >> ", stream.recordPath);
+        console.log(
+          "\t[recordRTCVideoTrack]",
+          "Stop recording >> ",
+          stream.recordPath
+        );
       })
       .size(VIDEO_OUTPUT_SIZE)
       .output(stream.recordPath);
@@ -59,7 +71,7 @@ function recordRTCVideoTrack(videoTrack, options = {}) {
   const _watcher = setInterval(() => {
     const readyState = videoTrack.readyState;
     if (readyState === "ended") {
-      console.log("track end");
+      console.log("\t[recordRTCVideoTrack]", "track end");
       clearInterval(_watcher);
       videoSkink.stop();
       stream.video.end();

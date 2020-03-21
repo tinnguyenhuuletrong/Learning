@@ -1,6 +1,7 @@
 const { EventEmitter } = require("events");
 const SimplePeer = require("simple-peer");
-var wrtc = require("wrtc");
+const wrtc = require("wrtc");
+const { RTCVideoSource } = require("wrtc").nonstandard;
 
 class WebRTCPeer extends EventEmitter {
   constructor(signalChannel) {
@@ -70,6 +71,19 @@ class WebRTCPeer extends EventEmitter {
   send(data) {
     if (!this.peer) return null;
     this.peer.send(data);
+  }
+
+  //-------------------------------------------------------//
+  //  Media
+  //-------------------------------------------------------//
+
+  async createVideoSource() {
+    const rtcSource = new RTCVideoSource();
+    const track = rtcSource.createTrack();
+    const stream = new wrtc.MediaStream([track]);
+
+    this.peer.addStream(stream);
+    return rtcSource;
   }
 
   _initFunc() {

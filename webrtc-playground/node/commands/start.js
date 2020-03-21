@@ -52,11 +52,14 @@ module.exports = function(app, store) {
       const { connection, simplePeerConfig } = store;
       if (connection instanceof WebRTCPeer) {
         connection.start({ mode, signalRoom: store.roomId, simplePeerConfig });
-        console.log("start...", {
-          mode,
-          signalRoom: store.roomId,
-          simplePeerConfig
-        });
+        console.dir(
+          {
+            mode,
+            signalRoom: store.roomId,
+            simplePeerConfig
+          },
+          { depth: 100 }
+        );
         return callback();
       }
 
