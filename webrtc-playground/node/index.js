@@ -8,7 +8,7 @@ require("firebase/database");
 
 const firebaseConfig = {
   apiKey: "AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ",
-  databaseURL: "https://weeklyhack-ff068.firebaseio.com/"
+  databaseURL: "https://weeklyhack-ff068.firebaseio.com/",
 };
 Firebase.initializeApp(firebaseConfig);
 
@@ -26,13 +26,13 @@ const store = {
         {
           urls: "turn:numb.viagenie.ca",
           username: "ilu20009@gmail.com",
-          credential: "Abc12345"
-        }
-      ]
-    }
+          credential: "Abc12345",
+        },
+      ],
+    },
   },
   connection: new WebRTCPeer(new FirebaseSignalChannel(Firebase.database())),
-  eventSource: new EventEmitter()
+  eventSource: new EventEmitter(),
 };
 
 global.store = store;
