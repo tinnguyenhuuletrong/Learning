@@ -1,0 +1,20 @@
+.box {
+  height: 100px;
+  border-radius: 5px;
+  margin-top: 5px;
+  background-clip: padding-box;
+  box-shadow: 0px 0px 9px 0px #00000040;
+}
+
+.box1 {
+  background-image: linear-gradient(to bottom, lightblue, lightskyblue);
+}
+
+.box2 {
+  background-image: linear-gradient(to bottom, plum, lightpink);
+}
+
+.box3 {
+  background-image: linear-gradient(to bottom, lightsalmon, lightcoral);
+  margin-left: 5px;
+}
