@@ -138,6 +138,7 @@ Styles.cardBase = {
 };
 
 Styles.cardContent = {
+  userSelect: "none",
   height: "100%",
 };
 
