@@ -12,6 +12,9 @@ Clone of [link](https://github.com/mdevils/typescript-exercises/tree/master)
 6.  Type declarations.
 7.  Module augmentation.
 8.  Advanced type mapping.
+9.  Promisify
+10. JS Module declaration 1
+11. JS Module declaration 2
 
 ## Rules and principles
 
