@@ -15,6 +15,8 @@ Clone of [link](https://github.com/mdevils/typescript-exercises/tree/master)
 9.  Promisify
 10. JS Module declaration 1
 11. JS Module declaration 2
+12. JS Module declaration - extend
+13. Mongodb query types
 
 ## Rules and principles
 
