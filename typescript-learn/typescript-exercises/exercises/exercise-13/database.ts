@@ -18,6 +18,8 @@ export type QueryObject<T> = {
   $text?: string;
 };
 
+// TTin: Too lazy to imp logic :)
+
 export class Database<T> {
   protected filename: string;
   protected fullTextSearchFieldNames: string[];
