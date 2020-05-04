@@ -16,9 +16,13 @@ var currentFacingMode = window.facingMode || "environment";
 var webcamSize = window.webcamSize || 1280;
 var _boostrapResolve;
 window.onWebcamCapture = null;
-window.boostrapWebcam = new Promise(resolve => (_boostrapResolve = resolve));
-window.initWebcam = function() {
-  DetectRTC.load(function() {
+window.boostrapWebcam = new Promise((resolve) => (_boostrapResolve = resolve));
+window.initWebcam = async function () {
+  // Safari IOS 13+ required this
+  await navigator.mediaDevices.getUserMedia({ video: true });
+
+  DetectRTC.load(function () {
+    console.dir(DetectRTC);
     // do some checks
     if (DetectRTC.isWebRTCSupported == false) {
       alert(
@@ -73,7 +77,7 @@ function initCameraUI() {
   // https://developer.mozilla.org/nl/docs/Web/HTML/Element/button
   // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role
 
-  takePhotoButton.addEventListener("click", function() {
+  takePhotoButton.addEventListener("click", function () {
     takeSnapshotUI();
     takeSnapshot();
   });
@@ -96,8 +100,8 @@ function initCameraUI() {
     // set init values
     fullScreenChange();
 
-    toggleFullScreenButton.addEventListener("click", function() {
-      screenfull.toggle(document.getElementById("container")).then(function() {
+    toggleFullScreenButton.addEventListener("click", function () {
+      screenfull.toggle(document.getElementById("container")).then(function () {
         console.log(
           "Fullscreen mode: " +
             (screenfull.isFullscreen ? "enabled" : "disabled")
@@ -112,7 +116,7 @@ function initCameraUI() {
   if (amountOfCameras > 1) {
     switchCameraButton.style.display = "block";
 
-    switchCameraButton.addEventListener("click", function() {
+    switchCameraButton.addEventListener("click", function () {
       if (currentFacingMode === "environment") currentFacingMode = "user";
       else currentFacingMode = "environment";
 
@@ -126,7 +130,7 @@ function initCameraUI() {
   // https://developer.mozilla.org/en-US/docs/Web/API/Screen/orientation
   window.addEventListener(
     "orientationchange",
-    function() {
+    function () {
       // iOS doesn't have screen.orientation, so fallback to window.orientation.
       // screen.orientation will
       if (screen.orientation) angle = screen.orientation.angle;
@@ -156,7 +160,7 @@ function initCameraUI() {
 function initCameraStream() {
   // stop any active streams in the window
   if (window.stream) {
-    window.stream.getTracks().forEach(function(track) {
+    window.stream.getTracks().forEach(function (track) {
       track.stop();
     });
   }
@@ -172,8 +176,8 @@ function initCameraStream() {
       height: { ideal: size },
       //width: { min: 1024, ideal: window.innerWidth, max: 1920 },
       //height: { min: 776, ideal: window.innerHeight, max: 1080 },
-      facingMode: currentFacingMode
-    }
+      facingMode: currentFacingMode,
+    },
   };
 
   navigator.mediaDevices
@@ -231,15 +235,15 @@ function takeSnapshot() {
   // https://developers.google.com/web/fundamentals/primers/promises
   // https://stackoverflow.com/questions/42458849/access-blob-value-outside-of-canvas-toblob-async-function
   function getCanvasBlob(canvas) {
-    return new Promise(function(resolve, reject) {
-      canvas.toBlob(function(blob) {
+    return new Promise(function (resolve, reject) {
+      canvas.toBlob(function (blob) {
         resolve(blob);
       }, "image/jpeg");
     });
   }
 
   // some API's (like Azure Custom Vision) need a blob with image data
-  getCanvasBlob(canvas).then(function(blob) {
+  getCanvasBlob(canvas).then(function (blob) {
     window.onWebcamCapture && window.onWebcamCapture(blob);
     // do something with the image blob
   });
@@ -264,7 +268,7 @@ function createClickFeedbackUI() {
     overlay.style.display = "none";
   }
 
-  return function() {
+  return function () {
     var overlay = document.getElementById("video_overlay");
     if (overlayVisibility == false) {
       overlayVisibility = true;
