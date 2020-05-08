@@ -33,7 +33,7 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testEnvironment": "node"
+    "testEnvironment": "jsdom"
   },
   "peerDependencies": {
     "react": "^16.13.1",
