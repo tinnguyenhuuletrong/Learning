@@ -1,0 +1,53 @@
+{
+  "name": "web-video-helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "module": "build/index.es.js",
+  "jsnext:main": "build/index.es.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "watch": "npm-watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.7",
+    "@types/react-test-renderer": "^16.9.2",
+    "jest": "^25.0.0",
+    "npm-watch": "^0.6.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts-ts": "^3.1.0",
+    "react-test-renderer": "^16.13.1",
+    "rollup": "^2.8.2",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-peer-deps-external": "^2.2.2",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "ts-jest": "^25.5.0",
+    "typescript": "^3.8.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
+  "peerDependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "js,jsx,ts,tsx"
+    }
+  },
+  "files": [
+    "build"
+  ]
+}

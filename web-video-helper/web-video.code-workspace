@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "name": "lib",
+      "path": "."
+    },
+    {
+      "name": "example",
+      "path": "./examples"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "examples": true
+    }
+  }
+}
