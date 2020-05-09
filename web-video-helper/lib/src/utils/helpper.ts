@@ -50,17 +50,18 @@ export function hasGetUserMedia() {
 }
 
 export interface GetCanvasFromVideoOptions {
+  canvas?: HTMLCanvasElement;
   mirrored?: boolean;
   imageSmoothing?: boolean;
   forceScreenshotSourceSize?: boolean;
   minScreenshotWidth?: number;
   minScreenshotHeight?: number;
 }
-export interface GetCanvasFromVideoReturn {
+export type GetCanvasFromVideoReturn = {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D | null;
   drawImage: (image: CanvasImageSource) => void;
-}
+};
 export function getCanvasFromVideo(
   video: HTMLVideoElement,
   options: GetCanvasFromVideoOptions
@@ -70,6 +71,7 @@ export function getCanvasFromVideo(
   }
 
   const {
+    canvas: canvasRef,
     mirrored,
     imageSmoothing = true,
     forceScreenshotSourceSize = true,
@@ -91,7 +93,8 @@ export function getCanvasFromVideo(
     }
   }
 
-  const canvas = document.createElement("canvas");
+  // use or create
+  const canvas = canvasRef ? canvasRef : document.createElement("canvas");
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
   const ctx = canvas.getContext("2d");

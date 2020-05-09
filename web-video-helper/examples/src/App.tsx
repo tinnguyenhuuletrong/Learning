@@ -1,9 +1,12 @@
 import React from "react";
 import "./App.css";
-import { WebcamRenderToVideo } from "web-video-helper";
+import { WebcamRenderToVideo, WebcamRenderToCanvas } from "web-video-helper";
 
 const videoConstraints = {
   width: 256,
+};
+const video2Constraints = {
+  width: 512,
 };
 declare global {
   interface Window {
@@ -23,7 +26,8 @@ function App() {
     <div className="App">
       <header className="App-header">Sample</header>
       <main className="App-main">
-        <WebcamRenderToVideo
+        <h3>Canvas element</h3>
+        <WebcamRenderToCanvas
           audio={false}
           forceScreenshotSourceSize
           videoConstraints={videoConstraints}
@@ -32,6 +36,8 @@ function App() {
             context.current.captureFn = doCapture;
           }}
         />
+        {/* <h3>Video element</h3> */}
+        {/* <WebcamRenderToVideo videoConstraints={video2Constraints} /> */}
         <button onClick={captureCallback}>capture</button>
         <img src={captureSrc} alt="" />
       </main>

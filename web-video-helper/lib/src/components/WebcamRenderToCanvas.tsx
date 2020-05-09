@@ -1,9 +1,14 @@
 import * as React from "react";
-import { hasGetUserMedia, getCanvasFromVideo } from "../utils/helpper";
+import {
+  hasGetUserMedia,
+  getCanvasFromVideo,
+  GetCanvasFromVideoReturn,
+} from "../utils/helpper";
 import { WebcamProps } from "../types";
 import requestUserMedia from "../hooks/requestUserMedia";
+import useAnimationFrame from "../hooks/useRequestAnimationFrame";
 
-const WebcamRenderToVideo = ({
+const WebcamRenderToCanvas = ({
   audio = true,
   forceScreenshotSourceSize = false,
   imageSmoothing = true,
@@ -17,18 +22,20 @@ const WebcamRenderToVideo = ({
   style = {},
 }: WebcamProps) => {
   const video = React.useRef<any>(null);
+  const canvas = React.useRef<HTMLCanvasElement | null>(null);
+  const canvasHelper = React.useRef<GetCanvasFromVideoReturn | null>(null);
+
   const [src, setVideoSrc] = React.useState<MediaStream>();
 
   // Capture func
   const doCapture = React.useCallback(() => {
-    const canvasHelper = getCanvasFromVideo(video.current, {
-      forceScreenshotSourceSize,
-      imageSmoothing,
-    });
-    if (!canvasHelper) return;
+    if (!canvasHelper.current) return;
 
-    canvasHelper.drawImage(video.current);
-    return canvasHelper.canvas.toDataURL(screenshotFormat, screenshotQuality);
+    canvasHelper.current.drawImage(video.current);
+    return canvasHelper.current.canvas.toDataURL(
+      screenshotFormat,
+      screenshotQuality
+    );
   }, []);
 
   // Request user media
@@ -59,6 +66,15 @@ const WebcamRenderToVideo = ({
       video.current.src = window.URL.createObjectURL(src);
     }
 
+    video.current.onloadedmetadata = () => {
+      // create displaying canvas
+      canvasHelper.current = getCanvasFromVideo(video.current, {
+        canvas: canvas.current as HTMLCanvasElement,
+        forceScreenshotSourceSize,
+        imageSmoothing,
+      });
+    };
+
     // Destroy
     return () => {
       try {
@@ -69,18 +85,37 @@ const WebcamRenderToVideo = ({
     };
   }, [src]);
 
+  // Animation Frame sync
+  const syncFrame = React.useCallback(() => {
+    if (!(canvasHelper.current && video.current)) return;
+    canvasHelper.current.drawImage(video.current);
+  }, []);
+  useAnimationFrame(60)(syncFrame);
+
   if (!hasGetUserMedia()) {
     onUserMediaError("getUserMedia not supported");
     return null;
   }
 
-  const videoStyle = mirrored
-    ? { ...style, transform: `${style.transform || ""} scaleX(-1)` }
+  const hiddenVideoStyle = mirrored
+    ? {
+        ...style,
+        transform: `${style.transform || ""} scaleX(-1)`,
+      }
     : style;
 
   return (
-    <video ref={video} autoPlay muted={audio} playsInline style={videoStyle} />
+    <>
+      <video
+        ref={video}
+        autoPlay
+        muted={audio}
+        playsInline
+        style={{ ...hiddenVideoStyle, display: "none" }}
+      />
+      <canvas ref={canvas} />
+    </>
   );
 };
 
-export default WebcamRenderToVideo;
+export default WebcamRenderToCanvas;
