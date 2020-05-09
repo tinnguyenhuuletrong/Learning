@@ -16,3 +16,7 @@ export interface WebcamProps extends React.HTMLProps<HTMLVideoElement> {
   screenshotQuality?: number;
   videoConstraints?: MediaStreamConstraints["video"];
 }
+
+export interface WebcamPropsCanvas extends WebcamProps {
+  syncFps?: number;
+}

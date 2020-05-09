@@ -28,6 +28,7 @@ function App() {
       <main className="App-main">
         <h3>Canvas element</h3>
         <WebcamRenderToCanvas
+          syncFps={60}
           audio={false}
           forceScreenshotSourceSize
           videoConstraints={videoConstraints}

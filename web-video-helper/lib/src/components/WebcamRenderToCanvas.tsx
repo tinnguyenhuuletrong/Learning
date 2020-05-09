@@ -4,11 +4,12 @@ import {
   getCanvasFromVideo,
   GetCanvasFromVideoReturn,
 } from "../utils/helpper";
-import { WebcamProps } from "../types";
+import { WebcamPropsCanvas } from "../types";
 import requestUserMedia from "../hooks/requestUserMedia";
 import useAnimationFrame from "../hooks/useRequestAnimationFrame";
 
 const WebcamRenderToCanvas = ({
+  syncFps = 60,
   audio = true,
   forceScreenshotSourceSize = false,
   imageSmoothing = true,
@@ -17,10 +18,10 @@ const WebcamRenderToCanvas = ({
   onUserMediaError = () => {},
   screenshotFormat = "image/jpeg",
   screenshotQuality = 0.92,
+  style = {},
   audioConstraints,
   videoConstraints,
-  style = {},
-}: WebcamProps) => {
+}: WebcamPropsCanvas) => {
   const video = React.useRef<any>(null);
   const canvas = React.useRef<HTMLCanvasElement | null>(null);
   const canvasHelper = React.useRef<GetCanvasFromVideoReturn | null>(null);
@@ -90,7 +91,7 @@ const WebcamRenderToCanvas = ({
     if (!(canvasHelper.current && video.current)) return;
     canvasHelper.current.drawImage(video.current);
   }, []);
-  useAnimationFrame(60)(syncFrame);
+  useAnimationFrame(syncFps)(syncFrame);
 
   if (!hasGetUserMedia()) {
     onUserMediaError("getUserMedia not supported");
