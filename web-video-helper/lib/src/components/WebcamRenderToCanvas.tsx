@@ -8,6 +8,10 @@ import { WebcamPropsCanvas } from "../types";
 import requestUserMedia from "../hooks/requestUserMedia";
 import useAnimationFrame from "../hooks/useRequestAnimationFrame";
 
+const hiddenVideoStyle = {
+  display: "none",
+};
+
 const WebcamRenderToCanvas = ({
   syncFps = 60,
   audio = true,
@@ -16,6 +20,7 @@ const WebcamRenderToCanvas = ({
   mirrored = false,
   onUserMedia = () => {},
   onUserMediaError = () => {},
+  onPostRender,
   screenshotFormat = "image/jpeg",
   screenshotQuality = 0.92,
   style = {},
@@ -73,6 +78,7 @@ const WebcamRenderToCanvas = ({
         canvas: canvas.current as HTMLCanvasElement,
         forceScreenshotSourceSize,
         imageSmoothing,
+        mirrored,
       });
     };
 
@@ -89,7 +95,11 @@ const WebcamRenderToCanvas = ({
   // Animation Frame sync
   const syncFrame = React.useCallback(() => {
     if (!(canvasHelper.current && video.current)) return;
-    canvasHelper.current.drawImage(video.current);
+
+    let nextFrame = video.current;
+    const { ctx, canvas, drawImage } = canvasHelper.current;
+    drawImage(nextFrame);
+    onPostRender && onPostRender(canvas, ctx);
   }, []);
   useAnimationFrame(syncFps)(syncFrame);
 
@@ -98,13 +108,6 @@ const WebcamRenderToCanvas = ({
     return null;
   }
 
-  const hiddenVideoStyle = mirrored
-    ? {
-        ...style,
-        transform: `${style.transform || ""} scaleX(-1)`,
-      }
-    : style;
-
   return (
     <>
       <video
@@ -112,9 +115,9 @@ const WebcamRenderToCanvas = ({
         autoPlay
         muted={audio}
         playsInline
-        style={{ ...hiddenVideoStyle, display: "none" }}
+        style={{ ...hiddenVideoStyle }}
       />
-      <canvas ref={canvas} />
+      <canvas ref={canvas} style={style} />
     </>
   );
 };

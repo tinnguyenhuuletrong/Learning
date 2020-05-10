@@ -59,7 +59,7 @@ export interface GetCanvasFromVideoOptions {
 }
 export type GetCanvasFromVideoReturn = {
   canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D | null;
+  ctx: CanvasRenderingContext2D;
   drawImage: (image: CanvasImageSource) => void;
 };
 export function getCanvasFromVideo(
@@ -97,7 +97,8 @@ export function getCanvasFromVideo(
   const canvas = canvasRef ? canvasRef : document.createElement("canvas");
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  ctx.imageSmoothingEnabled = imageSmoothing;
 
   function drawImage(image: CanvasImageSource) {
     if (ctx && canvas) {
@@ -107,7 +108,6 @@ export function getCanvasFromVideo(
         ctx.scale(-1, 1);
       }
 
-      ctx.imageSmoothingEnabled = imageSmoothing;
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
       // invert mirroring

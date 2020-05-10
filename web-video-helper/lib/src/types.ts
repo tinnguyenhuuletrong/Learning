@@ -19,4 +19,8 @@ export interface WebcamProps extends React.HTMLProps<HTMLVideoElement> {
 
 export interface WebcamPropsCanvas extends WebcamProps {
   syncFps?: number;
+  onPostRender?: (
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ) => void;
 }
