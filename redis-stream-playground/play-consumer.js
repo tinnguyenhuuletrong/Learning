@@ -11,9 +11,14 @@ async function main() {
 
 global.subcribles = {};
 async function subcrible(topic) {
-  const ins = new RedisStreamSubscriber(redisClient, topic);
+  const ins = new RedisStreamSubscriber(redisClient, topic, {
+    fromId: "latest",
+    pullIntervalMs: 0,
+    pullSize: 100,
+    debug: 1,
+  });
   ins.start();
-  ins.on("data", console.log);
+  ins.on("data", (data) => console.dir(data, { depth: 100 }));
   global.subcribles[topic] = ins;
 }
 console.log('call subcrible("userEvents")');
