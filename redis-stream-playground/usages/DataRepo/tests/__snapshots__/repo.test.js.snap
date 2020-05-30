@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataRepo - event 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "evt": "created",
+        "payload": Object {
+          "id": 2,
+          "name": "new",
+        },
+      },
+    ],
+    Array [
+      Object {
+        "evt": "updated",
+        "payload": Object {
+          "id": 2,
+          "name": "new_1",
+        },
+      },
+    ],
+    Array [
+      Object {
+        "evt": "deleted",
+        "payload": Object {
+          "id": 2,
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`DataRepo - query data sources 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "id": 0,
+      "name": "t1",
+    },
+    Object {
+      "id": 1,
+      "name": "t2",
+    },
+  ],
+  "requestId": 0,
+  "status": "success",
+}
+`;
+
+exports[`DataRepo - rpc test 1`] = `
+Array [
+  Object {
+    "data": "pong",
+    "requestId": 0,
+    "status": "success",
+  },
+  Object {
+    "data": "pong",
+    "requestId": 1,
+    "status": "success",
+  },
+  Object {
+    "data": "pong",
+    "requestId": 2,
+    "status": "success",
+  },
+]
+`;
