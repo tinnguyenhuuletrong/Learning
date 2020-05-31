@@ -2,16 +2,17 @@ const PubSub = require("./PubSub");
 
 class RpcClient {
   constructor() {
-    this.reqId = 0;
+    this.reqId = Date.now();
   }
 
   async request({ msg, reqTopic, resTopic }) {
     const reqId = this.reqId++;
     return new Promise(async (resolve, reject) => {
-      const handler = (data) => {
-        if (data.requestId !== reqId) return;
+      const handler = (response) => {
+        if (response.requestId !== reqId) return;
         PubSub.unSub(resTopic, handler);
-        resolve(data);
+        const { status, data } = response;
+        resolve({ status, data });
       };
       await PubSub.sub(resTopic, handler);
       await PubSub.pub(reqTopic, JSON.stringify({ requestId: reqId, ...msg }));

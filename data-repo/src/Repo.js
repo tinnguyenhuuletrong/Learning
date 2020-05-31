@@ -23,8 +23,22 @@ class Repo {
     }
   }
 
+  async _upsertTopic() {
+    try {
+      const count = await this.stream.length();
+      if (count <= 0)
+        this.stream.addToStream({
+          evt: "seed",
+          payload: {},
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async start() {
     await this.rpcServer.start();
+    await this._upsertTopic();
     this.dataSource.on("created", this._onCreated);
     this.dataSource.on("deleted", this._onDeleted);
     this.dataSource.on("updated", this._onUpdated);
@@ -81,6 +95,7 @@ class Repo {
         break;
 
       default:
+        return { status: "error", error: "invalid cmd" };
         break;
     }
   };

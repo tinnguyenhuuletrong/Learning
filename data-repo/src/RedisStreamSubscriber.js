@@ -1,6 +1,11 @@
 const { EventEmitter } = require("events");
 const { promisify } = require("util");
-const waitMs = promisify(setTimeout);
+const waitMs = (ms) =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
 
 // -----------------------------------------------------------------//
 // RedisStreamSubscriber
@@ -33,9 +38,7 @@ class RedisStreamSubscriber extends EventEmitter {
   async start() {
     this._isRunning = true;
     await this.summary();
-    setImmediate(() => {
-      this._onUpdate();
-    });
+    await this._onUpdate();
   }
 
   stop() {
@@ -159,7 +162,10 @@ class RedisStreamSubscriber extends EventEmitter {
     } else if (this._tailPullId === "begin") {
       this._tailPullId = 0;
     }
+    this._startLoop();
+  }
 
+  async _startLoop() {
     while (this._isRunning) {
       const data = await this._doPull();
 

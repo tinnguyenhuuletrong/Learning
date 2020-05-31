@@ -3,7 +3,7 @@ const PubSub = require("./PubSub");
 const noopFunc = () => ({});
 class RpcServer {
   constructor(topic, { requestHandlerAsync }) {
-    this.topic = this.topic;
+    this.topic = topic;
     this.requestHandlerAsync = requestHandlerAsync || noopFunc;
   }
 
@@ -41,7 +41,6 @@ class RpcServer {
 
   _onRpcRequest = async (data) => {
     const { requestHandlerAsync } = this;
-    console.log("[Repo] req", data);
     const res = await requestHandlerAsync(data);
     this._rpcResponse({ ...res, requestId: data.requestId });
   };

@@ -59,8 +59,39 @@ Object {
       "name": "t2",
     },
   ],
-  "requestId": 0,
   "status": "success",
+}
+`;
+
+exports[`DataRepo - remote 1`] = `
+Object {
+  "head": Any<String>,
+  "items": Object {
+    "0": Object {
+      "_id": 0,
+      "name": "t1",
+    },
+    "1": Object {
+      "_id": 1,
+      "name": "t2",
+    },
+  },
+}
+`;
+
+exports[`DataRepo - remote 2`] = `
+Object {
+  "head": Any<String>,
+  "items": Object {
+    "1": Object {
+      "_id": 1,
+      "name": "updated name",
+    },
+    "2": Object {
+      "_id": 2,
+      "name": "new",
+    },
+  },
 }
 `;
 
@@ -68,17 +99,14 @@ exports[`DataRepo - rpc test 1`] = `
 Array [
   Object {
     "data": "pong",
-    "requestId": 0,
     "status": "success",
   },
   Object {
     "data": "pong",
-    "requestId": 1,
     "status": "success",
   },
   Object {
     "data": "pong",
-    "requestId": 2,
     "status": "success",
   },
 ]
