@@ -26,6 +26,7 @@ class RedisStreamPublisher {
   }
 
   async addToStream(payload) {
+    console.log("addToStream", payload);
     // * -> auto generate ID
     return new Promise((resolve, reject) => {
       this._redisClient.xadd(
