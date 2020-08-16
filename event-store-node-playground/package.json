@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "eventstore": "^1.15.2",
-    "mongoose": "^5.7.13"
+    "eventstore": "^1.15.5",
+    "mongoose": "^5.7.13",
+    "redis": "^3.0.2",
+    "redis-streams-aggregator": "^1.0.11"
   }
 }
