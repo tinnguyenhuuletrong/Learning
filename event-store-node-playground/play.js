@@ -1,18 +1,38 @@
+const { promisify } = require("util");
 const eventstore = require("eventstore");
 const es = eventstore({
   type: "mongodb",
-  url: "mongodb://localhost/event-store"
-  // eventsCollectionName: "events", // optional
-  // snapshotsCollectionName: "snapshots", // optional
+  url: "mongodb://localhost/event-store",
+  maxSnapshotsCount: 1,
+  eventsCollectionName: "new_events", // optional
+  snapshotsCollectionName: "new_snapshots", // optional
   // transactionsCollectionName: "transactions" // optional
   // positionsCollectionName: 'positions' // optioanl, defaultly wont keep position
 });
 
-es.on("connect", function() {
+// -------------------------------------------------------//
+//  Promisify
+// -------------------------------------------------------//
+es.getFromSnapshotAsync = function () {
+  return new Promise((resolve, reject) => {
+    es.getFromSnapshot(...arguments, (err, snapshotData, stream) => {
+      if (err) reject(err);
+      else resolve([snapshotData, stream]);
+    });
+  });
+};
+
+es.deleteSnapshotAsync = async function (id) {
+  return await es.store.snapshots.remove({ _id: id });
+};
+es.createSnapshotAsync = promisify(es.createSnapshot).bind(es);
+// -------------------------------------------------------//
+
+es.on("connect", function () {
   console.log("storage connected");
 });
 
-es.on("disconnect", function() {
+es.on("disconnect", function () {
   console.log("connection to storage is gone");
 });
 
@@ -34,14 +54,14 @@ class PriceAggerate {
     this.totalPrice;
     this.priceMap = {
       certA: 10,
-      certB: 2.5
+      certB: 2.5,
     };
   }
   loadSnapshot(snap = {}) {
     this.totalPrice = snap.totalPrice || 0;
   }
   loadFromHistory(history) {
-    history.forEach(itm => {
+    history.forEach((itm) => {
       let val = this.priceMap[itm.payload.type] || 0;
       this.totalPrice += val;
     });
@@ -49,7 +69,7 @@ class PriceAggerate {
   getSnap() {
     const { totalPrice } = this;
     return {
-      totalPrice
+      totalPrice,
     };
   }
 }
@@ -62,14 +82,14 @@ class CountAggerate {
     this.countByType = snap.countByType || {};
   }
   loadFromHistory(history) {
-    history.forEach(itm => {
+    history.forEach((itm) => {
       this._inc(itm.payload.type);
     });
   }
   getSnap() {
     const { countByType } = this;
     return {
-      countByType
+      countByType,
     };
   }
 
@@ -83,61 +103,64 @@ class CountAggerate {
 // Utils
 //---------------
 function addEvent(type) {
-  es.getEventStream(streamId, function(err, stream) {
+  es.getEventStream(streamId, function (err, stream) {
     stream.addEvent(createEvent(type));
-    stream.commit(function(err, stream) {
+    stream.commit(function (err, stream) {
       console.log(stream.eventsToDispatch); // this is an array containing all added events in this commit.
     });
   });
 }
 
-function updateSnapshot(save = false) {
+async function updateSnapshot(save = false, version = 1) {
   const snapshotName = "report_" + streamId;
 
-  es.getFromSnapshot(
-    {
-      aggregateId: streamId
-    },
-    function(err, snapshot, stream) {
-      var snap = (snapshot && snapshot.data) || {};
-      var history = stream.events; // events history from given snapshot
+  const query = {
+    aggregateId: streamId,
+    version,
+  };
 
-      console.log("LastSnap: \n", snap);
-      console.log("NewEvents: \n", history);
+  let [snapshot, stream] = await es.getFromSnapshotAsync(query);
+  if (snapshot && snapshot.version !== version) {
+    console.log("delete", snapshot);
+    await es.deleteSnapshotAsync(snapshot._id);
+    [snapshot, stream] = await es.getFromSnapshotAsync(query);
+  }
 
-      // Init value for Aggerate
-      const priceAggr = new PriceAggerate();
-      priceAggr.loadSnapshot(snap && snap.priceAggr);
-      priceAggr.loadFromHistory(history);
+  var snap = (snapshot && snapshot.data) || {};
+  var history = stream.events; // events history from given snapshot
 
-      const countAggr = new CountAggerate();
-      countAggr.loadSnapshot(snap && snap.countAggr);
-      countAggr.loadFromHistory(history);
+  console.log("LastSnap: \n", snap);
+  console.log("NewEvents: \n", history);
 
-      // Saved snapshot object
-      const snapShotData = {
-        priceAggr: priceAggr.getSnap(),
-        countAggr: countAggr.getSnap(),
-        revision: stream.lastRevision,
-        updatedAt: new Date()
-      };
+  // Init value for Aggerate
+  const priceAggr = new PriceAggerate();
+  priceAggr.loadSnapshot(snap && snap.priceAggr);
+  priceAggr.loadFromHistory(history);
 
-      console.log("Updated snapshot \n", snapShotData);
+  const countAggr = new CountAggerate();
+  countAggr.loadSnapshot(snap && snap.countAggr);
+  countAggr.loadFromHistory(history);
 
-      if (history.length > 0 && save) {
-        es.createSnapshot(
-          {
-            aggregateId: streamId,
-            data: snapShotData,
-            revision: stream.lastRevision
-          },
-          function(err) {
-            console.log("snapshot updated:", snapshotName);
-          }
-        );
-      }
-    }
-  );
+  // Saved snapshot object
+  const snapShotData = {
+    priceAggr: priceAggr.getSnap(),
+    countAggr: countAggr.getSnap(),
+    revision: stream.lastRevision,
+    updatedAt: new Date(),
+  };
+
+  console.log("Updated snapshot \n", snapShotData);
+
+  if (history.length > 0 && save) {
+    await es.createSnapshotAsync({
+      aggregateId: streamId,
+      data: snapShotData,
+      revision: stream.lastRevision,
+      version,
+    });
+  }
+
+  return snapShotData;
 }
 
 function printHelp() {
