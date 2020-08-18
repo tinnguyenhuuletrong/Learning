@@ -189,7 +189,7 @@ class KycPromiseReducer extends IReducer {
 
         case "approve":
           {
-            const status = "approved";
+            const status = "inreview";
             const { transitionLogs } = this.state;
             this.state = {
               ...this.state,
@@ -214,7 +214,7 @@ class KycPromiseReducer extends IReducer {
   }
 
   getVersion() {
-    return 2;
+    return 1;
   }
 }
 
