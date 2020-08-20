@@ -82,7 +82,7 @@ class EventStore extends EventEmitter {
     if (snapshot && snapshot.version !== version) {
       this._log("Delete old version", snapshot);
       await this.es.deleteSnapshotAsync(snapshot._id);
-      [snapshot, stream] = await this.getFromSnapshotAsync(query);
+      [snapshot, stream] = await this.es.getFromSnapshotAsync(query);
     }
 
     var snap = (snapshot && snapshot.data) || {};
