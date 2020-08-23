@@ -1,20 +1,33 @@
-global.GlobalConfig = { MONGODB_ES_URI: "mongodb://localhost/event-store" };
+global.GlobalConfig = {
+  MONGODB_ES_URI: "mongodb://localhost/event-store",
+  MONGODB_SNAPSHOT_URI: "mongodb://localhost/event-store",
+};
 const { promisify } = require("util");
-const { EventStore, IReducer } = require("./lib/EventStore");
+const { MongoClient } = require("mongodb");
+const { EventStore } = require("./lib/EventStore");
+const { SnapshotStore, IReducer } = require("./lib/SnapshotStore");
 const waitMs = promisify(setTimeout);
 
+const client = new MongoClient(global.GlobalConfig.MONGODB_SNAPSHOT_URI);
 const es = new EventStore({
   eventsCollectionName: "events",
 });
-
+const snapStore = new SnapshotStore("kycPromise", es, {
+  mongodbClient: client,
+});
+const snapStore1 = new SnapshotStore("kycStats", es, {
+  mongodbClient: client,
+});
 async function main() {
   await es.start();
+  await client.connect();
   printHelp();
 }
 
 function printHelp() {
   console.log("supported:");
   console.log("-  simulate1(<userId>)");
+  console.log("-  simulate2(<userId>)");
   console.log("-  snapshot(<userId>)");
 }
 
@@ -66,6 +79,13 @@ function evApprove({ clientId, userId, message, certs }) {
     certs,
   });
 }
+
+function evNoop({ clientId, userId }) {
+  return createEvent("evNoop", {
+    clientId,
+    userId,
+  });
+}
 const clientId = "client_1";
 
 async function simulate1(userId = "1") {
@@ -111,6 +131,20 @@ async function simulate1(userId = "1") {
     events: batchevents2,
   });
 }
+async function simulate2(userId = "1") {
+  const batchevents = [
+    evNoop({
+      clientId,
+      userId,
+    }),
+  ];
+
+  await es.addEvents({
+    streamId: `kyc:${clientId}`,
+    aggregate: `${userId}`,
+    events: batchevents,
+  });
+}
 
 //-----------------------------------------------------------------------//
 //  Reducer
@@ -136,7 +170,7 @@ class KycPromiseReducer extends IReducer {
         payload: { type, data },
         commitStamp,
       } = iterator;
-      console.log(this.state, iterator);
+
       switch (type) {
         case "register":
           {
@@ -189,7 +223,7 @@ class KycPromiseReducer extends IReducer {
 
         case "approve":
           {
-            const status = "inreview";
+            const status = "approve";
             const { transitionLogs } = this.state;
             this.state = {
               ...this.state,
@@ -214,19 +248,61 @@ class KycPromiseReducer extends IReducer {
   }
 
   getVersion() {
+    return 2;
+  }
+}
+
+class KycStatsReducer extends IReducer {
+  constructor() {
+    super();
+    this.state = {
+      userIds: [],
+    };
+  }
+
+  loadSnapshot(state) {
+    this.state = { ...this.state, ...state };
+    return this.state;
+  }
+
+  onEvents(events = []) {
+    for (const iterator of events) {
+      const {
+        payload: { type, data },
+        commitStamp,
+      } = iterator;
+      const { userId, clientId } = data;
+      if (!this.state.userIds.includes(userId)) this.state.userIds.push(userId);
+    }
+  }
+
+  getSnap() {
+    return this.state;
+  }
+
+  getVersion() {
     return 1;
   }
 }
 
 async function snapshot(userId = 1) {
   const promiseReducer = new KycPromiseReducer();
-  const sc = await es.getSnapshot({
+  const sc = await snapStore.getSnapshot({
     streamId: `kyc:${clientId}`,
     aggregate: `${userId}`,
     reducer: promiseReducer,
     shouldSave: true,
   });
+  console.log(sc);
+}
 
+async function snapshot1() {
+  const statsReducer = new KycStatsReducer();
+  const sc = await snapStore1.getSnapshot({
+    streamId: `kyc:${clientId}`,
+    reducer: statsReducer,
+    shouldSave: true,
+  });
   console.log(sc);
 }
 
