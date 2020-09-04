@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "0300eaf171cb0c0e3dc58d17b0599f5e",
+    "revision": "02563163933b6492fa53cc7d7c7e74e4",
     "url": "/Learning/webrtc-playground/index.html"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/Learning/webrtc-playground/static/js/2.a902490c.chunk.js"
   },
   {
-    "revision": "19765a933352ffcfde0b",
-    "url": "/Learning/webrtc-playground/static/js/main.c96c0cec.chunk.js"
+    "revision": "d3efb2c4ca47bbbfdf4e",
+    "url": "/Learning/webrtc-playground/static/js/main.bd07d648.chunk.js"
   },
   {
     "revision": "657a827d36d2fecaf3b8",
