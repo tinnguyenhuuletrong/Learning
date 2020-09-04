@@ -3,7 +3,7 @@ const recordRTCVideoTrack = require("../helper/recordRTCVideoTrack");
 const replayRTCVideoTrack = require("../helper/replayRTCVideoTrack");
 const processRTCVideoTrack = require("../helper/processRTCVideoTrack");
 
-module.exports = function(app, store) {
+module.exports = function (app, store) {
   app
     .command("send <msg>", "send message")
     .action((args, callback = () => {}) => {
@@ -23,7 +23,7 @@ module.exports = function(app, store) {
       return callback();
     });
 
-  store.connection.on("stream", async stream => {
+  store.connection.on("stream", async (stream) => {
     store.otherMedia = stream;
     const trackLengths = stream.getTracks().length;
     console.log("Stream", stream, trackLengths);
@@ -31,7 +31,7 @@ module.exports = function(app, store) {
       const track = stream.getTracks()[0];
 
       // Save to file
-      // recordRTCVideoTrack(track);
+      recordRTCVideoTrack(track);
 
       // const videoSource = await store.connection.createVideoSource();
       // replayRTCVideoTrack(videoSource, track);

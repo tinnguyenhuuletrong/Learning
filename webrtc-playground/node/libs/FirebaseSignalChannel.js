@@ -30,7 +30,7 @@ class FirebaseSignalChannel extends EventEmitter {
     if (!this.signalRoom) throw new Error("call connect(..) first");
     const name = `rooms/${this.signalRoom}/buffer_${to}`;
     const bufferRef = this.database.ref(name);
-    bufferRef.push(data);
+    bufferRef.push(JSON.stringify(data));
   }
 
   unsubcrible() {
@@ -45,9 +45,9 @@ class FirebaseSignalChannel extends EventEmitter {
     //  Event handler
     //-------------------------------------------------------//
 
-    this._onMessage = snapshot => {
+    this._onMessage = (snapshot) => {
       const data = snapshot.val();
-      this.emit("message", data);
+      this.emit("message", JSON.parse(data));
     };
   }
 }
