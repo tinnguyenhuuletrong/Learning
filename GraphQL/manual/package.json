@@ -15,6 +15,6 @@
     "graphql-relay": "^0.4.3",
     "graphql-sequelize": "^4.0.1",
     "mysql": "^2.11.1",
-    "sequelize": "^3.24.6"
+    "sequelize": "^6.3.5"
   }
 }
