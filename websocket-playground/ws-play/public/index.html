@@ -9,11 +9,10 @@
     <pre id="logs"></pre>
     <script type="module">
       import { jsonrpc } from "./scripts/jsonrpc.js";
-      window.jsonrpc = jsonrpc;
 
       const logContent = document.getElementById("logs");
 
-      function debug() {
+      function _debug() {
         logContent.append(JSON.stringify(arguments));
         logContent.append("\n");
         console.log(...arguments);
@@ -21,17 +20,20 @@
 
       const ws = new WebSocket(`ws://localhost:8080?nounce=${Date.now()}`);
       ws.onopen = (ev) => {
-        debug("open", ev);
+        _debug("open", ev);
       };
 
       ws.onclose = (ev) => {
-        debug("close", ev);
+        _debug("close", ev);
       };
 
       ws.onmessage = (msg) => {
         console.log(msg);
-        debug("message", msg.data);
+        _debug("message", msg.data);
       };
+
+      window.jsonrpc = jsonrpc;
+      window.ws = ws;
     </script>
   </body>
 </html>
