@@ -1,0 +1,163 @@
+<html>
+  <head>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+
+    <script src="https://unpkg.com/h264-mp4-encoder/embuild/dist/h264-mp4-encoder.web.js"></script>
+  </head>
+  <body>
+    <h3>Record video from webcam -> video using h264-mp4-encoder (wasm)</h3>
+    <h6>
+      <a href="https://www.npmjs.com/package/h264-mp4-encoder">npm package</a>
+    </h6>
+    <div>
+      <video
+        id="webcam"
+        width="320px"
+        height="180px"
+        muted
+        loop
+        playsinline
+      ></video>
+      <video id="output-video" width="320px" height="180px" controls></video>
+    </div>
+    <button id="record" disabled>Start Recording</button>
+    <a id="downloadLink">download</a>
+    <p id="message"></p>
+    <pre id="info"></pre>
+    <script>
+      let transcoder;
+      let isRecording;
+      let videoCapture;
+      const webcam = document.getElementById("webcam");
+      const recordBtn = document.getElementById("record");
+      const startRecording = () => {
+        isRecording = true;
+        videoCapture = canvasHelperCreateVideoCapture(webcam);
+        startAnimating(60);
+        console.log("start");
+
+        recordBtn.textContent = "Stop Recording";
+        recordBtn.onclick = () => {
+          recordBtn.textContent = "Start Recording";
+          recordBtn.onclick = startRecording;
+          isRecording = false;
+          stopTranscode();
+        };
+      };
+
+      (async () => {
+        webcam.srcObject = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        webcam.onloadedmetadata = () => {
+          // const {
+          //   width: srcWidth,
+          //   height: srcHeight,
+          // } = webcam.srcObject.getTracks()[0].getSettings();
+          // webcam.width = srcWidth;
+          // webcam.height = srcHeight;
+
+          // video src width, height
+          //webcam.srcObject.getTracks()[0].getSettings();
+          initTranscode({ width: webcam.width, height: webcam.height });
+        };
+        await webcam.play();
+
+        recordBtn.disabled = false;
+        recordBtn.onclick = startRecording;
+      })();
+
+      function show(url) {
+        const video = document.getElementById("output-video");
+        video.src = url;
+
+        const link = document.getElementById("downloadLink");
+        link.href = url;
+        link.download = "test.mp4";
+      }
+
+      async function initTranscode({ width, height }) {
+        console.log("initTranscode 1", { width, height });
+        transcoder = await HME.createH264MP4Encoder();
+        transcoder.width = width;
+        transcoder.height = height;
+        console.log("initTranscode 2");
+        transcoder.initialize();
+        console.log("initTranscode 3");
+      }
+
+      async function stopTranscode() {
+        transcoder.finalize();
+        const uint8Array = transcoder.FS.readFile(transcoder.outputFilename);
+        console.log(transcoder.outputFilename);
+        console.log(uint8Array);
+        transcoder.delete();
+        var blob = new Blob([uint8Array], { type: "video/mp4" });
+        const url = URL.createObjectURL(blob);
+        show(url);
+      }
+
+      function animate() {
+        if (!isRecording) return;
+        requestAnimationFrame(animate);
+        now = Date.now();
+        elapsed = now - then;
+
+        if (elapsed > fpsInterval) {
+          then = now - (elapsed % fpsInterval);
+
+          // Put your drawing code here
+          const dataFrame = videoCapture.readDataDrame();
+          const _t = Date.now();
+          // console.log(dataFrame);
+          transcoder.addFrameRgba(dataFrame.data);
+        }
+      }
+
+      function startAnimating(fps) {
+        fpsInterval = 1000 / fps;
+        then = Date.now();
+        startTime = then;
+        animate();
+      }
+
+      function canvasHelperCreateVideoCapture(videoSource) {
+        var video = null;
+        if (typeof videoSource === "string") {
+          video = document.getElementById(videoSource);
+        } else {
+          video = videoSource;
+        }
+        if (!(video instanceof HTMLVideoElement)) {
+          throw new Error("Please input the valid video element or id.");
+          return;
+        }
+
+        var canvas = document.createElement("canvas");
+        canvas.width = video.width;
+        canvas.height = video.height;
+        var ctx = canvas.getContext("2d");
+
+        return {
+          readDataDrame: () => {
+            ctx.drawImage(video, 0, 0, video.width, video.height);
+            return ctx.getImageData(0, 0, video.width, video.height);
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
