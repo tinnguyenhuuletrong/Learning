@@ -1,0 +1,116 @@
+<html>
+  <head>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Record video from webcam -> video using MediaRecorder</h3>
+    <div>
+      <video id="webcam" width="320px" height="180px"></video>
+      <video id="output-video" width="320px" height="180px" controls></video>
+    </div>
+    <button id="record" disabled>Start Recording</button>
+    <input id="uploader" type="file" accept="video/*;capture=camera" capture />
+    <a id="downloadLink">download</a>
+    <p id="message"></p>
+    <pre id="info"></pre>
+    <script>
+      videoUpload();
+      printCheckSupport();
+      const webcam = document.getElementById("webcam");
+      const recordBtn = document.getElementById("record");
+      const startRecording = () => {
+        const codec = "video/webm\;codecs=vp9";
+        const rec = new MediaRecorder(webcam.srcObject, {
+          mimeType: codec,
+        });
+        let chunks = [];
+
+        recordBtn.textContent = "Stop Recording";
+        recordBtn.onclick = () => {
+          rec.stop();
+          recordBtn.textContent = "Start Recording";
+          recordBtn.onclick = startRecording;
+        };
+
+        rec.ondataavailable = (e) => chunks.push(e.data);
+        rec.onstop = async () => {
+          var blob = new Blob(chunks, { type: codec });
+          const url = URL.createObjectURL(blob);
+          show(url);
+          chunks = [];
+        };
+        rec.start();
+      };
+
+      (async () => {
+        webcam.srcObject = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        await webcam.play();
+        recordBtn.disabled = false;
+        recordBtn.onclick = startRecording;
+      })();
+
+      function show(url) {
+        const video = document.getElementById("output-video");
+        video.src = url;
+
+        const link = document.getElementById("downloadLink");
+        link.href = url;
+        link.download = "test.webm";
+      }
+
+      function printCheckSupport(params) {
+        const info = document.getElementById("info");
+        if (!window.MediaRecorder) return;
+        if (!MediaRecorder.isTypeSupported) return;
+        var types = [
+          "video/mp4",
+          "video/webm",
+          "audio/webm",
+          "video/webm\;codecs=vp8",
+          "video/webm\;codecs=daala",
+          "video/webm\;codecs=h264",
+          "audio/webm\;codecs=opus",
+          "video/mpeg",
+        ];
+
+        for (var i in types) {
+          const c =
+            "Is " +
+            types[i] +
+            " supported? " +
+            (MediaRecorder.isTypeSupported(types[i]) ? "Maybe!" : "Nope :(");
+          console.log(c);
+          info.append(`${c}\n`);
+        }
+      }
+
+      function videoUpload() {
+        const uploader = document.getElementById("uploader");
+        uploader.onchange = (ev) => {
+          var reader = new FileReader();
+          reader.readAsDataURL(ev.target.files[0]);
+          reader.onloadend = async (e) => {
+            const blob = await fetch(reader.result).then((res) => res.blob());
+            const url = URL.createObjectURL(blob);
+            show(url);
+          };
+        };
+      }
+    </script>
+  </body>
+</html>
