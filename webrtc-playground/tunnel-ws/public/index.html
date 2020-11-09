@@ -121,9 +121,9 @@
         }
       }
 
-      function startClient(signalRoom = "ttin") {
-        const ins = new WSSignalChannel("ws://localhost:3000");
-        ins.connect({ signalRoom: "ttin" });
+      function startClient(url = "ws://localhost:3000", signalRoom = "ttin") {
+        const ins = new WSSignalChannel(url);
+        ins.connect({ signalRoom });
         return ins;
       }
     </script>

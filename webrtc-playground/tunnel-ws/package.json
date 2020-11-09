@@ -1,10 +1,10 @@
 {
-  "name": "tunnel-ws",
+  "name": "bp-tunnel-ws",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production node app"
   },
   "author": "",
   "license": "ISC",

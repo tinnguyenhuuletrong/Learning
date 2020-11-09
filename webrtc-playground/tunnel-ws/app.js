@@ -185,11 +185,12 @@ wsServer.on("connection", async (ws) => {
     console.error(error);
   }
 });
-app.use(express.static("./public"));
+app.use("/static", express.static("./public"));
+app.use("/", (req, res) => res.json({ ok: 1 }));
 
 // Bind to express
-const PORT = 3000;
-const server = app.listen(3000);
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT);
 server.on("upgrade", (request, socket, head) => {
   wsServer.handleUpgrade(request, socket, head, (socket) => {
     wsServer.emit("connection", socket, request);
