@@ -1,84 +1,90 @@
-import { EventEmitter } from 'events'
-import DetectRTC from 'detectrtc'
-import Firebase from 'firebase/app'
-import 'firebase/database'
+import { EventEmitter } from "events";
+import DetectRTC from "detectrtc";
+import Firebase from "firebase/app";
+import "firebase/database";
 
-import { ESTEP, EACTION } from './constant'
-import WebRTCPeer from './libs/WebRTCPeer'
-import FirebaseSignalChannel from './libs/FirebaseSignalChannel'
+import { ESTEP, EACTION } from "./constant";
+import WebRTCPeer from "./libs/WebRTCPeer";
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ',
-  databaseURL: 'https://weeklyhack-ff068.firebaseio.com/'
-}
-Firebase.initializeApp(firebaseConfig)
+import FirebaseSignalChannel from "./libs/FirebaseSignalChannel";
+import WSSignalChannel from "./libs/WSSignalChannel";
+
+// const firebaseConfig = {
+//   apiKey: 'AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ',
+//   databaseURL: 'https://weeklyhack-ff068.firebaseio.com/'
+// }
+// Firebase.initializeApp(firebaseConfig)
+// const signalChannel = new FirebaseSignalChannel(Firebase.database())
+const signalChannel = new WSSignalChannel(
+  "wss://secret-headland-20594.herokuapp.com"
+);
 
 export const initialState = {
   supportWebRTC: false,
   appStep: ESTEP.CHOICE_MODE,
   roomId: `room-${Date.now()}`,
-  mode: '',
+  mode: "",
   mineMedia: null,
-  connection: new WebRTCPeer(new FirebaseSignalChannel(Firebase.database())),
-  eventSource: new EventEmitter()
-}
+  connection: new WebRTCPeer(signalChannel),
+  eventSource: new EventEmitter(),
+};
 
 const mainReducer = (state, action) => {
-  console.log('action', action)
+  console.log("action", action);
   switch (action.type) {
     case EACTION.reset:
-      const previousMedia = state.mineMedia
-      const previousConnection = state.connection
+      const previousMedia = state.mineMedia;
+      const previousConnection = state.connection;
       if (previousMedia) {
-        previousMedia.getTracks().forEach(track => track.stop())
+        previousMedia.getTracks().forEach((track) => track.stop());
       }
       if (previousConnection) {
-        previousConnection.reset()
+        previousConnection.reset();
       }
       return {
         ...initialState,
         eventSource: new EventEmitter(),
-        supportWebRTC: DetectRTC.isWebRTCSupported
-      }
+        supportWebRTC: DetectRTC.isWebRTCSupported,
+      };
     case EACTION.updateWebRTCSupport:
       return {
         ...state,
-        supportWebRTC: action.value
-      }
+        supportWebRTC: action.value,
+      };
     case EACTION.setAppMode:
       return {
         ...state,
-        mode: action.value
-      }
+        mode: action.value,
+      };
     case EACTION.setRoomId:
       return {
         ...state,
-        roomId: action.value
-      }
+        roomId: action.value,
+      };
     case EACTION.setAppStep:
       return {
         ...state,
-        appStep: action.value
-      }
+        appStep: action.value,
+      };
     case EACTION.setMineMedia:
       return {
         ...state,
-        mineMedia: action.value
-      }
+        mineMedia: action.value,
+      };
     case EACTION.updateConenction:
       return {
         ...state,
-        connection: action.value
-      }
+        connection: action.value,
+      };
     default:
-      return state
+      return state;
   }
-}
+};
 
-const debugDev = reducer => (state, action) => {
-  const newState = reducer(state, action)
-  window.store = newState
-  return newState
-}
+const debugDev = (reducer) => (state, action) => {
+  const newState = reducer(state, action);
+  window.store = newState;
+  return newState;
+};
 
-export const reducer = debugDev(mainReducer)
+export const reducer = debugDev(mainReducer);

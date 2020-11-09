@@ -1,5 +1,5 @@
 const { EventEmitter } = require("events");
-const WebSocket = require("ws");
+const WebSocket = window.WebSocket;
 
 class Deferred {
   constructor() {
