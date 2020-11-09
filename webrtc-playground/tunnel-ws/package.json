@@ -1,0 +1,17 @@
+{
+  "name": "tunnel-ws",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsonrpc-lite": "^2.2.0",
+    "uuidv4": "^6.2.5",
+    "ws": "^7.4.0"
+  }
+}

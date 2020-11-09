@@ -3,14 +3,17 @@ const { EventEmitter } = require("events");
 const Firebase = require("firebase/app");
 const WebRTCPeer = require("./libs/WebRTCPeer");
 const FirebaseSignalChannel = require("./libs/FirebaseSignalChannel");
+const WSSignalChannel = require("./libs/WSSignalChannel");
 
-require("firebase/database");
+// require("firebase/database");
+// const firebaseConfig = {
+//   apiKey: "AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ",
+//   databaseURL: "https://weeklyhack-ff068.firebaseio.com/",
+// };
+// Firebase.initializeApp(firebaseConfig);
+// const signalChannel = new FirebaseSignalChannel(Firebase.database())
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBe719lkdeQBL0McXykgBMUClMUN3UgpUQ",
-  databaseURL: "https://weeklyhack-ff068.firebaseio.com/",
-};
-Firebase.initializeApp(firebaseConfig);
+const signalChannel = new WSSignalChannel("ws://localhost:3000");
 
 const store = {
   roomId: `room-${Date.now()}`,
@@ -31,7 +34,7 @@ const store = {
       ],
     },
   },
-  connection: new WebRTCPeer(new FirebaseSignalChannel(Firebase.database())),
+  connection: new WebRTCPeer(signalChannel),
   eventSource: new EventEmitter(),
 };
 

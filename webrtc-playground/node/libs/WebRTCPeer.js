@@ -26,7 +26,7 @@ class WebRTCPeer extends EventEmitter {
     this.peer = new SimplePeer({
       initiator: this.mode === WebRTCPeer.MODE.HOST,
       ...simplePeerConfig,
-      wrtc
+      wrtc,
     });
     this.signalChannel.connect({ signalRoom, mode });
     this.subcrible();
@@ -38,7 +38,7 @@ class WebRTCPeer extends EventEmitter {
     this.signalChannel.on("message", this._onChannelMessage);
 
     const events = ["error", "connect", "data", "close", "stream"];
-    events.forEach(key => {
+    events.forEach((key) => {
       const handlerName = `$on${key}`;
       this[handlerName] = this._eventForward(key);
       this.peer.on(key, this[handlerName]);
@@ -53,7 +53,7 @@ class WebRTCPeer extends EventEmitter {
 
     this.peer.off("signal", this._onNewSignal);
     const events = ["error", "connect", "data", "close", "stream"];
-    events.forEach(key => {
+    events.forEach((key) => {
       const handlerName = `$on${key}`;
       this.peer.off(key, this[handlerName]);
     });
@@ -87,18 +87,18 @@ class WebRTCPeer extends EventEmitter {
   }
 
   _initFunc() {
-    this._addSendSignalLog = data => {
+    this._addSendSignalLog = (data) => {
       const newMsg = {
         from: this.mode,
         data,
-        _t: new Date()
+        _t: new Date(),
       };
       this.signalLogs.push(newMsg);
 
       this.emit("signalLog", newMsg);
     };
 
-    this._addReceiveSignalLog = data => {
+    this._addReceiveSignalLog = (data) => {
       const other =
         this.mode === WebRTCPeer.MODE.HOST
           ? WebRTCPeer.MODE.PEER
@@ -106,7 +106,7 @@ class WebRTCPeer extends EventEmitter {
       const newMsg = {
         from: other,
         data,
-        _t: new Date()
+        _t: new Date(),
       };
       this.signalLogs.push(newMsg);
 
@@ -117,7 +117,7 @@ class WebRTCPeer extends EventEmitter {
     //  Event handler
     //-------------------------------------------------------//
 
-    this._onNewSignal = data => {
+    this._onNewSignal = (data) => {
       this._addSendSignalLog(data);
       const to =
         this.mode === WebRTCPeer.MODE.HOST
@@ -127,12 +127,13 @@ class WebRTCPeer extends EventEmitter {
       this.signalChannel.send(to, data);
     };
 
-    this._onChannelMessage = data => {
+    this._onChannelMessage = (data) => {
       this._addReceiveSignalLog(data);
       this.peer.signal(data);
     };
 
-    this._eventForward = name => data => {
+    this._eventForward = (name) => (data) => {
+      console.log("_eventForward", name, data);
       this.emit(name, data);
     };
   }
@@ -140,7 +141,7 @@ class WebRTCPeer extends EventEmitter {
 
 WebRTCPeer.MODE = {
   HOST: "HOST",
-  PEER: "PEER"
+  PEER: "PEER",
 };
 
 module.exports = WebRTCPeer;
