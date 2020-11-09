@@ -13,7 +13,9 @@ const WSSignalChannel = require("./libs/WSSignalChannel");
 // Firebase.initializeApp(firebaseConfig);
 // const signalChannel = new FirebaseSignalChannel(Firebase.database())
 
-const signalChannel = new WSSignalChannel("ws://localhost:3000");
+const signalChannel = new WSSignalChannel(
+  "wss://secret-headland-20594.herokuapp.com"
+);
 
 const store = {
   roomId: `room-${Date.now()}`,

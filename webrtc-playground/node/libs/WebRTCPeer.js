@@ -133,7 +133,7 @@ class WebRTCPeer extends EventEmitter {
     };
 
     this._eventForward = (name) => (data) => {
-      console.log("_eventForward", name, data);
+      // console.log("_eventForward", name, data);
       this.emit(name, data);
     };
   }

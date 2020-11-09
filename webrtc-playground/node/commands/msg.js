@@ -16,7 +16,7 @@ module.exports = function (app, store) {
       }
 
       if (connection instanceof WebRTCPeer) {
-        connection.send(msg);
+        connection.send(String(msg));
         return callback();
       }
 
