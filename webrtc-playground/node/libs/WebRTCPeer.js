@@ -21,14 +21,14 @@ class WebRTCPeer extends EventEmitter {
     this.signalLogs = [];
   }
 
-  start({ mode, simplePeerConfig = {}, signalRoom }) {
+  async start({ mode, simplePeerConfig = {}, signalRoom }) {
+    await this.signalChannel.connect({ signalRoom, mode });
     this.mode = mode;
     this.peer = new SimplePeer({
       initiator: this.mode === WebRTCPeer.MODE.HOST,
       ...simplePeerConfig,
       wrtc,
     });
-    this.signalChannel.connect({ signalRoom, mode });
     this.subcrible();
   }
 

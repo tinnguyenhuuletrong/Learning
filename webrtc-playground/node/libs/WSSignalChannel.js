@@ -49,7 +49,7 @@ class WSSignalChannel extends EventEmitter {
       this.reset();
     });
 
-    return this.connectedPromise.promise;
+    return this.roomReadyPromise.promise;
   }
 
   disconnect() {
