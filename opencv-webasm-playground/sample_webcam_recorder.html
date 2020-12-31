@@ -17,7 +17,14 @@
   <body>
     <h3>Record video from webcam -> video using MediaRecorder</h3>
     <div>
-      <video id="webcam" width="320px" height="180px"></video>
+      <video
+        id="webcam"
+        width="320px"
+        height="180px"
+        muted
+        loop
+        playsinline
+      ></video>
       <video id="output-video" width="320px" height="180px" controls></video>
     </div>
     <button id="record" disabled>Start Recording</button>
