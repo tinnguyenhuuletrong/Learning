@@ -1,0 +1,6 @@
+Open CV 4.5.0_5
+
+Install via homebrew
+Need apply PR - https://github.com/justadudewhohacks/opencv4nodejs/pull/762
+
+export OPENCV4NODEJS_DISABLE_AUTOBUILD=1
