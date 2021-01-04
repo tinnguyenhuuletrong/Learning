@@ -37,9 +37,11 @@
       const codec = printCheckSupport();
       const webcam = document.getElementById("webcam");
       const recordBtn = document.getElementById("record");
+      const extFile = codec.includes("webm") ? "webm" : "mp4";
       const startRecording = () => {
         const rec = new MediaRecorder(webcam.srcObject, {
           mimeType: codec,
+          videoBitsPerSecond: 800000,
         });
         let chunks = [];
 
@@ -52,6 +54,8 @@
 
         rec.ondataavailable = (e) => chunks.push(e.data);
         rec.onstop = async () => {
+          console.log("aaaaa", { chunks, codec });
+          window.tmp = { chunks, codec };
           var blob = new Blob(chunks, { type: codec });
           const url = URL.createObjectURL(blob);
           show(url);
@@ -63,7 +67,7 @@
       (async () => {
         webcam.srcObject = await navigator.mediaDevices.getUserMedia({
           video: true,
-          audio: true,
+          // audio: true,
         });
         await webcam.play();
         recordBtn.disabled = false;
@@ -76,7 +80,7 @@
 
         const link = document.getElementById("downloadLink");
         link.href = url;
-        link.download = "test.webm";
+        link.download = `test.${extFile}`;
       }
 
       function printCheckSupport(params) {
@@ -84,14 +88,14 @@
         if (!window.MediaRecorder) return;
         if (!MediaRecorder.isTypeSupported) return;
         var types = [
-          "video/avi",
           "video/mp4",
           "video/webm",
-          "audio/webm",
+          "video/webm\;codecs=h264",
+          "video/webm\;codecs=vp9",
           "video/webm\;codecs=vp8",
           "video/webm\;codecs=daala",
-          "video/webm\;codecs=h264",
           "audio/webm\;codecs=opus",
+          "video/avi",
           "video/mpeg",
         ];
 
