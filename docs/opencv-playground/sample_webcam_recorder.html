@@ -13,6 +13,7 @@
         align-items: center;
       }
     </style>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.9.5/dist/ffmpeg.min.js"></script>
   </head>
   <body>
     <h3>Record video from webcam -> video using MediaRecorder</h3>
@@ -37,7 +38,7 @@
       const codec = printCheckSupport();
       const webcam = document.getElementById("webcam");
       const recordBtn = document.getElementById("record");
-      const extFile = codec.includes("webm") ? "webm" : "mp4";
+      let extFile = codec.includes("webm") ? "webm" : "mp4";
       const startRecording = () => {
         const rec = new MediaRecorder(webcam.srcObject, {
           mimeType: codec,
@@ -55,8 +56,18 @@
         rec.ondataavailable = (e) => chunks.push(e.data);
         rec.onstop = async () => {
           console.log("aaaaa", { chunks, codec });
-          window.tmp = { chunks, codec };
           var blob = new Blob(chunks, { type: codec });
+          window.tmp = { chunks, codec };
+
+          // ffmpeg convert to webm
+          if (extFile === "webm") {
+            const mp4ArrayBuffer = await convertWebmToMp4(
+              await blob.arrayBuffer()
+            );
+            blob = new Blob([mp4ArrayBuffer], { type: "video/mp4" });
+            extFile = "mp4";
+          }
+
           const url = URL.createObjectURL(blob);
           show(url);
           chunks = [];
@@ -81,6 +92,25 @@
         const link = document.getElementById("downloadLink");
         link.href = url;
         link.download = `test.${extFile}`;
+      }
+
+      async function convertWebmToMp4(arrayBuffer) {
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        const ffmpeg = createFFmpeg({ log: true });
+
+        const message = document.getElementById("message");
+        message.innerHTML = "Loading ffmpeg-core.js";
+        await ffmpeg.load();
+        message.innerHTML = "Start transcoding";
+
+        console.log("aaa", arrayBuffer);
+
+        const name = "record.webm";
+        ffmpeg.FS("writeFile", name, await fetchFile(arrayBuffer));
+        await ffmpeg.run("-i", name, "-c", "copy", "output.mp4");
+        message.innerHTML = "Complete transcoding";
+        const data = ffmpeg.FS("readFile", "output.mp4");
+        return data.buffer;
       }
 
       function printCheckSupport(params) {
