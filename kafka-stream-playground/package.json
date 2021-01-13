@@ -1,0 +1,15 @@
+{
+  "name": "kafka-stream-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-docker": "cd tools && docker-compose up"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^5.1.0",
+    "kafka-streams": "^5.0.0"
+  }
+}

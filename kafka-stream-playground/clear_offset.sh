@@ -1,0 +1,1 @@
+docker exec tools_kafka_1 sh /opt/kafka/bin/kafka-streams-application-reset.sh --application-id c3 --input-topics my-input-topic
