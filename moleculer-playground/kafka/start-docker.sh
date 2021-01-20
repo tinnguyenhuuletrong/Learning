@@ -1,0 +1,1 @@
+cd tools && docker-compose up
