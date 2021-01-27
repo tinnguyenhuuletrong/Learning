@@ -8,3 +8,8 @@
 ## Instalation
 
 - yarn
+
+## Commands
+
+- Build: `yarn run lerna run build`
+- Test: `yarn run lerna run test`
