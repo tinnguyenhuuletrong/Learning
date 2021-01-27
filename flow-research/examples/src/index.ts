@@ -36,27 +36,27 @@ function constructNode(id, ins): INode {
 
 function createFlow(context?: IFlowContext): IFlowInstance {
   const nodeLogStart = NodeLog.create({
-    label: "start",
+    label: "START",
     nextNode: "ConditionCheck",
   });
 
   const nodeLogEnd = NodeLog.create({
-    label: "end",
+    label: "END",
     nextNode: "",
   });
 
   const nodeLogSuccess = NodeLog.create({
-    label: "success",
+    label: "UPPER 18. Can access service",
     nextNode: "END",
   });
 
   const nodeLogFailed = NodeLog.create({
-    label: "failed",
+    label: "UNDER 18. Bye",
     nextNode: "END",
   });
 
   const nodeCondition = NodeIf.create({
-    condition: {},
+    condition: { age: { $gt: 18 } },
     trueNode: "SuccessLog",
     falseNode: "EndLog",
   });
@@ -65,9 +65,9 @@ function createFlow(context?: IFlowContext): IFlowInstance {
     context,
     nodes: [
       constructNode("START", nodeLogStart),
-      constructNode("ConditionCheck", nodeLogSuccess),
-      constructNode("SuccessLog", nodeLogFailed),
-      constructNode("EndLog", nodeCondition),
+      constructNode("ConditionCheck", nodeCondition),
+      constructNode("SuccessLog", nodeLogSuccess),
+      constructNode("EndLog", nodeLogFailed),
       constructNode("END", nodeLogEnd),
     ],
   };
@@ -82,17 +82,16 @@ async function run(initContext: IFlowContext): Promise<IFlowRunRes> {
 
   // END check
   if (!activeNodeIns) return { state: EFlowState.END, context: initContext };
-  if (activeNodeIns.id === "END")
-    return { state: EFlowState.END, context: initContext };
 
   const res = (await activeNodeIns.ins.exec(
     flowIns.context.data
   )) as IExeResult;
 
   if (res.isSuccess) {
-    if (res.nextNode) flowIns.context.activeNode = res.nextNode;
-    else throw new Error("Node exec error");
-  }
+    if (res.nextNode) {
+      flowIns.context.activeNode = res.nextNode;
+    } else return { state: EFlowState.END, context: initContext };
+  } else throw new Error("Node exec error");
 
   return { state: EFlowState.CONTINUE, context: flowIns.context };
 }
@@ -100,7 +99,9 @@ async function run(initContext: IFlowContext): Promise<IFlowRunRes> {
 async function main() {
   const context = {
     activeNode: "START",
-    data: {},
+    data: {
+      age: 1,
+    },
   };
 
   let state: IFlowRunRes;
