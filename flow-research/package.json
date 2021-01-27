@@ -5,7 +5,8 @@
     "lerna": "lerna"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples"
   ],
   "devDependencies": {
     "@types/jest": "^26.0.20",
