@@ -1,0 +1,16 @@
+{
+  "name": "@ttinflow/node-log",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "play": "ts-node example/play",
+    "build": "rm -rf dist && tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@ttinflow/types": "*"
+  },
+  "author": "",
+  "license": "ISC"
+}
