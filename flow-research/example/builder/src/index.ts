@@ -96,18 +96,4 @@ async function run(initContext: IFlowContext): Promise<IFlowRunRes> {
   return { state: EFlowState.CONTINUE, context: flowIns.context };
 }
 
-async function main() {
-  const context = {
-    activeNode: "START",
-    data: {
-      age: 1,
-    },
-  };
-
-  let state: IFlowRunRes;
-  do {
-    state = await run(context);
-  } while (state.state !== EFlowState.END);
-}
-
-main();
+export { run };

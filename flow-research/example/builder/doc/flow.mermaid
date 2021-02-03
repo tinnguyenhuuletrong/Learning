@@ -1,0 +1,6 @@
+stateDiagram-v2
+    [*] --> Condition(age>18)?
+    Condition(age>18)? --> SuccessLog : true
+    Condition(age>18)? --> EndLog : false
+    SuccessLog --> [*]
+    EndLog --> [*]
