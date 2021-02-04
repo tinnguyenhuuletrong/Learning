@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/Cellar/opencv/4.5.0_5/include/opencv4"
+                "/usr/local/Cellar/opencv/4.5.1_2/include/opencv4",
+                "/usr/local/Cellar/dlib/19.21/include"
             ],
             "defines": [],
             "macFrameworkPath": [],

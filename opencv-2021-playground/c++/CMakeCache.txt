@@ -225,6 +225,9 @@ OpenCV_Play_BINARY_DIR:STATIC=/Users/admin/Documents/projects/_research/Learning
 //Value Computed by CMake
 OpenCV_Play_SOURCE_DIR:STATIC=/Users/admin/Documents/projects/_research/Learning/opencv-2021-playground/c++
 
+//The directory containing a CMake configuration file for dlib.
+dlib_DIR:PATH=/usr/local/lib/cmake/dlib
+
 
 ########################
 # INTERNAL cache entries
