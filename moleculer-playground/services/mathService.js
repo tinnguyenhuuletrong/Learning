@@ -9,12 +9,24 @@ function calFibo(index) {
 module.exports = {
   name: "math",
   actions: {
-    add(ctx) {
-      return Number(ctx.params.a) + Number(ctx.params.b);
+    add: {
+      params: {
+        a: "number",
+        b: "number",
+      },
+      handler: (ctx) => {
+        return Number(ctx.params.a) + Number(ctx.params.b);
+      },
     },
 
-    sub(ctx) {
-      return Number(ctx.params.a) - Number(ctx.params.b);
+    sub: {
+      params: {
+        a: "number",
+        b: "number",
+      },
+      handler: (ctx) => {
+        return Number(ctx.params.a) - Number(ctx.params.b);
+      },
     },
 
     fibo: {
@@ -22,7 +34,6 @@ module.exports = {
         index: "number",
       },
       handler: async (ctx) => {
-        await waitForMs(1000);
         return calFibo(ctx.params.index);
       },
     },

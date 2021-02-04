@@ -5,6 +5,7 @@ async function main() {
   const broker = new ServiceBroker({
     nodeID: "cli-agent",
     transporter: "TCP",
+    metrics: true,
   });
 
   await broker.start();

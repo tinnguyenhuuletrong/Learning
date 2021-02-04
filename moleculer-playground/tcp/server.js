@@ -5,7 +5,7 @@ const EventListernerService = require("../services/eventListernerService");
 async function main() {
   // Create a ServiceBroker
   const broker = new ServiceBroker({
-    nodeID: "service-a",
+    nodeID: "service-a-" + Date.now(),
     metrics: true,
     transporter: "TCP",
   });
