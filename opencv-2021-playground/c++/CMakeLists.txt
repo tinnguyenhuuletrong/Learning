@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 
-# Enable C++11
-set(CMAKE_CXX_STANDARD 11)
+# Enable C++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT (MSVC_IDE OR XCODE))
@@ -29,10 +29,16 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "./bin")
 
 add_executable( DisplayImage DisplayImage.cpp )
-target_link_libraries( DisplayImage ${OpenCV_LIBS} )
+target_link_libraries( DisplayImage ${OpenCV_LIBS})
 
 add_executable( DisplayVideo DisplayVideo.cpp )
 target_link_libraries( DisplayVideo ${OpenCV_LIBS} )
 
 add_executable( DlibFace DlibFace.cpp )
 target_link_libraries( DlibFace ${OpenCV_LIBS}  dlib::dlib )
+
+add_executable( FaceExtractVideoHaar FaceExtractVideoHaar.cpp )
+target_link_libraries( FaceExtractVideoHaar ${OpenCV_LIBS}  dlib::dlib )
+
+add_executable( FaceExtractVideoDlib FaceExtractVideoDlib.cpp )
+target_link_libraries( FaceExtractVideoDlib ${OpenCV_LIBS} dlib::dlib)

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "lib/haarFaceDetect.hpp"
 using namespace cv;
 using namespace std;
 
@@ -24,7 +23,6 @@ int main(int argc, char **argv){
     return -1;
   }
 
-  init_haarFaceDetect();
 	Mat frame;
   while(1){
    
@@ -34,8 +32,6 @@ int main(int argc, char **argv){
     // If the frame is empty, break immediately
     if (frame.empty())
       break;
-
-    detect_haarFace(frame);
 
     // Display the resulting frame
     imshow( "Frame", frame );

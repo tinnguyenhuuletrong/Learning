@@ -9,6 +9,14 @@ int fcount = 0;
 char buffer[50];
 std::vector<Rect> faces;
 
+
+void save_face(const Mat &frame, const Rect &rec)
+{
+	sprintf(buffer, "./out/haar/face_%d.jpg", fcount);
+	imwrite(buffer, frame(rec));
+	fcount++;
+}
+
 int init_haarFaceDetect()
 {
 	if (!face_cascade.load(faceCascadePath))
@@ -24,17 +32,13 @@ int init_haarFaceDetect()
 void detect_haarFace(const Mat &frame)
 {
 	cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
-	face_cascade.detectMultiScale(frame_gray, faces);
+	cv::Size minSize = frame.size() /3;
+	cv::Size maxSize = frame.size();
+	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 3, 0, minSize, maxSize);
 
 	for (size_t i = 0; i < faces.size(); i++)
 	{
-		rectangle(frame, faces[i], Scalar(255, 0, 0), 2);
+		// rectangle(frame, faces[i], Scalar(255, 0, 0), 2);
+		save_face(frame, faces[i]);
 	}
-}
-
-void save_face(const Mat &frame, const Rect &rec)
-{
-	sprintf(buffer, "./out/face_%d.jpg", fcount);
-	imwrite(buffer, frame(rec));
-	fcount++;
 }
