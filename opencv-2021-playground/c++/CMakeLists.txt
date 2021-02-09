@@ -17,6 +17,7 @@ message( STATUS "A 64-bit OS detected" )
 project( OpenCV_Play )
 find_package( OpenCV REQUIRED )
 find_package( dlib REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 message(STATUS "OpenCV library status:")
 message(STATUS "    config: ${OpenCV_DIR}")
@@ -41,4 +42,4 @@ add_executable( FaceExtractVideoHaar FaceExtractVideoHaar.cpp )
 target_link_libraries( FaceExtractVideoHaar ${OpenCV_LIBS}  dlib::dlib )
 
 add_executable( FaceExtractVideoDlib FaceExtractVideoDlib.cpp )
-target_link_libraries( FaceExtractVideoDlib ${OpenCV_LIBS} dlib::dlib)
+target_link_libraries( FaceExtractVideoDlib PRIVATE ${OpenCV_LIBS} dlib::dlib nlohmann_json::nlohmann_json)

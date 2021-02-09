@@ -224,6 +224,9 @@ OpenCV_Play_SOURCE_DIR:STATIC=/Users/admin/Documents/projects/_research/Learning
 //The directory containing a CMake configuration file for dlib.
 dlib_DIR:PATH=/usr/local/lib/cmake/dlib
 
+//The directory containing a CMake configuration file for nlohmann_json.
+nlohmann_json_DIR:PATH=/usr/local/lib/cmake/nlohmann_json
+
 
 ########################
 # INTERNAL cache entries
@@ -366,4 +369,6 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding OpenCV
 FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr/local/Cellar/opencv/4.5.1_2][v4.5.1()]
+//Details about finding nlohmann_json
+FIND_PACKAGE_MESSAGE_DETAILS_nlohmann_json:INTERNAL=[/usr/local/lib/cmake/nlohmann_json/nlohmann_jsonConfig.cmake][v3.9.1()]
 

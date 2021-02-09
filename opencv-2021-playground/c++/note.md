@@ -1,8 +1,8 @@
-## Macos 
+## Macos
 
 1. Install opencv
 
-``` sh
+```sh
 brew install opencv
 ```
 
@@ -12,10 +12,16 @@ brew install opencv
 - Guide here http://dlib.net/compile.html
 - link by `make install`
 
+3. nlohmann/json
+
+```sh
+brew tap nlohmann/json
+brew install nlohmann-json
+```
+
 3. Cmake
 
 ```sh
 cmake .
 make # output -> bin
 ```
-
