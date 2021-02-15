@@ -5,15 +5,16 @@ import cv2
 import numpy as np
 print("Start")
 # loaded_model = pickle.load(open('myface.IsolationForest.pkl', 'rb'))
-loaded_model = pickle.load(open('myface.OneClassSVM.pkl', 'rb'))
+# loaded_model = pickle.load(open('myface.myface.OneClassSVM.pkl', 'rb'))
+loaded_model = pickle.load(open('myface.LocalOutlierFactor.pkl', 'rb'))
 
 res = loaded_model.predict([np.random.rand(128)])
-print("Done", res)
+print("Done")
 
 known_face_encodings = np.load('my_face_encode.npy')
-print("Done 2", known_face_encodings)
+print("Done 2")
 
-cap = cv2.VideoCapture("/Users/admin/Downloads/Review_layout.mp4")
+cap = cv2.VideoCapture("/Users/admin/Downloads/IMG_0152.jpg")
 while (cap.isOpened()):
   ret, frame = cap.read()
   if ret == True:
@@ -34,15 +35,16 @@ while (cap.isOpened()):
       match_score.append(score)
 
     i = 0
+    res = loaded_model.predict(face_encodings)
+
     for enc in face_locations:
       (top, right, bottom, left) = enc
       cv2.rectangle(frame, (left, top), (right, bottom), (0,0,255))
       font = cv2.FONT_HERSHEY_DUPLEX
       cv2.putText(frame, str(match_score[i]), (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+      cv2.putText(frame, str(res[i]), (left - 6, top - 10), font, 1.0, (0, 255, 0), 1)
       i+=1
 
-
-    res = loaded_model.predict(face_encodings)
     print(res, match_score)
     cv2.imshow('Video', frame)
 
