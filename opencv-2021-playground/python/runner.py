@@ -14,7 +14,7 @@ print("Done")
 known_face_encodings = np.load('my_face_encode.npy')
 print("Done 2")
 
-cap = cv2.VideoCapture("/Users/admin/Downloads/IMG_0152.jpg")
+cap = cv2.VideoCapture(0)
 while (cap.isOpened()):
   ret, frame = cap.read()
   if ret == True:
