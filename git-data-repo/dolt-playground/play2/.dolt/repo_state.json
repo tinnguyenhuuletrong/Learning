@@ -1,0 +1,17 @@
+{
+  "head": "refs/heads/master",
+  "staged": "9s8kjtn908tfr40laaa7a3j797elhbl1",
+  "working": "9tu3ihksrtngi5mfggmlhd0h3q1e10fg",
+  "merge": null,
+  "remotes": {
+    "origin": {
+      "name": "origin",
+      "url": "file:///Users/admin/Documents/tmp/dolt-playground/repo",
+      "fetch_specs": [
+        "refs/heads/*:refs/remotes/origin/*"
+      ],
+      "params": {}
+    }
+  },
+  "branches": {}
+}

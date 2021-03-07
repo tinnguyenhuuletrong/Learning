@@ -1,0 +1,2 @@
+select * from state_populations;
+update state_populations set population=30 where state='hanoi';
