@@ -2,3 +2,5 @@ runner-env
 my_face.mp4
 *.pkl
 *.npy
+
+__pycache__
