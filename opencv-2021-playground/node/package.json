@@ -10,5 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "opencv4nodejs": "^5.6.0"
+  },
+  "opencv4nodejs": {
+    "disableAutoBuild": 1
   }
 }
