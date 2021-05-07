@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-docker": "cd tools && docker-compose up"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "kafkajs": "^1.11.0"
+    "kafkajs": "^1.15.0"
   }
 }
