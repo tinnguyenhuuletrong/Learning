@@ -2,11 +2,13 @@ use rand::Rng;
 use std::cmp::Ordering;
 use std::io;
 
+const RANGE: std::ops::Range<u32> = 1..200;
+
 fn main() {
-    let secret_number = rand::thread_rng().gen_range(1..101);
+    let secret_number = rand::thread_rng().gen_range(RANGE);
 
     // println!("The secret number is: {}", secret_number);
-    println!("Guess the number in range 1-101 !");
+    println!("Guess the number in range {}-{} !", RANGE.start, RANGE.end);
 
     loop {
         println!("Please input your guess.");
