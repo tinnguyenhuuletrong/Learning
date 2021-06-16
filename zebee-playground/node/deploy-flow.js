@@ -5,12 +5,7 @@ async function main() {
   //  https://console.cloud.camunda.io/org/3e7053f3-d867-41c1-83b7-5bbae0882adc/models
 
   const zbc = new ZB.ZBClient();
-  const result = await zbc.createWorkflowInstance({
-    bpmnProcessId: "Process_KYC_greater_than_18_e1cd6352",
-    variables: { age: 100 },
-  });
+  const result = await zbc.deployWorkflow("./bpmn/KYC_greater_than_18.bpmn");
   console.log(result);
-
-  zbc.close(200);
 }
 main();
