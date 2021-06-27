@@ -39,7 +39,7 @@ const schema = makeSchema({
   outputs: {
     typegen: path.join(
       __dirname,
-      "node_modules/@types/typegen-nexus/index.d.ts"
+      "../node_modules/@types/typegen-nexus/index.d.ts"
     ),
     schema: path.join(__dirname, "./schema.graphql"),
   },
