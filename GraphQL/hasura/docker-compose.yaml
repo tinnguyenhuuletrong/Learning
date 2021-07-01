@@ -1,27 +1,16 @@
 version: "3.6"
 services:
   postgres:
-    image: postgres:12
+    image: postgres:latest
     restart: always
     ports:
       - 5432:5432
-    # volumes:
-    #   - db_data:/var/lib/postgresql/data
+    volumes:
+      - db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: postgrespassword
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    depends_on:
-      - postgres
-    ports:
-      - 5050:80
-    ## you can change pgAdmin default username/password with below environment variables
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
   graphql-engine:
-    image: hasura/graphql-engine:v1.3.1-beta.1
+    image: hasura/graphql-engine:v2.0.1
     ports:
       - "8080:8080"
     depends_on:
@@ -35,5 +24,10 @@ services:
       HASURA_GRAPHQL_DEV_MODE: "true"
       ## uncomment next line to set an admin secret
       # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+  backend:
+    image: node:latest
+    volumes:
+      - ./:/home/node/app
+
 volumes:
   db_data:

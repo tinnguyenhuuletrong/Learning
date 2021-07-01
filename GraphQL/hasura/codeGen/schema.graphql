@@ -1,0 +1,1101 @@
+schema {
+  query: query_root
+  mutation: mutation_root
+  subscription: subscription_root
+}
+
+"""whether this query should be cached (Hasura Cloud only)"""
+directive @cached(
+  """measured in seconds"""
+  ttl: Int! = 60
+
+  """refresh the cache entry"""
+  refresh: Boolean! = false
+) on QUERY
+
+"""
+Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'.
+"""
+input String_comparison_exp {
+  _eq: String
+  _gt: String
+  _gte: String
+
+  """does the column match the given case-insensitive pattern"""
+  _ilike: String
+  _in: [String!]
+
+  """
+  does the column match the given POSIX regular expression, case insensitive
+  """
+  _iregex: String
+  _is_null: Boolean
+
+  """does the column match the given pattern"""
+  _like: String
+  _lt: String
+  _lte: String
+  _neq: String
+
+  """does the column NOT match the given case-insensitive pattern"""
+  _nilike: String
+  _nin: [String!]
+
+  """
+  does the column NOT match the given POSIX regular expression, case insensitive
+  """
+  _niregex: String
+
+  """does the column NOT match the given pattern"""
+  _nlike: String
+
+  """
+  does the column NOT match the given POSIX regular expression, case sensitive
+  """
+  _nregex: String
+
+  """does the column NOT match the given SQL regular expression"""
+  _nsimilar: String
+
+  """
+  does the column match the given POSIX regular expression, case sensitive
+  """
+  _regex: String
+
+  """does the column match the given SQL regular expression"""
+  _similar: String
+}
+
+"""
+columns and relationships of "follows"
+"""
+type follows {
+  created_at: timestamptz!
+  follower_id: uuid
+  updated_at: timestamptz!
+
+  """An object relationship"""
+  user: users
+
+  """An object relationship"""
+  userByUserId: users
+  user_id: uuid
+}
+
+"""
+aggregated selection of "follows"
+"""
+type follows_aggregate {
+  aggregate: follows_aggregate_fields
+  nodes: [follows!]!
+}
+
+"""
+aggregate fields of "follows"
+"""
+type follows_aggregate_fields {
+  count(columns: [follows_select_column!], distinct: Boolean): Int!
+  max: follows_max_fields
+  min: follows_min_fields
+}
+
+"""
+order by aggregate values of table "follows"
+"""
+input follows_aggregate_order_by {
+  count: order_by
+  max: follows_max_order_by
+  min: follows_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "follows"
+"""
+input follows_arr_rel_insert_input {
+  data: [follows_insert_input!]!
+}
+
+"""
+Boolean expression to filter rows from the table "follows". All fields are combined with a logical 'AND'.
+"""
+input follows_bool_exp {
+  _and: [follows_bool_exp!]
+  _not: follows_bool_exp
+  _or: [follows_bool_exp!]
+  created_at: timestamptz_comparison_exp
+  follower_id: uuid_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
+  userByUserId: users_bool_exp
+  user_id: uuid_comparison_exp
+}
+
+"""
+input type for inserting data into table "follows"
+"""
+input follows_insert_input {
+  created_at: timestamptz
+  follower_id: uuid
+  updated_at: timestamptz
+  user: users_obj_rel_insert_input
+  userByUserId: users_obj_rel_insert_input
+  user_id: uuid
+}
+
+"""aggregate max on columns"""
+type follows_max_fields {
+  created_at: timestamptz
+  follower_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+order by max() on columns of table "follows"
+"""
+input follows_max_order_by {
+  created_at: order_by
+  follower_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""aggregate min on columns"""
+type follows_min_fields {
+  created_at: timestamptz
+  follower_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+order by min() on columns of table "follows"
+"""
+input follows_min_order_by {
+  created_at: order_by
+  follower_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""
+response of any mutation on the table "follows"
+"""
+type follows_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [follows!]!
+}
+
+"""Ordering options when selecting data from "follows"."""
+input follows_order_by {
+  created_at: order_by
+  follower_id: order_by
+  updated_at: order_by
+  user: users_order_by
+  userByUserId: users_order_by
+  user_id: order_by
+}
+
+"""
+select columns of table "follows"
+"""
+enum follows_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  follower_id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_id
+}
+
+"""
+input type for updating data in table "follows"
+"""
+input follows_set_input {
+  created_at: timestamptz
+  follower_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""mutation root"""
+type mutation_root {
+  """
+  delete data from the table: "follows"
+  """
+  delete_follows(
+    """filter the rows which have to be deleted"""
+    where: follows_bool_exp!
+  ): follows_mutation_response
+
+  """
+  delete data from the table: "posts"
+  """
+  delete_posts(
+    """filter the rows which have to be deleted"""
+    where: posts_bool_exp!
+  ): posts_mutation_response
+
+  """
+  delete data from the table: "users"
+  """
+  delete_users(
+    """filter the rows which have to be deleted"""
+    where: users_bool_exp!
+  ): users_mutation_response
+
+  """
+  delete single row from the table: "users"
+  """
+  delete_users_by_pk(id: uuid!): users
+
+  """
+  insert data into the table: "follows"
+  """
+  insert_follows(
+    """the rows to be inserted"""
+    objects: [follows_insert_input!]!
+  ): follows_mutation_response
+
+  """
+  insert a single row into the table: "follows"
+  """
+  insert_follows_one(
+    """the row to be inserted"""
+    object: follows_insert_input!
+  ): follows
+
+  """
+  insert data into the table: "posts"
+  """
+  insert_posts(
+    """the rows to be inserted"""
+    objects: [posts_insert_input!]!
+  ): posts_mutation_response
+
+  """
+  insert a single row into the table: "posts"
+  """
+  insert_posts_one(
+    """the row to be inserted"""
+    object: posts_insert_input!
+  ): posts
+
+  """
+  insert data into the table: "users"
+  """
+  insert_users(
+    """the rows to be inserted"""
+    objects: [users_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: users_on_conflict
+  ): users_mutation_response
+
+  """
+  insert a single row into the table: "users"
+  """
+  insert_users_one(
+    """the row to be inserted"""
+    object: users_insert_input!
+
+    """on conflict condition"""
+    on_conflict: users_on_conflict
+  ): users
+
+  """
+  update data of the table: "follows"
+  """
+  update_follows(
+    """sets the columns of the filtered rows to the given values"""
+    _set: follows_set_input
+
+    """filter the rows which have to be updated"""
+    where: follows_bool_exp!
+  ): follows_mutation_response
+
+  """
+  update data of the table: "posts"
+  """
+  update_posts(
+    """sets the columns of the filtered rows to the given values"""
+    _set: posts_set_input
+
+    """filter the rows which have to be updated"""
+    where: posts_bool_exp!
+  ): posts_mutation_response
+
+  """
+  update data of the table: "users"
+  """
+  update_users(
+    """sets the columns of the filtered rows to the given values"""
+    _set: users_set_input
+
+    """filter the rows which have to be updated"""
+    where: users_bool_exp!
+  ): users_mutation_response
+
+  """
+  update single row of the table: "users"
+  """
+  update_users_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: users_set_input
+    pk_columns: users_pk_columns_input!
+  ): users
+}
+
+"""column ordering options"""
+enum order_by {
+  """in ascending order, nulls last"""
+  asc
+
+  """in ascending order, nulls first"""
+  asc_nulls_first
+
+  """in ascending order, nulls last"""
+  asc_nulls_last
+
+  """in descending order, nulls first"""
+  desc
+
+  """in descending order, nulls first"""
+  desc_nulls_first
+
+  """in descending order, nulls last"""
+  desc_nulls_last
+}
+
+"""
+columns and relationships of "posts"
+"""
+type posts {
+  content: String
+  created_at: timestamptz!
+  id: uuid
+  updated_at: timestamptz!
+
+  """An object relationship"""
+  user: users
+  user_id: uuid
+}
+
+"""
+aggregated selection of "posts"
+"""
+type posts_aggregate {
+  aggregate: posts_aggregate_fields
+  nodes: [posts!]!
+}
+
+"""
+aggregate fields of "posts"
+"""
+type posts_aggregate_fields {
+  count(columns: [posts_select_column!], distinct: Boolean): Int!
+  max: posts_max_fields
+  min: posts_min_fields
+}
+
+"""
+order by aggregate values of table "posts"
+"""
+input posts_aggregate_order_by {
+  count: order_by
+  max: posts_max_order_by
+  min: posts_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "posts"
+"""
+input posts_arr_rel_insert_input {
+  data: [posts_insert_input!]!
+}
+
+"""
+Boolean expression to filter rows from the table "posts". All fields are combined with a logical 'AND'.
+"""
+input posts_bool_exp {
+  _and: [posts_bool_exp!]
+  _not: posts_bool_exp
+  _or: [posts_bool_exp!]
+  content: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  id: uuid_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
+  user_id: uuid_comparison_exp
+}
+
+"""
+input type for inserting data into table "posts"
+"""
+input posts_insert_input {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  updated_at: timestamptz
+  user: users_obj_rel_insert_input
+  user_id: uuid
+}
+
+"""aggregate max on columns"""
+type posts_max_fields {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+order by max() on columns of table "posts"
+"""
+input posts_max_order_by {
+  content: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""aggregate min on columns"""
+type posts_min_fields {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+order by min() on columns of table "posts"
+"""
+input posts_min_order_by {
+  content: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""
+response of any mutation on the table "posts"
+"""
+type posts_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [posts!]!
+}
+
+"""Ordering options when selecting data from "posts"."""
+input posts_order_by {
+  content: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user: users_order_by
+  user_id: order_by
+}
+
+"""
+select columns of table "posts"
+"""
+enum posts_select_column {
+  """column name"""
+  content
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_id
+}
+
+"""
+input type for updating data in table "posts"
+"""
+input posts_set_input {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+type query_root {
+  """An array relationship"""
+  follows(
+    """distinct select on columns"""
+    distinct_on: [follows_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [follows_order_by!]
+
+    """filter the rows returned"""
+    where: follows_bool_exp
+  ): [follows!]!
+
+  """An aggregate relationship"""
+  follows_aggregate(
+    """distinct select on columns"""
+    distinct_on: [follows_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [follows_order_by!]
+
+    """filter the rows returned"""
+    where: follows_bool_exp
+  ): follows_aggregate!
+
+  """An array relationship"""
+  posts(
+    """distinct select on columns"""
+    distinct_on: [posts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [posts_order_by!]
+
+    """filter the rows returned"""
+    where: posts_bool_exp
+  ): [posts!]!
+
+  """An aggregate relationship"""
+  posts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [posts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [posts_order_by!]
+
+    """filter the rows returned"""
+    where: posts_bool_exp
+  ): posts_aggregate!
+
+  """
+  fetch data from the table: "users"
+  """
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """
+  fetch aggregated fields from the table: "users"
+  """
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+
+  """fetch data from the table: "users" using primary key columns"""
+  users_by_pk(id: uuid!): users
+}
+
+type subscription_root {
+  """An array relationship"""
+  follows(
+    """distinct select on columns"""
+    distinct_on: [follows_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [follows_order_by!]
+
+    """filter the rows returned"""
+    where: follows_bool_exp
+  ): [follows!]!
+
+  """An aggregate relationship"""
+  follows_aggregate(
+    """distinct select on columns"""
+    distinct_on: [follows_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [follows_order_by!]
+
+    """filter the rows returned"""
+    where: follows_bool_exp
+  ): follows_aggregate!
+
+  """An array relationship"""
+  posts(
+    """distinct select on columns"""
+    distinct_on: [posts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [posts_order_by!]
+
+    """filter the rows returned"""
+    where: posts_bool_exp
+  ): [posts!]!
+
+  """An aggregate relationship"""
+  posts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [posts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [posts_order_by!]
+
+    """filter the rows returned"""
+    where: posts_bool_exp
+  ): posts_aggregate!
+
+  """
+  fetch data from the table: "users"
+  """
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """
+  fetch aggregated fields from the table: "users"
+  """
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+
+  """fetch data from the table: "users" using primary key columns"""
+  users_by_pk(id: uuid!): users
+}
+
+scalar timestamptz
+
+"""
+Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'.
+"""
+input timestamptz_comparison_exp {
+  _eq: timestamptz
+  _gt: timestamptz
+  _gte: timestamptz
+  _in: [timestamptz!]
+  _is_null: Boolean
+  _lt: timestamptz
+  _lte: timestamptz
+  _neq: timestamptz
+  _nin: [timestamptz!]
+}
+
+"""
+columns and relationships of "users"
+"""
+type users {
+  avatar_url: String
+  created_at: timestamptz!
+  email: String!
+  first_name: String
+
+  """An array relationship"""
+  follows(
+    """distinct select on columns"""
+    distinct_on: [follows_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [follows_order_by!]
+
+    """filter the rows returned"""
+    where: follows_bool_exp
+  ): [follows!]!
+
+  """An aggregate relationship"""
+  follows_aggregate(
+    """distinct select on columns"""
+    distinct_on: [follows_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [follows_order_by!]
+
+    """filter the rows returned"""
+    where: follows_bool_exp
+  ): follows_aggregate!
+  id: uuid!
+  last_name: String
+  password: String!
+
+  """An array relationship"""
+  posts(
+    """distinct select on columns"""
+    distinct_on: [posts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [posts_order_by!]
+
+    """filter the rows returned"""
+    where: posts_bool_exp
+  ): [posts!]!
+
+  """An aggregate relationship"""
+  posts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [posts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [posts_order_by!]
+
+    """filter the rows returned"""
+    where: posts_bool_exp
+  ): posts_aggregate!
+  updated_at: timestamptz!
+}
+
+"""
+aggregated selection of "users"
+"""
+type users_aggregate {
+  aggregate: users_aggregate_fields
+  nodes: [users!]!
+}
+
+"""
+aggregate fields of "users"
+"""
+type users_aggregate_fields {
+  count(columns: [users_select_column!], distinct: Boolean): Int!
+  max: users_max_fields
+  min: users_min_fields
+}
+
+"""
+Boolean expression to filter rows from the table "users". All fields are combined with a logical 'AND'.
+"""
+input users_bool_exp {
+  _and: [users_bool_exp!]
+  _not: users_bool_exp
+  _or: [users_bool_exp!]
+  avatar_url: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  email: String_comparison_exp
+  first_name: String_comparison_exp
+  follows: follows_bool_exp
+  id: uuid_comparison_exp
+  last_name: String_comparison_exp
+  password: String_comparison_exp
+  posts: posts_bool_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "users"
+"""
+enum users_constraint {
+  """unique or primary key constraint"""
+  users_pkey
+}
+
+"""
+input type for inserting data into table "users"
+"""
+input users_insert_input {
+  avatar_url: String
+  created_at: timestamptz
+  email: String
+  first_name: String
+  follows: follows_arr_rel_insert_input
+  id: uuid
+  last_name: String
+  password: String
+  posts: posts_arr_rel_insert_input
+  updated_at: timestamptz
+}
+
+"""aggregate max on columns"""
+type users_max_fields {
+  avatar_url: String
+  created_at: timestamptz
+  email: String
+  first_name: String
+  id: uuid
+  last_name: String
+  password: String
+  updated_at: timestamptz
+}
+
+"""aggregate min on columns"""
+type users_min_fields {
+  avatar_url: String
+  created_at: timestamptz
+  email: String
+  first_name: String
+  id: uuid
+  last_name: String
+  password: String
+  updated_at: timestamptz
+}
+
+"""
+response of any mutation on the table "users"
+"""
+type users_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [users!]!
+}
+
+"""
+input type for inserting object relation for remote table "users"
+"""
+input users_obj_rel_insert_input {
+  data: users_insert_input!
+
+  """on conflict condition"""
+  on_conflict: users_on_conflict
+}
+
+"""
+on conflict condition type for table "users"
+"""
+input users_on_conflict {
+  constraint: users_constraint!
+  update_columns: [users_update_column!]! = []
+  where: users_bool_exp
+}
+
+"""Ordering options when selecting data from "users"."""
+input users_order_by {
+  avatar_url: order_by
+  created_at: order_by
+  email: order_by
+  first_name: order_by
+  follows_aggregate: follows_aggregate_order_by
+  id: order_by
+  last_name: order_by
+  password: order_by
+  posts_aggregate: posts_aggregate_order_by
+  updated_at: order_by
+}
+
+"""primary key columns input for table: users"""
+input users_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "users"
+"""
+enum users_select_column {
+  """column name"""
+  avatar_url
+
+  """column name"""
+  created_at
+
+  """column name"""
+  email
+
+  """column name"""
+  first_name
+
+  """column name"""
+  id
+
+  """column name"""
+  last_name
+
+  """column name"""
+  password
+
+  """column name"""
+  updated_at
+}
+
+"""
+input type for updating data in table "users"
+"""
+input users_set_input {
+  avatar_url: String
+  created_at: timestamptz
+  email: String
+  first_name: String
+  id: uuid
+  last_name: String
+  password: String
+  updated_at: timestamptz
+}
+
+"""
+update columns of table "users"
+"""
+enum users_update_column {
+  """column name"""
+  avatar_url
+
+  """column name"""
+  created_at
+
+  """column name"""
+  email
+
+  """column name"""
+  first_name
+
+  """column name"""
+  id
+
+  """column name"""
+  last_name
+
+  """column name"""
+  password
+
+  """column name"""
+  updated_at
+}
+
+scalar uuid
+
+"""
+Boolean expression to compare columns of type "uuid". All fields are combined with logical 'AND'.
+"""
+input uuid_comparison_exp {
+  _eq: uuid
+  _gt: uuid
+  _gte: uuid
+  _in: [uuid!]
+  _is_null: Boolean
+  _lt: uuid
+  _lte: uuid
+  _neq: uuid
+  _nin: [uuid!]
+}

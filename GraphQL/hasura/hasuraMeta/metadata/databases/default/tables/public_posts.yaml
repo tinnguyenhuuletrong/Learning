@@ -1,0 +1,46 @@
+table:
+  name: posts
+  schema: public
+object_relationships:
+- name: user
+  using:
+    foreign_key_constraint_on: user_id
+insert_permissions:
+- permission:
+    backend_only: false
+    check:
+      user_id:
+        _eq: X-Hasura-User-Id
+    columns:
+    - content
+    set:
+      user_id: x-hasura-User-Id
+  role: anonymous
+select_permissions:
+- permission:
+    columns:
+    - content
+    - created_at
+    - id
+    - updated_at
+    - user_id
+    filter:
+      user_id:
+        _eq: X-Hasura-User-Id
+  role: anonymous
+update_permissions:
+- permission:
+    check: {}
+    columns:
+    - content
+    - updated_at
+    filter:
+      user_id:
+        _eq: X-Hasura-User-Id
+  role: anonymous
+delete_permissions:
+- permission:
+    filter:
+      user_id:
+        _eq: X-Hasura-User-Id
+  role: anonymous

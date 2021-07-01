@@ -1,0 +1,36 @@
+table:
+  name: follows
+  schema: public
+object_relationships:
+- name: user
+  using:
+    foreign_key_constraint_on: follower_id
+- name: userByUserId
+  using:
+    foreign_key_constraint_on: user_id
+insert_permissions:
+- permission:
+    backend_only: false
+    check:
+      user_id:
+        _eq: X-Hasura-User-Id
+    columns:
+    - follower_id
+  role: anonymous
+select_permissions:
+- permission:
+    columns:
+    - created_at
+    - updated_at
+    - follower_id
+    - user_id
+    filter:
+      user_id:
+        _eq: X-Hasura-User-Id
+  role: anonymous
+delete_permissions:
+- permission:
+    filter:
+      user_id:
+        _eq: X-Hasura-User-Id
+  role: anonymous

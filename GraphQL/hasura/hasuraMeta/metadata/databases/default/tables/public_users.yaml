@@ -1,0 +1,58 @@
+table:
+  name: users
+  schema: public
+array_relationships:
+- name: follows
+  using:
+    foreign_key_constraint_on:
+      column: user_id
+      table:
+        name: follows
+        schema: public
+- name: posts
+  using:
+    foreign_key_constraint_on:
+      column: user_id
+      table:
+        name: posts
+        schema: public
+insert_permissions:
+- permission:
+    backend_only: false
+    check: {}
+    columns:
+    - avatar_url
+    - email
+    - first_name
+    - last_name
+    - password
+  role: anonymous
+select_permissions:
+- permission:
+    columns:
+    - avatar_url
+    - created_at
+    - email
+    - first_name
+    - id
+    - last_name
+    - password
+    - updated_at
+    filter:
+      id:
+        _eq: X-Hasura-User-Id
+    limit: 1
+  role: anonymous
+update_permissions:
+- permission:
+    check: null
+    columns:
+    - avatar_url
+    - email
+    - first_name
+    - last_name
+    - password
+    filter:
+      id:
+        _eq: X-Hasura-User-Id
+  role: anonymous
