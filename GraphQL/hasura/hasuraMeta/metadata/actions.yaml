@@ -1,6 +1,15 @@
-actions: []
+actions:
+- name: wellcome_sync
+  definition:
+    kind: synchronous
+    handler: http://backend:3000/wellcome_sync
+    forward_client_headers: true
+  permissions:
+  - role: anonymous
 custom_types:
   enums: []
-  input_objects: []
-  objects: []
+  input_objects:
+  - name: SampleInput
+  objects:
+  - name: SampleOutput
   scalars: []
