@@ -70,7 +70,7 @@ async function main() {
 
   const variables = {
     pid: 1,
-    pvalue: 3000,
+    pvalue: 10,
   };
   const listener = new EventEmitter();
 
@@ -80,7 +80,10 @@ async function main() {
 
   const api = await engine.execute({ variables, listener });
   console.log("finish", api.state, api.environment.output);
-  console.log("final state", api.getState());
+  console.log(
+    "final state saved",
+    require("fs").writeFileSync("./saved.json", JSON.stringify(api.getState()))
+  );
 }
 
 main();
