@@ -14,7 +14,13 @@ enum Message {
 
 impl Message {
   fn print (&self) {
-    println!("Msg: {:?}", self);
+    println!("Default print. Msg: {:?}", self);
+    match self {
+      Message::Quit => println!("I am Quit"),
+      Message::Move{x, y} => println!("I am Move {} {}", x, y),
+      Message::Write(_) => println!("I am Write"),
+      Message::ChangeColor(_,_,_) => println!("I am Change color"),
+    }
   }
 }
 
