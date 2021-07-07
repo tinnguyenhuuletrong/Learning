@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^2.6.1",
+    "canvas": "^2.8.0",
     "color-space": "^1.16.0",
     "firebase": "^6.6.0",
     "fluent-ffmpeg": "^2.1.2",
