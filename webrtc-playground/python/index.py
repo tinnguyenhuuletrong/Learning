@@ -3,9 +3,12 @@ import asyncio
 from aiortc.rtcicetransport import RTCIceCandidate
 from aiortc.rtcpeerconnection import RTCPeerConnection
 from aiortc.rtcsessiondescription import RTCSessionDescription
+from aiortc.contrib.media import (MediaRelay)
 from WSSignalling import WSSignalling
 from util.FlagViewStreamTrack import FlagVideoStreamTrack
 from util.ImageViewStreamTrack import ImageViewStreamTrack
+from util.VideoTransformStreamTrack import VideoTransformStreamTrack
+
 import argparse
 import logging
 
@@ -23,28 +26,23 @@ def channel_send(channel, message):
 
 async def run(pc, signaling, mode):
 
+    relay = MediaRelay()
+    transform = VideoTransformStreamTrack(
+        None, transform="cartoon"
+    )
+
     def add_data_channel(channel):
         @channel.on("message")
         async def on_message(message):
             channel_log(channel, "<", message)
-            channel_send(channel, "py echo %s" % message)
-            if message == "play":
-                print('start video')
-                await add_tracks()
-
-    async def add_tracks():
-        # if player and player.audio:
-        #     pc.addTrack(player.audio)
-
-        # if player and player.video:
-        #     pc.addTrack(player.video)
-
-        pc.addTrack(ImageViewStreamTrack(img_path='./avatar.jpg'))
-        await pc.setLocalDescription(await pc.createOffer())
-        await signaling.send(pc.localDescription)
+            VALID_MODE = ["cartoon", "edges", "rotate", 'none']
+            if message in VALID_MODE:
+                transform.transform = message
+                channel_send(channel, 'update transform')
+            else:
+                channel_send(channel, "py echo %s" % message)
 
     # Event Handler
-
     # @pc.on("connectionstatechange")
     # async def on_connection_change_state():
     #     if pc.connectionState == "connected":
@@ -53,8 +51,8 @@ async def run(pc, signaling, mode):
     @pc.on("track")
     async def on_track(track):
         print("Receiving %s" % track.kind)
-        await asyncio.sleep(2)
-        await add_tracks()
+        await asyncio.sleep(1)
+        transform.add_track(relay.subscribe(track))
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -73,6 +71,8 @@ async def run(pc, signaling, mode):
     #     channel = pc.createDataChannel('chat')
     #     add_data_channel(channel)
     #     await add_tracks()
+
+    pc.addTrack(transform)
 
     # consume signaling
     while signaling.is_connect():
@@ -99,9 +99,14 @@ if __name__ == "__main__":
         description="Python Webrtc client")
 
     # Not yet support renegotiate
-    # parser.add_argument("mode", choices=["PEER"])
+    parser.add_argument("mode", choices=["PEER"])
     parser.add_argument("roomId", help="Room id")
     parser.add_argument("--verbose", "-v", action="count")
+
+    # args = type('', (), {})()
+    # args.mode = 'PEER'
+    # args.roomId = 'ttin'
+    # args.verbose = False
 
     args = parser.parse_args()
     mode = 'PEER'
