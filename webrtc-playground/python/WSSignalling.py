@@ -3,6 +3,7 @@ import logging
 import time
 import json
 
+from websockets import ConnectionClosedOK
 from aiortc import RTCIceCandidate, RTCSessionDescription
 from aiortc.sdp import candidate_from_sdp, candidate_to_sdp
 
@@ -15,9 +16,14 @@ class WSSignalling:
         self._url = url or "wss://secret-headland-20594.herokuapp.com"
         self._room_id = room_id
         self._websocket = None
+        self._ready = False
 
     def is_connect(self):
         return self._websocket != None
+
+    async def wait_for_ready(self):
+        while not self._ready:
+            await self.receive()
 
     def _object_from_string(self, message_str):
         message = json.loads(message_str)
@@ -68,22 +74,29 @@ class WSSignalling:
     async def close(self):
         await self._websocket.close()
         self._websocket = None
+        self._ready = False
 
     async def receive(self):
-        message = await self._websocket.recv()
-        logger.info("< " + message)
-        message = json.loads(message)
-        if "method" in message and message["method"] == "peer-info":
-            return self._object_from_string(message["params"]["data"])
+        try:
+            message = await self._websocket.recv()
+            logger.info("< " + message)
+            message = json.loads(message)
+            if "method" in message and message["method"] == "peer-info":
+                return self._object_from_string(message["params"]["data"])
+            elif "method" in message and message["method"] == "room-info":
+                self._ready = message["params"]["isReady"]
+
+        except ConnectionClosedOK:
+            pass
 
     async def send(self, descr):
-        message = self._object_to_string({
+        message = json.dumps({
             "jsonrpc": "2.0",
             "id": str(time.time()),
             "method": "send",
             "params": {
                 "roomId": self._room_id,
-                "data": json.dumps(descr),
+                "data": self._object_to_string(descr),
             },
         })
         logger.info("> " + message)

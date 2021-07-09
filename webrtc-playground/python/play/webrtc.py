@@ -15,52 +15,6 @@ from aiortc import (
 )
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 from aiortc.contrib.signaling import BYE, add_signaling_arguments, create_signaling
-import websockets
-
-logger = logging.getLogger(__name__)
-
-
-class WSSignalling:
-    def __init__(self, room_id, url):
-        self._url = url or "https://appr.tc"
-        self._room_id = room_id
-        self._websocket = None
-        pass
-
-    def _object_to_string(obj):
-        if isinstance(obj, RTCSessionDescription):
-            message = {"sdp": obj.sdp, "type": obj.type}
-        elif isinstance(obj, RTCIceCandidate):
-            message = {
-                "candidate": "candidate:" + candidate_to_sdp(obj),
-                "id": obj.sdpMid,
-                "label": obj.sdpMLineIndex,
-                "type": "candidate",
-            }
-        else:
-            assert obj is BYE
-            message = {"type": "bye"}
-        return json.dumps(message, sort_keys=True)
-
-    async def connect(self):
-    self._websocket = await websockets.connect(
-        self._url
-    )
-    print(f"WSSignalling room is {self._room_id}")
-
-    pass
-
-    async def close(self):
-        await self._websocket.close()
-        pass
-
-    async def receive(self):
-        pass
-
-    async def send(self, descr):
-        message = self._object_to_string(obj)
-        logger.info("> " + message)
-        await self._websocket.send(json.dumps({"cmd": "send", "msg": message}))
 
 
 class FlagVideoStreamTrack(VideoStreamTrack):
