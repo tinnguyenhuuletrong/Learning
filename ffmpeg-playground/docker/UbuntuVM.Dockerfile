@@ -1,3 +1,0 @@
-FROM node:14
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends gcc build-essential curl apt ffmpeg

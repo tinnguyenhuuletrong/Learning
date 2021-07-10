@@ -1,9 +1,0 @@
-{-# STDLIB_VERSION 3 #-}
-{-# CONTENT_TYPE EXPRESSION #-}
-{-# SCRIPT_TYPE ASSET #-}
-
-# only exchange transactions are allowed for everyone.
-match tx {
-  case t:ExchangeTransaction => true
-  case _ => false
-}

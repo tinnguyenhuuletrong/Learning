@@ -1,1 +1,0 @@
-openssl rsautl -decrypt -inkey privatekey.pem -in message.rsa -out message.dec

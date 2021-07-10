@@ -1,1 +1,0 @@
-openssl ecparam -list_curves

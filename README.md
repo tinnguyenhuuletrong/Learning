@@ -1,3 +1,0 @@
-TTin. Homework!
-
-TestSVN

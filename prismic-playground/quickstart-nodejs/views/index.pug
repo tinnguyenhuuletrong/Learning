@@ -1,9 +1,0 @@
-extends ./layout.pug
- 
-block body
-  div.welcome
-    img(src=document.data.image.url, class='star')
-    div.video
-      != document.data.embeded.html
-    != PrismicDOM.RichText.asHtml(document.data.title, ctx.linkResolver)
-    != PrismicDOM.RichText.asHtml(document.data.description, ctx.linkResolver)

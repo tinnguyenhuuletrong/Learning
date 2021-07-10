@@ -1,1 +1,0 @@
-openssl dgst -ecdsa-with-SHA1 -verify ec-publickey.pem -signature ecdsa_signature.bin message.txt

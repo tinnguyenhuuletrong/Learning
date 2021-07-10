@@ -1,7 +1,0 @@
-overwrite: true
-schema: "http://graphql-engine:8080/v1/graphql"
-documents: null
-generates:
-  ./codeGen/schema.graphql:
-    plugins:
-      - "schema-ast"

@@ -1,8 +1,0 @@
-syntax = "proto3";
- 
-message AwesomeMessage {
-    string strField = 1; // becomes awesomeField
-    int32 intField = 2;
-    float floatField = 3;
-    bytes  bufferField = 4;
-}

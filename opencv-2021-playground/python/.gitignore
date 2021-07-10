@@ -1,7 +1,0 @@
-runner-env
-my_face.mp4
-*.pkl
-*.npy
-
-tmp
-__pycache__

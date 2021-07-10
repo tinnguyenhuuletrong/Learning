@@ -1,1 +1,0 @@
-openssl dgst -sha256 -sign privatekey.pem -out rsa_signature.bin message.txt

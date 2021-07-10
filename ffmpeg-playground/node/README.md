@@ -1,3 +1,0 @@
-## Requirement
-
-- Node 14+

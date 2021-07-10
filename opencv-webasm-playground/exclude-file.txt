@@ -1,7 +1,0 @@
-doc
-node_modules
-cert.pem
-key.pem
-exclude-file.txt
-.gitignore
-sync.sh

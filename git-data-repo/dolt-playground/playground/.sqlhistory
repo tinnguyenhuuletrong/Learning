@@ -1,2 +1,0 @@
-show tables;
-insert into state_populations values ('hanoi', 20);

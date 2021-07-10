@@ -1,1 +1,0 @@
-openssl dgst -sha256 -verify publickey.pem -signature rsa_signature.bin message.txt

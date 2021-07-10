@@ -1,1 +1,0 @@
-docker exec tools_kafka_1 sh /opt/kafka/bin/kafka-streams-application-reset.sh --application-id c1 --input-topics book_domain

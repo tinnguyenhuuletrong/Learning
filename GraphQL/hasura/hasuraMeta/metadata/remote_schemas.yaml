@@ -1,5 +1,0 @@
-- name: Dota2
-  definition:
-    url: https://api.stratz.com/graphql
-    timeout_seconds: 60
-  comment: ""
