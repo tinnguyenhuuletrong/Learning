@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "elliptic": "^6.4.1"
+    "elliptic": "^6.5.4"
   }
 }
