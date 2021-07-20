@@ -1,4 +1,7 @@
 trait Summary {
+  fn summarize_author(&self) -> String {
+    return String::from("unknown")
+  }
   fn summarize(&self) -> String;
 }
 
@@ -15,6 +18,7 @@ impl Summary for NewsArticle {
   }
 }
 
+#[derive(std::fmt::Debug)]
 struct Tweet {
   pub username: String,
   pub content: String,
@@ -26,6 +30,20 @@ impl Summary for Tweet {
   fn summarize(&self) -> String {
       format!("{}: {}", self.username, self.content)
   }
+
+  fn summarize_author(&self) -> String {
+    format!("@{}", self.username)
+  }
+}
+
+fn notify<T: Summary>(item: &T) {
+  println!("Breaking news! {}", item.summarize());
+}
+
+fn summary_debug<T>(item: &T) 
+  where T: Summary + std::fmt::Debug
+{
+  println!("Debug {:?}", item);
 }
 
 fn main() {
@@ -45,6 +63,14 @@ fn main() {
     content: String::from("nothing to see here!"),
   };
 
-  println!("1 new tweet: {}", tweet.summarize());
-  println!("1 new article: {}", new_art.summarize());
+  println!("1 new tweet: {} - {}", tweet.summarize(), tweet.summarize_author());
+  println!("1 new article: {} - {}", new_art.summarize(), new_art.summarize_author());
+
+  notify(&tweet);
+  notify(&new_art);
+
+  summary_debug(&tweet);
+
+  // NewsArticle: missing implement Debug
+  // summary_debug(&new_art);
 }
