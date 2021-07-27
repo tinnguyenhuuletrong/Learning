@@ -1,3 +1,4 @@
+use console::Style;
 use std::env;
 use std::process;
 
@@ -10,7 +11,8 @@ fn main() {
         eprintln!("{}", err);
         process::exit(1);
     });
-    println!("{:?}", config);
+    let cyan = Style::new().cyan();
+    println!("{:?}", cyan.apply_to(&config));
 
     if let Err(e) = lib::run(&config) {
         eprintln!("Error: {}", e);

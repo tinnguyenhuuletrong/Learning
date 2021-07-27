@@ -1,3 +1,4 @@
+use console::Style;
 use std::error::Error;
 use std::fs;
 
@@ -25,9 +26,12 @@ impl Config {
 
 pub fn run(config: &Config) -> Result<(), Box<dyn Error>> {
   let content = fs::read_to_string(&config.file_name)?;
-
+  let red = Style::new().red();
   for line in search(&config.search_term, &content) {
-    let line_to_print = line.replace(&config.search_term, &format!("*{}*", &config.search_term));
+    let line_to_print = line.replace(
+      &config.search_term,
+      &format!("{}", red.apply_to(&config.search_term)),
+    );
     println!("{}", line_to_print);
   }
 
