@@ -1,0 +1,11 @@
+{
+  "name": "node_native_opencv",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node-gyp rebuild"
+  },
+  "author": "",
+  "license": "ISC"
+}
