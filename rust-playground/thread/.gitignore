@@ -2,3 +2,5 @@ thread_0
 channel_0
 channel_1
 channel_2
+mutex
+atomic
