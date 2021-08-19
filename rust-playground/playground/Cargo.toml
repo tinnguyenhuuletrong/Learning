@@ -8,5 +8,7 @@ version = "0.1.0"
 [dependencies]
 async-std = "1.9.0"
 futures = "0.3.16"
+reqwest = {version = "*", features = ["json"]}
 rust-crypto = "0.2.36"
+serde = {version = "*", features = ["derive"]}
 tokio = {version = "1.10.0", features = ["full"]}
