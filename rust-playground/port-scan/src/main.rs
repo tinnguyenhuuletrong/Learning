@@ -72,18 +72,16 @@ async fn scan(target: IpAddr, concurency: usize, timeout_sec: u64, is_full: bool
         true => Box::new((1..=u16::MAX).into_iter()),
         false => Box::new(common_ports::MOST_COMMON_PORTS_1002.to_owned().into_iter()),
     };
-    
     stream::iter(ports)
-    .for_each_concurrent(concurency, |port| async move {
-        let timeout = Duration::from_secs(timeout_sec);
-        let socket_address = SocketAddr::new(target.clone(), port);
+        .for_each_concurrent(concurency, |port| async move {
+            let timeout = Duration::from_secs(timeout_sec);
+            let socket_address = SocketAddr::new(target.clone(), port);
 
-        if tokio::time::timeout(timeout, TcpStream::connect(&socket_address))
-            .await
-            .is_ok()
-        {
-            println!("{}", port);
-        }
-    })
-    .await;
+            let res = tokio::time::timeout(timeout, TcpStream::connect(&socket_address)).await;
+            // not timeout and TCPStream promise is_ok also
+            if res.is_ok() && res.unwrap().is_ok() {
+                println!("{}", port);
+            }
+        })
+        .await;
 }
