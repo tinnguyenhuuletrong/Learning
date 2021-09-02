@@ -1,0 +1,23 @@
+[package]
+edition = "2018"
+name = "async_learn"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "tokio_runner"
+path = "src/tokio_runner.rs"
+
+[[bin]]
+name = "mini_runner"
+path = "src/mini_runner.rs"
+
+[[bin]]
+name = "mini_runner2"
+path = "src/mini_runner2.rs"
+
+[dependencies]
+crossbeam = "*"
+futures = "*"
+tokio = {version = "*", features = ["full"]}
