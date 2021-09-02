@@ -46,11 +46,6 @@ struct Task {
   executor: channel::Sender<Arc<Task>>,
 }
 
-impl Task {
-  fn schedule(self: &Arc<Self>) {
-      self.executor.send(self.clone()).unwrap();
-  }
-}
 impl ArcWake for Task {
   fn wake(self: Arc<Self>) {
     self.schedule()
@@ -61,6 +56,10 @@ impl ArcWake for Task {
   }
 }
 impl Task {
+  fn schedule(self: &Arc<Self>) {
+      self.executor.send(self.clone()).unwrap();
+  }
+
   fn poll(self: Arc<Self>) -> Poll<()> {
       let waker = task::waker(self.clone());
       let mut cx = Context::from_waker(&waker);
