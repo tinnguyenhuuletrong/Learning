@@ -28,7 +28,9 @@ pub fn create(
     use crate::persistence::schema::{details::dsl::*, planets::dsl::*};
 
     diesel::insert_into(planets)
-        .values(new_planet);
+        .values(&new_planet)
+        .execute(conn)?;
+
     let created_planet: PlanetEntity = planets.find(sql("last_insert_rowid()")).get_result(conn)?;
     new_details_entity.planet_id = created_planet.id;
 

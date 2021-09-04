@@ -1,5 +1,8 @@
 mod common;
-use planets_service::persistence::{model::PlanetEntity, repo};
+use planets_service::persistence::{
+    model::{DetailsEntity, NewDetailsEntity, NewPlanetEntity, PlanetEntity},
+    repo,
+};
 
 #[test]
 fn query_get_all() -> Result<(), anyhow::Error> {
@@ -65,6 +68,47 @@ fn query_get_by_id() -> Result<(), anyhow::Error> {
             name: String::from("Mercury"),
             type_: String::from("TERRESTRIAL_PLANET")
         }
+    );
+    Ok(())
+}
+
+#[test]
+fn create_planet() -> Result<(), anyhow::Error> {
+    let conn = common::setup()?;
+    let res = repo::create(
+        NewPlanetEntity {
+            name: String::from("ALPHA"),
+            type_: String::from("GAS"),
+        },
+        NewDetailsEntity {
+            mean_radius: 1e8,
+            mass: 1e24,
+            population: None,
+            planet_id: 0,
+        },
+        &conn,
+    )?;
+    assert_eq!(
+        res,
+        PlanetEntity {
+            id: 9,
+            name: String::from("ALPHA"),
+            type_: String::from("GAS")
+        }
+    );
+
+    let res = repo::get_details(&[res.id], &conn)?;
+    println!("{:?}", res);
+
+    assert_eq!(
+        res,
+        Vec::from([DetailsEntity {
+            id: 9,
+            mean_radius: 1e8,
+            mass: 1e24,
+            population: None,
+            planet_id: 9
+        }])
     );
     Ok(())
 }
