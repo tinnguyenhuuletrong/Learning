@@ -8,10 +8,13 @@ use async_graphql::{
     Context, EmptySubscription, Schema,
 };
 use async_graphql_actix_web::{Request, Response, WSSubscription};
+use event_hub::EventHub;
+use graphql::Subscription;
 use persistence::connection::{Conn, DbPool};
 
 #[macro_use]
 extern crate diesel;
+mod event_hub;
 mod graphql;
 pub mod persistence;
 
@@ -22,22 +25,26 @@ pub fn get_conn_from_ctx(ctx: &Context<'_>) -> Conn {
         .expect("Can't get DB connection")
 }
 
-pub fn create_schema_with_context(pool: DbPool) -> Schema<Query, Mutation, EmptySubscription> {
+pub fn get_event_from_ctx<'a>(ctx: &'a Context<'_>) -> &'a EventHub {
+    ctx.data::<Arc<EventHub>>()
+        .expect("Can't get Event")
+        .as_ref()
+}
+
+pub fn create_schema_with_context(pool: DbPool) -> Schema<Query, Mutation, Subscription> {
     let arc_pool = Arc::new(pool);
     let cloned_pool = Arc::clone(&arc_pool);
     let details_data_loader =
         DataLoader::new(DetailsLoader { pool: cloned_pool }).max_batch_size(10);
+    let arc_event_hub = Arc::new(EventHub::new());
 
     // let kafka_consumer_counter = Mutex::new(0);
 
-    Schema::build(Query, Mutation, EmptySubscription)
+    Schema::build(Query, Mutation, Subscription)
         // limits are commented out, because otherwise introspection query won't work
-        // .limit_depth(3)
-        // .limit_complexity(15)
         .data(arc_pool)
         .data(details_data_loader)
-        // .data(kafka::create_producer())
-        // .data(kafka_consumer_counter)
+        .data(arc_event_hub)
         .finish()
 }
 pub fn configure_service(cfg: &mut web::ServiceConfig) {

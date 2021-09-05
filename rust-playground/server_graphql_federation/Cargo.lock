@@ -1636,6 +1636,7 @@ dependencies = [
  "actix-web",
  "actix-web-actors",
  "anyhow",
+ "async-channel",
  "async-graphql",
  "async-graphql-actix-web",
  "diesel",
@@ -1646,6 +1647,7 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "tokio",
 ]
 
 [[package]]

@@ -3,21 +3,22 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use async_graphql::dataloader::{DataLoader, Loader};
+use async_graphql::futures_util::Stream;
 use async_graphql::ID;
 use async_graphql::*;
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
 
-use crate::get_conn_from_ctx;
 use crate::persistence::connection::{Conn, DbPool};
 use crate::persistence::model::{DetailsEntity, NewDetailsEntity, NewPlanetEntity, PlanetEntity};
 use crate::persistence::repo;
+use crate::{get_conn_from_ctx, get_event_from_ctx};
 
 pub struct Query;
 pub struct Mutation;
 
 pub struct Subscription;
-pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
+pub type AppSchema = Schema<Query, Mutation, Subscription>;
 
 //------------------------------------------------------------------//
 //  Query
@@ -60,7 +61,6 @@ fn find_planet_by_id_internal(ctx: &Context<'_>, id: ID) -> Option<Planet> {
 #[Object]
 impl Mutation {
     async fn create_planet(&self, ctx: &Context<'_>, planet: PlanetInput) -> Result<Planet, Error> {
-        println!("hit");
         let new_planet = NewPlanetEntity {
             name: planet.name,
             type_: planet.type_.to_string(),
@@ -77,14 +77,35 @@ impl Mutation {
         let created_planet_entity =
             repo::create(new_planet, new_planet_details, &get_conn_from_ctx(ctx))?;
 
-        // let producer = ctx
-        //     .data::<FutureProducer>()
-        //     .expect("Can't get Kafka producer");
-        // let message = serde_json::to_string(&Planet::from(&created_planet_entity))
-        //     .expect("Can't serialize a planet");
-        // kafka::send_message(producer, message).await;
+        let event_hub = get_event_from_ctx(ctx);
+        let message = serde_json::to_value(&Planet::from(&created_planet_entity))?;
+        event_hub.send(message)?;
 
         Ok(Planet::from(&created_planet_entity))
+    }
+}
+
+//------------------------------------------------------------------//
+//  Subscription
+//------------------------------------------------------------------//
+
+#[Subscription]
+impl Subscription {
+    async fn latest_planet<'ctx>(
+        &self,
+        ctx: &'ctx Context<'_>,
+    ) -> impl Stream<Item = Planet> + 'ctx {
+        let event_hub = get_event_from_ctx(ctx);
+        let recv = event_hub.clone_recevier();
+
+        async_stream::stream! {
+             while let value = recv.recv().await {
+                yield match value {
+                    Ok(message) => serde_json::from_value(message).expect("Can't deserialize a planet"),
+                    Err(e) => panic!("Error while Kafka message processing: {}", e),
+                };
+            }
+        }
     }
 }
 
