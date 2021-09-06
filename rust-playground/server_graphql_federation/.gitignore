@@ -2,3 +2,4 @@ target
 planets-service/target
 planets-service/*.sqlite
 satellites-service/*.sqlite
+gateway/node_modules
