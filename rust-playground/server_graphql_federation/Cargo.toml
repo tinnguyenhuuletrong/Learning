@@ -1,6 +1,6 @@
 [workspace]
 members = [
   # "auth-service",
-  "planets-service", # "satellites-service",
-  # "common-utils",
+  "planets-service",
+  "satellites-service", # "common-utils",
 ]
