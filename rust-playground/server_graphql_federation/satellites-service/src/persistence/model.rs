@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 
 use crate::persistence::schema::satellites;
 
-#[derive(Identifiable, Queryable)]
+#[derive(Identifiable, Queryable, Debug, PartialEq)]
 #[table_name = "satellites"]
 pub struct SatelliteEntity {
     pub id: i32,
