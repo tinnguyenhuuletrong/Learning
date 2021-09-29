@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tensorflow Js - Face align</title>
+    <title>Tensorflow Js - DeepID Encode</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
@@ -33,30 +33,81 @@
       .outputPanel {
         display: flex;
         flex-direction: row;
+        align-items: center;
       }
     </style>
   </head>
   <body>
     <section class="section">
       <div class="container">
-        <h1 class="title">Face align</h1>
+        <h1 class="title">Face Encode</h1>
+        <p class="content subtitle is-5">
+          It is using pre-train model provided by
+          <a href="https://viso.ai/computer-vision/deepface/" target="_blank"
+            >DeepFace</a
+          >.
+        </p>
+        <ul class="content mb-3">
+          <li>
+            Face Detector:
+            <a
+              href="https://github.com/tensorflow/tfjs-models/tree/master/blazeface"
+              target="_blank"
+              >Blazeface</a
+            >
+          </li>
+          <li>
+            Face Encoder:
+            <a
+              href="https://github.com/serengil/deepface/blob/97d0a7d1dfaa055ea2b38117ba837bd22c691a7c/deepface/basemodels/DeepID.py"
+              target="_blank"
+              >DeepID</a
+            >
+          </li>
+        </ul>
+
         <div class="layout">
           <div class="videoGroup">
             <video id="cameraInput" class="cameraInput" autoplay></video>
-            <canvas id="imgOutput"></canvas>
           </div>
           <button id="btnCapture" class="button mt-1">Capture</button>
+
+          <h4 class="title is-4 mt-3">Middle steps</h4>
           <div class="outputPanel box mt-3">
-            <figure class="image">
+            <canvas id="imgOutput"></canvas>
+
+            <figure class="image ml-1">
               <img
                 id="debug"
                 src="https://bulma.io/images/placeholders/128x128.png"
               />
             </figure>
+
+            <figure class="image ml-1">
+              <img
+                id="debug1"
+                src="https://bulma.io/images/placeholders/128x128.png"
+              />
+            </figure>
+          </div>
+
+          <h4 class="title is-4 mt-3">Encode vector 160</h4>
+          <div class="outputEncode box mt-3">
+            <pre id="encode"></pre>
           </div>
         </div>
       </div>
     </section>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong>2021</strong> by
+          <a href="https://github.com/tinnguyenhuuletrong">TTin</a>. The source
+          code is licensed
+          <a href="http://opensource.org/licenses/mit-license.php">MIT</a>
+        </p>
+      </div>
+    </footer>
 
     <script type="module">
       let blazeFaceModel, depthIdModel;
@@ -187,15 +238,58 @@
           // create canvas and rotate img
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
-          canvas.width = itm.img.width * 1.1;
-          canvas.height = itm.img.height * 1.1;
+          canvas.width = itm.img.width;
+          canvas.height = itm.img.height;
+          ctx.fillStyle = "rgb(0, 0, 0)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
           const bitmap = await createImageBitmap(itm.img);
           ctx.translate(canvas.width / 2, canvas.height / 2);
           ctx.rotate((angle * Math.PI) / 180);
-          ctx.drawImage(bitmap, -canvas.width / 2, -canvas.height / 2);
+          ctx.drawImage(
+            bitmap,
+            0,
+            0,
+            itm.img.width,
+            itm.img.height,
+            -canvas.width / 2,
+            -canvas.height / 2,
+            canvas.width,
+            canvas.height
+          );
 
-          itm.alignImgSrc = canvas.toDataURL("image/png");
+          itm.alignImgSrc = canvas.toDataURL("image/jpg");
+          itm.alignImgData = ctx.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
         }
+      }
+
+      async function resizeImageData(img, targetSize) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = targetSize[0];
+        canvas.height = targetSize[1];
+        const bitmap = await createImageBitmap(img);
+
+        ctx.drawImage(
+          bitmap,
+          0,
+          0,
+          img.width,
+          img.height,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        return [
+          ctx.getImageData(0, 0, canvas.width, canvas.height),
+          canvas.toDataURL("image/jpg"),
+        ];
       }
 
       function bindInput() {
@@ -221,22 +315,46 @@
         await alignProcess(predictions);
         drawFaces(ctx, predictions);
         console.log(predictions);
-        document.getElementById("debug").src = predictions[0].alignImgSrc;
+
+        const selectedItm = predictions[0];
+
+        // DepthID input shape [null, 55, 47, 3]
+        const targetSize = [47, 55];
+        const [inpImageData, inpImageSrc] = await resizeImageData(
+          selectedItm.alignImgData,
+          targetSize
+        );
+        document.getElementById("debug").src = selectedItm.alignImgSrc;
+        document.getElementById("debug1").src = inpImageSrc;
+
+        const inp = tf.browser.fromPixels(inpImageData).expandDims(0);
+        window.inp = inp;
+
+        const res = await depthIdModel.predict(inp);
+        window.res = res;
+        document.getElementById("encode").innerText = JSON.stringify(
+          res.arraySync()[0],
+          null,
+          2
+        );
       }
 
       async function main() {
         await tf.setBackend("wasm");
 
         console.log("main start");
-        await requestCam();
 
         // Load the model.
         blazeFaceModel = await blazeface.load();
         console.log("blazeFaceModel end", blazeFaceModel);
 
-        // depthIdModel = await tf.loadLayersModel("./tsjs_deepid/model.json");
-        // console.log("depthIdModel end", blazeFaceModel);
+        depthIdModel = await tf.loadLayersModel(
+          "./assets/deepID_tsfjs/model.json"
+        );
+        window.depthIdModel = depthIdModel;
+        console.log("depthIdModel end", depthIdModel);
 
+        await requestCam();
         bindInput();
       }
       main();
