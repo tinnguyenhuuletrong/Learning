@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tensorflow Js - Face align</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cash/8.1.0/cash.min.js"></script>
+    <!-- Import @tensorflow/tfjs or @tensorflow/tfjs-core -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- Adds the WASM backend to the global backend registry -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script>
+
+    <!-- Import blazeface model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+    <style>
+      .layout {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
+      #imgOutput {
+        background-color: antiquewhite;
+        margin-left: 0.5rem;
+      }
+      .videoGroup {
+        display: flex;
+        align-items: center;
+      }
+      .outputPanel {
+        display: flex;
+        flex-direction: row;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <h1 class="title">Face align</h1>
+        <div class="layout">
+          <div class="videoGroup">
+            <video id="cameraInput" class="cameraInput" autoplay></video>
+            <canvas id="imgOutput"></canvas>
+          </div>
+          <button id="btnCapture" class="button mt-1">Capture</button>
+          <div class="outputPanel box mt-3">
+            <figure class="image">
+              <img
+                id="debug"
+                src="https://bulma.io/images/placeholders/128x128.png"
+              />
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      let blazeFaceModel, depthIdModel;
+
+      async function requestCam(params) {
+        try {
+          const videoStream = await window.navigator.mediaDevices.getUserMedia({
+            video: { width: 400 },
+          });
+          const video = document.getElementById("cameraInput");
+          video.srcObject = videoStream;
+          video.onloadedmetadata = function (e, meta) {
+            video.width = video.videoWidth;
+            video.height = video.videoHeight;
+            video.play();
+          };
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      function drawFaces(ctx, predictions) {
+        ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+        if (predictions.length > 0) {
+          /*
+          `predictions` is an array of objects describing each detected face, for example:
+
+          [
+            {
+              topLeft: [232.28, 145.26],
+              bottomRight: [449.75, 308.36],
+              probability: [0.998],
+              landmarks: [
+                [295.13, 177.64], // right eye
+                [382.32, 175.56], // left eye
+                [341.18, 205.03], // nose
+                [345.12, 250.61], // mouth
+                [252.76, 211.37], // right ear
+                [431.20, 204.93] // left ear
+              ]
+            }
+          ]
+          */
+
+          for (let i = 0; i < predictions.length; i++) {
+            const start = predictions[i].topLeft;
+            const end = predictions[i].bottomRight;
+            const size = [end[0] - start[0], end[1] - start[1]];
+            ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+            ctx.fillRect(start[0], start[1], size[0], size[1]);
+
+            const landmarks = predictions[i].landmarks;
+            ctx.fillStyle = "blue";
+            for (let j = 0; j < landmarks.length; j++) {
+              const x = landmarks[j][0];
+              const y = landmarks[j][1];
+              ctx.fillRect(x, y, 5, 5);
+            }
+          }
+        }
+      }
+
+      function extractFaces(ctx, predictions) {
+        for (let i = 0; i < predictions.length; i++) {
+          const start = predictions[i].topLeft;
+          const end = predictions[i].bottomRight;
+          const size = [end[0] - start[0], end[1] - start[1]];
+
+          // Do some padding
+          const imgData = ctx.getImageData(
+            start[0],
+            start[1],
+            size[0],
+            size[1]
+          );
+          predictions[i].img = imgData;
+        }
+      }
+
+      function distance(vecA, vecB) {
+        const poSum = vecA
+          .map((x, i) => Math.abs(x - vecB[i]) ** 2) // square the difference
+          .reduce((sum, now) => sum + now);
+
+        return poSum ** (1 / 2);
+      }
+
+      function align_face(left_eye, right_eye) {
+        const [left_eye_x, left_eye_y] = left_eye;
+        const [right_eye_x, right_eye_y] = right_eye;
+
+        // find rotation direction
+        let point_3rd, direction;
+
+        if (left_eye_y > right_eye_y) {
+          point_3rd = [right_eye_x, left_eye_y];
+          direction = -1; // rotate same direction to clock
+        } else {
+          point_3rd = [left_eye_x, right_eye_y];
+          direction = 1; //rotate inverse direction of clock
+        }
+
+        // find length of triangle edges
+        const a = distance(left_eye, point_3rd);
+        const b = distance(right_eye, point_3rd);
+        const c = distance(right_eye, left_eye);
+
+        //apply cosine rule
+        if (b != 0 && c != 0) {
+          const cos_a = (b * b + c * c - a * a) / (2 * b * c);
+          let angle = Math.acos(cos_a); //angle in radian
+          angle = (angle * 180) / Math.PI; //radian to degree
+
+          if (direction === -1) angle = 90 - angle;
+
+          return direction * angle;
+        }
+        return 0;
+      }
+
+      async function alignProcess(predictions) {
+        for (let i = 0; i < predictions.length; i++) {
+          const itm = predictions[i];
+          const leftEye = itm.landmarks[1];
+          const rightEye = itm.landmarks[0];
+          const angle = align_face(leftEye, rightEye);
+
+          // create canvas and rotate img
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = itm.img.width * 1.1;
+          canvas.height = itm.img.height * 1.1;
+          const bitmap = await createImageBitmap(itm.img);
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((angle * Math.PI) / 180);
+          ctx.drawImage(bitmap, -canvas.width / 2, -canvas.height / 2);
+
+          itm.alignImgSrc = canvas.toDataURL("image/png");
+        }
+      }
+
+      function bindInput() {
+        $("#btnCapture").on("click", doCapture);
+      }
+
+      async function doCapture() {
+        const video = document.getElementById("cameraInput");
+        const canvas = document.getElementById("imgOutput");
+
+        canvas.width = video.width;
+        canvas.height = video.height;
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(video, 0, 0, video.width, video.height);
+
+        const returnTensors = false;
+        const predictions = await blazeFaceModel.estimateFaces(
+          video,
+          returnTensors
+        );
+        extractFaces(ctx, predictions);
+        await alignProcess(predictions);
+        drawFaces(ctx, predictions);
+        console.log(predictions);
+        document.getElementById("debug").src = predictions[0].alignImgSrc;
+      }
+
+      async function main() {
+        await tf.setBackend("wasm");
+
+        console.log("main start");
+        await requestCam();
+
+        // Load the model.
+        blazeFaceModel = await blazeface.load();
+        console.log("blazeFaceModel end", blazeFaceModel);
+
+        // depthIdModel = await tf.loadLayersModel("./tsjs_deepid/model.json");
+        // console.log("depthIdModel end", blazeFaceModel);
+
+        bindInput();
+      }
+      main();
+    </script>
+  </body>
+</html>
