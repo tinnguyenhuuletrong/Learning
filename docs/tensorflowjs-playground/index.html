@@ -72,6 +72,11 @@
           </div>
           <button id="btnCapture" class="button mt-1">Capture</button>
 
+          <h5 class="title is-6 mt-3">
+            Distance last 2 pics:
+            <span id="last_2_distance"></span>
+          </h5>
+
           <h4 class="title is-4 mt-3">Middle steps</h4>
           <div class="outputPanel box mt-3">
             <canvas id="imgOutput"></canvas>
@@ -110,7 +115,15 @@
     </footer>
 
     <script type="module">
-      let blazeFaceModel, depthIdModel;
+      let blazeFaceModel, activeModel;
+
+      // DepthID input shape [null, 55, 47, 3]
+      const MODEL_PATH = "./assets/deepID_tsfjs/model.json";
+      const targetSize = [47, 55];
+
+      // VGG input shape [null, 224, 224, 3]
+      // const MODEL_PATH = "./assets/vgg_tsfjs/model.json";
+      // const targetSize = [224, 224];
 
       async function requestCam(params) {
         try {
@@ -317,9 +330,6 @@
         console.log(predictions);
 
         const selectedItm = predictions[0];
-
-        // DepthID input shape [null, 55, 47, 3]
-        const targetSize = [47, 55];
         const [inpImageData, inpImageSrc] = await resizeImageData(
           selectedItm.alignImgData,
           targetSize
@@ -327,11 +337,23 @@
         document.getElementById("debug").src = selectedItm.alignImgSrc;
         document.getElementById("debug1").src = inpImageSrc;
 
-        const inp = tf.browser.fromPixels(inpImageData).expandDims(0);
+        const inp = tf.browser
+          .fromPixels(inpImageData)
+          .mul(tf.scalar(1 / 255))
+          .expandDims(0);
         window.inp = inp;
 
-        const res = await depthIdModel.predict(inp);
-        window.res = res;
+        const res = await activeModel.predict(inp);
+        window.res = res.arraySync()[0];
+        window.hisResults.unshift(window.res);
+
+        if (window.hisResults.length >= 2) {
+          document.getElementById("last_2_distance").innerText = distance(
+            window.hisResults[0],
+            window.hisResults[1]
+          );
+        }
+
         document.getElementById("encode").innerText = JSON.stringify(
           res.arraySync()[0],
           null,
@@ -348,15 +370,17 @@
         blazeFaceModel = await blazeface.load();
         console.log("blazeFaceModel end", blazeFaceModel);
 
-        depthIdModel = await tf.loadLayersModel(
-          "./assets/deepID_tsfjs/model.json"
-        );
-        window.depthIdModel = depthIdModel;
-        console.log("depthIdModel end", depthIdModel);
+        activeModel = await tf.loadLayersModel(MODEL_PATH);
+        window.activeModel = activeModel;
+        console.log("activeModel end", activeModel);
 
         await requestCam();
         bindInput();
       }
+
+      window.hisResults = [];
+      window.eulerDistance = distance;
+
       main();
     </script>
   </body>
