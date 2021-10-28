@@ -80,66 +80,31 @@ async function findAnswer2() {
 async function test() {
   const abi = [
     {
-      constant: false,
       inputs: [
         {
-          name: "n",
-          type: "uint8",
+          internalType: "address payable",
+          name: "_addr",
+          type: "address",
         },
       ],
-      name: "guess",
+      name: "proxyGuess",
       outputs: [],
-      payable: true,
       stateMutability: "payable",
       type: "function",
     },
-    {
-      constant: true,
-      inputs: [],
-      name: "isComplete",
-      outputs: [
-        {
-          name: "",
-          type: "bool",
-        },
-      ],
-      payable: false,
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: false,
-          name: "guess",
-          type: "uint8",
-        },
-        {
-          indexed: false,
-          name: "answer",
-          type: "uint8",
-        },
-      ],
-      name: "Log",
-      type: "event",
-    },
   ];
 
+  // Proxy ctx
   const ctx = new web3.eth.Contract(
     abi,
-    "0x244CD9c888C03C26c41f58C851d53cEff47d224E"
+    "0x27ecF58B12e45dDa805711E8C207a954Eb5a557D"
   );
+  const target = "0x1a17C986B6FCE090c4F11fB8E7DcC904dBc133b2";
 
-  const answer2 = await findAnswer2();
-  const answer = await findAnswer();
-  console.log({ answer, answer2 });
-
-  const res = await ctx.methods.guess(answer).send({
+  const res = await ctx.methods.proxyGuess(target).send({
     from: account.address,
-    value: web3.utils.toWei("0.000001", "ether"),
-    gasLimit: 21204 * 2,
-    // gasPrice: web3.utils.toWei("0.0001", "ether"),
+    value: web3.utils.toWei("1", "ether"),
+    gasLimit: 21204 * 6,
   });
   console.log(res);
 }

