@@ -3,4 +3,6 @@ random_array.npy
 __pycache__
 mp_env
 
-mediapipe/data/one
+mediapipe/data/*
+mediapipe/log
+mediapipe/*.h5
