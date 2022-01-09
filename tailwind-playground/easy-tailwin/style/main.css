@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.card {
+  @apply bg-white rounded-lg shadow border overflow-hidden relative hover:shadow-lg cursor-pointer;
+}
+
+.badge {
+  @apply bg-amber-50 text-gray-400 rounded-full 
+  p-2 mt-2 ml-2
+  absolute top-0 left-0 
+  text-sm font-bold uppercase;
+}
+
+.button {
+  @apply p-2 md:shadow md:rounded-full 
+  md:border-2  md:border-pink-200  
+  md:hover:border-pink-50
+   text-xs font-bold tracking-wider
+   cursor-pointer
+   transition ease-in duration-200;
+}
+
+.navItem {
+  @apply cursor-pointer hover:underline hover:text-gray-800 py-1 px-4 border-r-4 border-transparent;
+}
+
+.navItemActive {
+  @apply border-r-4 border-red-200;
+}
