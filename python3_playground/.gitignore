@@ -6,5 +6,4 @@ mp_env
 mediapipe/data/*
 mediapipe/log
 mediapipe/*.h5
-mediapipe/model/*
 mediapipe/data.zip
