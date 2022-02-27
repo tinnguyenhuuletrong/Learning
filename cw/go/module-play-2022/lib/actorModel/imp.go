@@ -1,6 +1,7 @@
 package actor_system
 
 import (
+	"context"
 	"sync"
 
 	"github.com/ian-kent/go-log/log"
@@ -16,8 +17,10 @@ type IActor interface {
 	Stop()
 }
 
+type ContextActorId struct{}
+
 type Task interface {
-	Execute()
+	Execute(context.Context)
 }
 
 type IActorSystem interface {
@@ -144,8 +147,12 @@ func (actor *TaskActor) Start() {
 	defer actor.wg.Done()
 	actor.wg.Add(1)
 	log.Debug("Actor: %d. start", actor.id)
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, ContextActorId{}, actor.id)
+
 	for task := range actor.tasks {
-		task.Execute()
+		task.Execute(ctx)
 	}
 	log.Debug("Actor: %d. stop", actor.id)
 	actor.closeSig <- true

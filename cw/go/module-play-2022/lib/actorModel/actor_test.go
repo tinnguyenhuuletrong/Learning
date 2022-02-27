@@ -1,6 +1,7 @@
 package actor_system
 
 import (
+	"context"
 	"sync"
 	"testing"
 	"time"
@@ -13,8 +14,8 @@ type TestTask struct {
 	delay time.Duration
 }
 
-func (task *TestTask) Execute() {
-	log.Debug("Exe task %d", task.id)
+func (task *TestTask) Execute(ctx context.Context) {
+	log.Debug("Exe task %d by actorId %d", task.id, ctx.Value(ContextActorId{}))
 	<-time.After(task.delay)
 }
 
