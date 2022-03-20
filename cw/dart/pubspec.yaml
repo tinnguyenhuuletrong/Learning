@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   http: ^0.13.4
+  get_server: ^1.1.1
 
 dev_dependencies:
   lints: ^1.0.0
