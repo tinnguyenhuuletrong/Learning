@@ -14,8 +14,8 @@ void main() async {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink)),
     initialRoute: "/",
     getPages: [
-      GetPage(name: "/", page: () => Home()),
-      GetPage(name: "/detail/:id", page: () => DetailPage()),
+      GetPage(name: "/", page: () => const Home()),
+      GetPage(name: "/detail/:id", page: () => const DetailPage()),
     ],
   ));
 }
