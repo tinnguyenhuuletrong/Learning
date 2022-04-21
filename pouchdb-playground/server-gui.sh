@@ -1,0 +1,1 @@
+npx pouchdb-server -d ./_db
