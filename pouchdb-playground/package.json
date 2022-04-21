@@ -12,6 +12,6 @@
     "express": "^4.17.1",
     "express-pouchdb": "^4.2.0",
     "lodash": "^4.17.15",
-    "pouchdb": "^7.1.1"
+    "pouchdb": "^7.3.0"
   }
 }
