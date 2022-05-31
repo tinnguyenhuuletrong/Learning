@@ -159,12 +159,10 @@ export default function WalletConnectBody() {
       {connector?.state === "connected" && (
         <>
           <label className="block">
-            <span className="block text-sm font-medium text-slate-700">
-              Message:
-            </span>
+            <span className=" text-slate-700 my-2 mr-4">Message:</span>
             <input
               type="text"
-              className="form-input rounded text-pink-500"
+              className="form-input rounded-full text-purple-500 border-purple-200 drop-shadow-md"
               value={inpMessage}
               onChange={(v) => setIntMessage(v.target.value)}
             />
@@ -175,9 +173,22 @@ export default function WalletConnectBody() {
             <span className=" font-semibold">{inpMessage}</span>
           </p>
 
-          <div className=" flex justify-end">
+          <div className=" flex justify-end space-x-3">
             <button
-              className="peer bg-blue-200 p-2 rounded font-medium"
+              type="submit"
+              className="
+                
+                transition
+                px-6 p-2 
+                rounded-full font-medium  
+                drop-shadow-md bg-blue-200 
+                hover:bg-blue-400 
+                hover:cursor-pointer
+                focus:ring focus:ring-blue-300
+                
+                disabled:opacity-75
+                disabled:bg-gray-300
+              "
               disabled={!inpMessage}
               onClick={onSign}
             >
@@ -185,7 +196,16 @@ export default function WalletConnectBody() {
             </button>
 
             <button
-              className="peer bg-pink-200 p-2 rounded font-medium ml-3 "
+              type="reset"
+              className="
+                transition
+                px-6 p-2 
+                rounded-full font-medium  
+                drop-shadow-md bg-pink-200 
+                hover:bg-pink-400 
+                hover:cursor-pointer
+                focus:ring focus:ring-pink-300
+              "
               onClick={onReset}
             >
               Reset
@@ -194,7 +214,8 @@ export default function WalletConnectBody() {
         </>
       )}
       <p>
-        Result: <span className="font-bold uppercase break-all">{signRes}</span>
+        Result:{" "}
+        <span className="font-bold uppercase break-all">{signRes || "-"}</span>
       </p>
     </>
   );

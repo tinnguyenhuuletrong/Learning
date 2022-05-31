@@ -22,7 +22,9 @@ export default function Layout({
         className={`absolute inset-0 bg-[url(/public/imgs/grid.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]`}
       ></div>
       <div
-        className="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 
+        className="relative  px-6 pt-10 pb-8 shadow-xl ring-2 ring-gray-900/5 
+        bg-white/30
+        backdrop-blur-sm
       sm:mx-auto 
       sm:max-w-lg 
       sm:rounded-lg 
