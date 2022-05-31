@@ -9,6 +9,7 @@ import rollupNodePolyFill from "rollup-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "https://tinnguyenhuuletrong.github.io/Learning/walletconnect-playground",
   plugins: [react()],
   optimizeDeps: {
     esbuildOptions: {
