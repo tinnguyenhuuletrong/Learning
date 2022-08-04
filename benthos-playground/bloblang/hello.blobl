@@ -1,0 +1,3 @@
+root = this
+root.hello = "world"
+root.yob = now().ts_strftime("%Y").number() - this.age

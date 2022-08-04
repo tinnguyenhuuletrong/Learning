@@ -1,0 +1,113 @@
+http:
+  enabled: true
+  address: 0.0.0.0:4195
+  root_path: /benthos
+  debug_endpoints: false
+  cert_file: ""
+  key_file: ""
+  cors:
+    enabled: false
+    allowed_origins: []
+  basic_auth:
+    enabled: false
+    realm: restricted
+    username: ""
+    password_hash: ""
+    algorithm: sha256
+    salt: ""
+
+# --------------
+# Single input
+# input:
+#   label: "standalone_terminal"
+#   stdin:
+#     codec: lines
+#     max_buffer: 1000000
+
+# --------------
+# Broker input
+input:
+  label: "broker"
+  broker:
+    inputs:
+      - stdin:
+          codec: lines
+          max_buffer: 1000000
+
+      - http_server:
+          address: ""
+          path: /broker/input
+          ws_path: /broker/ws
+          allowed_verbs:
+            - POST
+          timeout: 5s
+          sync_response:
+            status: "200"
+
+buffer:
+  none: {}
+pipeline:
+  threads: -1
+  processors:
+    - label: "simple_processor"
+      bloblang: |
+        root = {
+          "id": uuid_v4(),
+          "data": content().string(),
+          "_t": now(),
+          "_meta": meta()
+        }
+
+# --------------
+# Single output
+# output:
+#   label: "terminal_output"
+#   stdout:
+#     codec: lines
+
+# --------------
+# Broker output
+output:
+  label: "broker_output"
+  broker:
+    pattern: fan_out
+    outputs:
+      - stdout:
+          codec: lines
+
+      # Discard in case not metadata 
+      #   stdin source
+      - sync_response: {}
+        processors:
+          - bloblang: | 
+              root = if meta().keys().length() != 0 { this.id } else { deleted() }
+# Monitoring
+logger:
+  level: INFO
+  format: logfmt
+  add_timestamp: false
+  timestamp_name: time
+  static_fields:
+    '@service': benthos
+  file:
+    path: ""
+    rotate: false
+    rotate_max_age_days: 0
+metrics:
+  prometheus:
+    use_histogram_timing: false
+    histogram_buckets: []
+    add_process_metrics: false
+    add_go_metrics: false
+    push_url: ""
+    push_interval: ""
+    push_job_name: benthos_push
+    push_basic_auth:
+      username: ""
+      password: ""
+    file_output_path: ""
+  mapping: ""
+tracer:
+  none: {}
+shutdown_timeout: 5s
+
