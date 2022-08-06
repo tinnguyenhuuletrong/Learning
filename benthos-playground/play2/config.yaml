@@ -1,0 +1,101 @@
+http:
+  enabled: true
+  address: 0.0.0.0:4195
+  root_path: /benthos
+  debug_endpoints: false
+  cert_file: ""
+  key_file: ""
+  cors:
+    enabled: false
+    allowed_origins: []
+  basic_auth:
+    enabled: false
+    realm: restricted
+    username: ""
+    password_hash: ""
+    algorithm: sha256
+    salt: ""
+input:
+  label: "stdin_input"
+  stdin:
+    codec: lines
+    max_buffer: 1000000
+buffer:
+  none: {}
+
+pipeline:
+  threads: -1
+  processors:
+    # Capture data <- content()
+    - bloblang: |
+        root.data = content().string()
+        
+    - branch:
+        # Map new context for processor
+        request_map: |
+          root = {}
+        processors:
+          - cache:
+              resource: cache_db
+              operator: get
+              key: 'seqId'
+          - catch:
+             - bloblang: '0'
+
+        # Map from child context -> root
+        result_map: |
+          # root.prevId = this
+          #  OR
+          root.prevId = content().number()
+
+    # Assign sequenceId
+    - bloblang: |
+        root = this
+        root.seqId = this.prevId + 1
+        root.prevId = deleted()
+
+    # Update cache <- seqId
+    - cache:
+        resource: cache_db
+        operator: set
+        key: 'seqId'
+        value: '${! json().seqId | 0 }'
+
+output:
+  label: ""
+  stdout:
+    codec: lines
+
+logger:
+  level: INFO
+  format: logfmt
+  add_timestamp: false
+  timestamp_name: time
+  static_fields:
+    '@service': benthos
+  file:
+    path: ""
+    rotate: false
+    rotate_max_age_days: 0
+metrics:
+  prometheus:
+    use_histogram_timing: false
+    histogram_buckets: []
+    add_process_metrics: false
+    add_go_metrics: false
+    push_url: ""
+    push_interval: ""
+    push_job_name: benthos_push
+    push_basic_auth:
+      username: ""
+      password: ""
+    file_output_path: ""
+  mapping: ""
+tracer:
+  none: {}
+shutdown_timeout: 20s
+
+cache_resources:
+  - label: cache_db
+    file:
+      directory: "play2"

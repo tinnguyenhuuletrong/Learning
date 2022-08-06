@@ -36,3 +36,12 @@ benthos create stdin/bloblang/stdout > config.yaml
 
 benthos -c ./config.yaml
 ```
+
+## Benthos play 2
+
+- Play with cache, branching, children context
+
+``` sh
+cd play2
+benthos -c ./config.yaml
+```
