@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "packages/libs/rs-wasm-bind",
     "packages/libs/rs-node-bind",
     "packages/app/rs-play"
 ]
