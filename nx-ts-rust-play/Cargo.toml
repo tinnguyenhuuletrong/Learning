@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "packages/libs/rs-node-bind",
+    "packages/app/rs-play"
+]

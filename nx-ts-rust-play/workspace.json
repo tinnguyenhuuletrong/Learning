@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "app-cli-play": "packages/app/cli-play",
+    "rs_node_bind": "packages/libs/rs-node-bind",
+    "rs_play": "packages/app/rs-play",
+    "_artifacts": "packages/_artifacts"
+  }
+}

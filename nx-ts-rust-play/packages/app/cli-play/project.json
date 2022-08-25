@@ -1,0 +1,69 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/app/cli-play/src",
+  "projectType": "application",
+  "implicitDependencies": [
+    "_artifacts"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/app/cli-play",
+        "main": "packages/app/cli-play/src/main.ts",
+        "tsConfig": "packages/app/cli-play/tsconfig.app.json",
+        "assets": [
+          "packages/app/cli-play/src/assets"
+        ],
+        "webpackConfig": "packages/app/cli-play/webpack.config.js"
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/app/cli-play/src/environments/environment.ts",
+              "with": "packages/app/cli-play/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "dependsOn": [
+        "^build"
+      ],
+      "options": {
+        "buildTarget": "app-cli-play:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/app/cli-play/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/app/cli-play"
+      ],
+      "options": {
+        "jestConfig": "packages/app/cli-play/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
