@@ -12,6 +12,7 @@
       "options": {
         "commands": [
           "wasm-pack build",
+          "rm -rf ../../_artifacts/assets/rs-wasm/",
           "mv -f ./pkg/ ../../_artifacts/assets/rs-wasm/"
         ],
         "parallel": false,

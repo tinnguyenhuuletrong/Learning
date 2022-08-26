@@ -4,6 +4,7 @@
   "projects": {
     "_artifacts": "packages/_artifacts",
     "app-cli-play": "packages/app/cli-play",
+    "app-web-play": "packages/app/web-play",
     "rs_node_bind": "packages/libs/rs-node-bind",
     "rs_play": "packages/app/rs-play",
     "rs_wasm_bind": "packages/libs/rs-wasm-bind"

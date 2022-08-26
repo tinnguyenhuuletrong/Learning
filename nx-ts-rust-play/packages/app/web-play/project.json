@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/app/web-play/src",
+  "projectType": "application",
+  "implicitDependencies": [
+    "_artifacts"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nxext/vite:build",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/packages/app/web-play",
+        "baseHref": "/",
+        "configFile": "packages/app/web-play/vite.config.ts"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "packages/app/web-play/src/environments/environment.ts",
+              "with": "packages/app/web-play/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nxext/vite:dev",
+      "options": {
+        "outputPath": "dist/packages/app/web-play",
+        "baseHref": "/",
+        "configFile": "packages/app/web-play/vite.config.ts"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "packages/app/web-play/src/environments/environment.ts",
+              "with": "packages/app/web-play/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/app/web-play/**/*.{ts,js,tsx,jsx}"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

@@ -18,6 +18,7 @@
     "@nrwl/node": "^14.5.6",
     "@nrwl/nx-cloud": "latest",
     "@nrwl/workspace": "14.5.6",
+    "@nxext/vite": "^14.0.3",
     "@nxrs/cargo": "^0.3.3",
     "@types/jest": "27.4.1",
     "@types/node": "16.11.7",
@@ -25,6 +26,7 @@
     "@typescript-eslint/parser": "^5.29.0",
     "eslint": "~8.15.0",
     "eslint-config-prettier": "8.1.0",
+    "eslint-plugin-import": "2.25.2",
     "install": "^0.13.0",
     "jest": "27.5.1",
     "node-loader": "^2.0.0",
@@ -33,6 +35,10 @@
     "prettier": "^2.6.2",
     "ts-jest": "27.1.4",
     "ts-node": "10.9.1",
-    "typescript": "~4.7.2"
+    "typescript": "~4.7.2",
+    "vite": "^2.9.14",
+    "vite-plugin-eslint": "1.3.0",
+    "vite-plugin-top-level-await": "^1.1.1",
+    "vite-plugin-wasm": "^1.0.1"
   }
 }
