@@ -11,3 +11,9 @@ export function sayHiFromWasm() {
 export function alertHiFromWasm() {
   return Addon.greet();
 }
+
+export function parseCsv(inp: string) {
+  return JSON.parse(Addon.csv_parse(inp) || '{}');
+}
+
+(window as any).Addon = Addon;

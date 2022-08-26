@@ -3,6 +3,7 @@
   "sourceRoot": "packages/app/web-play/src",
   "projectType": "application",
   "implicitDependencies": [
+    "rs_wasm_bind",
     "_artifacts"
   ],
   "targets": {

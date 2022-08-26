@@ -1,5 +1,6 @@
 mod utils;
 
+use rs_play::*;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -21,6 +22,19 @@ pub fn greet() {
 #[wasm_bindgen]
 pub fn rs_wasm_bind() -> String {
     "rs_wasm_bind".into()
+}
+
+#[wasm_bindgen]
+pub fn csv_parse(inp: String) -> String {
+    let raw_str = inp.as_str();
+    let res = CSVParser::parse(Rule::record, &raw_str);
+
+    match res {
+        Ok(it) => it,
+        Err(err) => return "".into(),
+    }
+    .to_json()
+    .into()
 }
 
 #[cfg(test)]

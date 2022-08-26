@@ -28,6 +28,10 @@ app.innerHTML = `
             <span>Wasm 👋</span>
           </button>
       </div>
+
+      <div class="mt-1">
+        <pre>${JSON.stringify(App.parseCsv(`1,2,-3`), null, 2)}</pre>
+      </div>
     </div>
   </div>
 `;

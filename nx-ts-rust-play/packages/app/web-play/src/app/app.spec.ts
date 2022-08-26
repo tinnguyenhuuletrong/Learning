@@ -1,4 +1,4 @@
-import App from './app';
+import * as App from './app';
 
 describe('App', () => {
   it('should render successfully', () => {

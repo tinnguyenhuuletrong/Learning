@@ -256,6 +256,7 @@ name = "rs_wasm_bind"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
+ "rs_play",
  "wasm-bindgen",
  "wasm-bindgen-test",
  "wee_alloc",
