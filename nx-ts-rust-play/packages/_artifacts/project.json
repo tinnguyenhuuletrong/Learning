@@ -9,14 +9,16 @@
   ],
   "targets": {
     "build": {
-      "executor": "nx:run-script",
+      "executor": "nx:run-commands",
       "options": {
-        "script": "build:rs-lib"
-      },
-      "configurations": {
-        "production": {
-          "release": true
-        }
+        "commands": [
+          "npx nx run rs_node_bind:build:production && cp target/release/librs_node_bind.dylib packages/_artifacts/assets/librs_node_bind.node",
+          "npx nx run rs_wasm_bind:build"
+        ],
+        "parallel": true,
+        "outputPath": [
+          "packages/_artifacts/assets"
+        ]
       }
     }
   }

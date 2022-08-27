@@ -30,6 +30,9 @@
       }
     },
     "serve": {
+      "dependsOn": [
+        "^build"
+      ],
       "executor": "@nxext/vite:dev",
       "options": {
         "outputPath": "dist/packages/app/web-play",

@@ -3,6 +3,7 @@
   "sourceRoot": "packages/app/cli-play/src",
   "projectType": "application",
   "implicitDependencies": [
+    "rs_node_bind",
     "_artifacts"
   ],
   "targets": {

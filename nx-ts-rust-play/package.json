@@ -2,9 +2,7 @@
   "name": "ts-and-friends",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {
-    "build:rs-lib": "cp target/release/librs_node_bind.dylib packages/_artifacts/assets/librs_node_bind.node"
-  },
+  "scripts": {},
   "private": true,
   "dependencies": {
     "tslib": "^2.3.0"
