@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Math expression 1 + (3 * 5)**2 1`] = `
+MathExpVisitor {
+  "_logs": Array [
+    "got num: 1",
+    "got num: 3",
+    "got num: 5",
+    "exec * for r:3, l:5 -> 15",
+    "got num: 2",
+    "exec ** for r:15, l:2 -> 225",
+    "exec + for r:1, l:225 -> 226",
+  ],
+  "mem": Object {},
+  "stack": Array [],
+}
+`;
