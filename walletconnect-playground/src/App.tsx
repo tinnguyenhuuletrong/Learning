@@ -1,4 +1,5 @@
 import Layout from "./Layout";
+import SignatureVerify from "./SignatureVerify";
 import WalletConnectBody from "./WalletConnectBody";
 
 const Header = () => {
@@ -12,7 +13,7 @@ const Header = () => {
 const Footer = () => {
   return (
     <>
-      <p className="text-gray-900">TTin - 2022</p>
+      <p className="text-gray-900">TTin - Wed Aug 31 2022 11:08:57 GMT+0700 </p>
       <p>
         <a
           href="https://tailwindcss.com"
@@ -29,7 +30,13 @@ function App() {
   return (
     <Layout
       Header={<Header />}
-      Body={<WalletConnectBody />}
+      Body={
+        <>
+          <WalletConnectBody />
+          <hr />
+          <SignatureVerify />
+        </>
+      }
       Footer={<Footer />}
     />
   );

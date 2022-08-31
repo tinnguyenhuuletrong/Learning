@@ -32,15 +32,9 @@ function useWalletConnect() {
       connector,
       state: "waiting",
       signMessage: (message: string) => {
-        const signParams = [
-          baseState.walletAddress,
-          utils.keccak256(
-            utils.toUtf8Bytes(
-              "\x19Ethereum Signed Message:\n" + message.length + message
-            )
-          ),
-        ];
-        return connector?.signMessage(signParams);
+        const signParams = [message, baseState.walletAddress];
+        console.log(signParams);
+        return connector?.signPersonalMessage(signParams);
       },
       reset: async () => {
         connector.killSession();
@@ -127,13 +121,13 @@ export default function WalletConnectBody() {
   const onSign = useCallback(async () => {
     if (!connector?.connector) return;
     try {
-      const res = await connector.signMessage("hello");
+      const res = await connector.signMessage(inpMessage || "empty");
       console.log(res);
       setSignRes(res);
     } catch (error: any) {
       setSignRes(error.message);
     }
-  }, [connector, setSignRes]);
+  }, [connector, setSignRes, inpMessage]);
 
   const onReset = useCallback(async () => {
     if (!connector?.connector) return;
@@ -146,10 +140,7 @@ export default function WalletConnectBody() {
           State: <span className="font-bold uppercase">{connector?.state}</span>
         </p>
         <p>
-          Address:{" "}
-          <span className="font-bold uppercase">
-            {connector?.walletAddress}
-          </span>
+          Address: <span className="font-bold">{connector?.walletAddress}</span>
         </p>
         <p>
           ChainID:{" "}
@@ -214,8 +205,7 @@ export default function WalletConnectBody() {
         </>
       )}
       <p>
-        Result:{" "}
-        <span className="font-bold uppercase break-all">{signRes || "-"}</span>
+        Result: <span className="font-bold break-all">{signRes || "-"}</span>
       </p>
     </>
   );
