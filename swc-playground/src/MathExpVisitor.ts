@@ -3,25 +3,34 @@ import {
   BinaryExpression,
   Expression,
   ExpressionStatement,
+  Module,
   NumericLiteral,
+  ParenthesisExpression,
 } from "@swc/core/types";
 import { Visitor } from "@swc/core/Visitor";
 
-export class RuntimeData {
+declare module "@swc/core/types" {
+  interface Node {
+    _runtimeValue: any;
+  }
+  interface Fn {
+    _runtimeValue: Function;
+  }
+}
+
+export class RuntimeContext {
   stack = [];
   mem = {};
   _logs = [];
-
-  _val = new WeakMap();
 }
 
 export class RuntimeError extends Error {
-  ctx?: RuntimeData = null;
+  ctx?: RuntimeContext = null;
   extraInfo? = null;
 
   constructor(
     message: string,
-    { ctx, extraInfo }: { ctx: RuntimeData; extraInfo?: any }
+    { ctx, extraInfo }: { ctx: RuntimeContext; extraInfo?: any }
   ) {
     super(message);
     this.name = "RuntimeError";
@@ -31,28 +40,7 @@ export class RuntimeError extends Error {
   }
 }
 
-function asNumber(ctx: RuntimeData, exp: Expression): number {
-  switch (exp.type) {
-    case "NumericLiteral":
-      return exp.value;
-    case "Identifier":
-      return ctx.mem[exp.value];
-    case "ParenthesisExpression": {
-      const val = ctx._val.get(exp.expression);
-      if (val) return val;
-
-      throw new RuntimeError(`asNumber failed ${exp.type}`, { ctx });
-    }
-    default: {
-      const val = ctx._val.get(exp);
-      if (val) return val;
-
-      throw new RuntimeError(`asNumber failed ${exp.type}`, { ctx });
-    }
-  }
-}
-
-function asIdentifier(ctx: RuntimeData, exp: Expression) {
+function asIdentifier(ctx: RuntimeContext, exp: Expression) {
   switch (exp.type) {
     case "StringLiteral":
       return exp.value;
@@ -61,31 +49,41 @@ function asIdentifier(ctx: RuntimeData, exp: Expression) {
   }
 }
 
-function asValue(ctx: RuntimeData, exp: Expression) {
-  const val = ctx._val.get(exp);
-  return val;
+function resolveValue(ctx: RuntimeContext, n: Expression) {
+  switch (n.type) {
+    case "Identifier":
+      return ctx.mem[n.value];
+
+    default:
+      return n._runtimeValue;
+  }
 }
 
 export class MathExpVisitor extends Visitor {
-  ctx: RuntimeData;
+  ctx: RuntimeContext;
 
   constructor() {
     super();
-    this.ctx = new RuntimeData();
+  }
+
+  run(astCode: Module, ctx: RuntimeContext) {
+    this.ctx = ctx;
+    const res = this.visitProgram(astCode);
+    return res;
   }
 
   visitAssignmentExpression(n: AssignmentExpression) {
     super.visitAssignmentExpression(n);
     const varName = asIdentifier(this.ctx, n.left as Expression);
-    const varVal = asValue(this.ctx, n.right);
+    const varVal = n.right._runtimeValue;
     this.ctx.mem[varName] = varVal;
     this.ctx._logs.push(`assign ${varName} = ${varVal}`);
     return n;
   }
 
-  visitExpressionStatement(n: ExpressionStatement) {
-    super.visitExpressionStatement(n);
-    this.ctx._val.set(n, n.expression);
+  visitParenthesisExpression(n: ParenthesisExpression) {
+    super.visitParenthesisExpression(n);
+    n._runtimeValue = n.expression._runtimeValue;
     return n;
   }
 
@@ -93,8 +91,8 @@ export class MathExpVisitor extends Visitor {
     super.visitBinaryExpression(n);
     const op = n.operator;
     // can left / right be NumericLiteral / Expression / Identify
-    const v1 = asNumber(this.ctx, n.left);
-    const v2 = asNumber(this.ctx, n.right);
+    const v1 = resolveValue(this.ctx, n.left);
+    const v2 = resolveValue(this.ctx, n.right);
     let res;
     switch (op) {
       case "+":
@@ -115,21 +113,50 @@ export class MathExpVisitor extends Visitor {
       case "**":
         res = v1 ** v2;
         break;
+
+      case "===":
       case "==":
         res = v1 == v2;
         break;
+
+      case "!=":
+      case "!==":
+        res = v1 != v2;
+        break;
+
+      case ">":
+        res = v1 > v2;
+        break;
+      case ">=":
+        res = v1 >= v2;
+        break;
+
+      case "<":
+        res = v1 < v2;
+        break;
+      case "<=":
+        res = v1 <= v2;
+        break;
+
+      case "&&":
+        res = v1 && v2;
+        break;
+      case "||":
+        res = v1 || v2;
+        break;
+
       default:
         throw new Error(`unknown op ${op}`);
     }
-    this.ctx._val.set(n, res);
-    this.ctx._logs.push(`exec ${op} for r:${v1}, l:${v2} -> ${res}`);
+    n._runtimeValue = res;
+    this.ctx._logs.push(`exec ${op} for v1:${v1}, v2:${v2} -> ${res}`);
     return n;
   }
 
   visitNumericLiteral(n: NumericLiteral) {
     const v = parseFloat(n.raw);
-    this.ctx._val.set(n, v);
     this.ctx._logs.push(`got num: ${v}`);
+    n._runtimeValue = v;
     return n;
   }
 }
