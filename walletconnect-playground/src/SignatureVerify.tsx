@@ -89,6 +89,30 @@ export default function SignatureVerify() {
           {verifyRes || "-"}
         </span>
       </p>
+      <hr />
+      <p>
+        <span className="font-bold uppercase">Code</span>
+        <span className="block break-all mt-3">
+          Solidity:{" "}
+          <a
+            href="https://gist.github.com/tinnguyenhuuletrong/9b0ee54df0757125369f8e3edb4f7428"
+            target="_blank"
+            className="text-indigo-300"
+          >
+            Verify_Personal_Sign_Signature.sol
+          </a>
+        </span>
+        <span className="block break-all mt-3">
+          EtherJs:{" "}
+          <a
+            href="https://gist.github.com/tinnguyenhuuletrong/b14dcf53eaee3c925be2ec4f4c987f70"
+            target="_blank"
+            className="text-indigo-300"
+          >
+            Verify_Personal_Sign_Signature.ts
+          </a>
+        </span>
+      </p>
     </>
   );
 }
