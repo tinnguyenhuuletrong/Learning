@@ -1,14 +1,18 @@
 import * as swc from "@swc/core";
-import { MathExpVisitor, RuntimeContext } from "./MathExpVisitor";
+import { TLiteExpVisitor, RuntimeContext } from "./TLiteExpVisitor";
 import { wrappedWithFuncCallLog } from "./proxyHelper";
 
 // https://astexplorer.net/
 const code = `
-res = inp <=2
+if (inp %2 === 0) {
+  isEven = true
+} else {
+  isEven = false
+}
 `;
 
 const res = swc.parseSync(code);
-const ins = wrappedWithFuncCallLog(new MathExpVisitor());
+const ins = wrappedWithFuncCallLog(new TLiteExpVisitor());
 const ctx = new RuntimeContext();
 ctx.mem = { inp: 2 };
 
