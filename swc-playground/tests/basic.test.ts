@@ -109,3 +109,42 @@ describe("TLite condition", () => {
     expect(runtime).toMatchSnapshot();
   });
 });
+
+describe("TLite array", () => {
+  test("res = [1,2,inp > 18,'name']", async () => {
+    const exp = `res = [1,2,inp > 18,'name']`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = "22";
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["res"]).toEqual([1, 2, true, "name"]);
+    expect(runtime).toMatchSnapshot();
+  });
+});
+
+describe("TLite nestest mixed object", () => {
+  test("mixed obj type and dynamic props 1", async () => {
+    const exp = `res = {name: "mr.A", age: inp}
+    res.isMature = res.age > 18
+    res.house.address = "123 street A"
+    res.house.items = ["table", "tv", "air-conditioner"]
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = 22;
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual({
+      name: "mr.A",
+      age: 22,
+      isMature: true,
+      house: {
+        address: "123 street A",
+        items: ["table", "tv", "air-conditioner"],
+      },
+    });
+    expect(runtime).toMatchSnapshot();
+  });
+});

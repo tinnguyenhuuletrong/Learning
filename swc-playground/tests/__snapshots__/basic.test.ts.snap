@@ -1,5 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`TLite array res = [1,2,inp > 18,'name'] 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got num: 1",
+      "got num: 2",
+      "got num: 18",
+      "exec > for v1:22, v2:18 -> true",
+      "got str: name",
+      "got array: [1,2,true,\\"name\\"]",
+      "assign res = [1,2,true,\\"name\\"]",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "mem": Object {
+      "inp": "22",
+      "res": Array [
+        1,
+        2,
+        true,
+        "name",
+      ],
+    },
+    "stack": Array [],
+  },
+}
+`;
+
 exports[`TLite condition if (inp%2 == 0) isEven = true else isEven = false 1`] = `
 TLiteExpVisitor {
   "ctx": RuntimeContext {
@@ -34,7 +63,7 @@ TLiteExpVisitor {
       "exec > for v1:22, v2:18 -> true",
       "got str: mature",
       "exec if_branch_expression: true -> mature",
-      "assign res = mature",
+      "assign res = \\"mature\\"",
     ],
     "_opts": Object {
       "debugTrace": true,
@@ -199,6 +228,50 @@ TLiteExpVisitor {
     "mem": Object {
       "inp": 3,
       "res": true,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite nestest mixed object mixed obj type and dynamic props 1 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got str: mr.A",
+      "got kv pair: [name,mr.A]",
+      "got kv pair: [age,22]",
+      "got object: {\\"name\\":\\"mr.A\\",\\"age\\":22}",
+      "assign res = {\\"name\\":\\"mr.A\\",\\"age\\":22}",
+      "got num: 18",
+      "exec > for v1:22, v2:18 -> true",
+      "assign res.isMature = true",
+      "got str: 123 street A",
+      "assign res.house.address = \\"123 street A\\"",
+      "got str: table",
+      "got str: tv",
+      "got str: air-conditioner",
+      "got array: [\\"table\\",\\"tv\\",\\"air-conditioner\\"]",
+      "assign res.house.items = [\\"table\\",\\"tv\\",\\"air-conditioner\\"]",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "mem": Object {
+      "inp": 22,
+      "res": Object {
+        "age": 22,
+        "house": Object {
+          "address": "123 street A",
+          "items": Array [
+            "table",
+            "tv",
+            "air-conditioner",
+          ],
+        },
+        "isMature": true,
+        "name": "mr.A",
+      },
     },
     "stack": Array [],
   },

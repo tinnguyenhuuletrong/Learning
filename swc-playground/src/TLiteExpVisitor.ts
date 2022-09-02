@@ -1,4 +1,5 @@
 import {
+  ArrayExpression,
   AssignmentExpression,
   BinaryExpression,
   BooleanLiteral,
@@ -6,18 +7,35 @@ import {
   Expression,
   ExpressionStatement,
   IfStatement,
+  KeyValueProperty,
+  MemberExpression,
   Module,
   NumericLiteral,
+  ObjectExpression,
   ParenthesisExpression,
+  Property,
+  RuntimeGeneric,
+  RuntimeKV,
+  RuntimeObjectExpression,
+  SpreadElement,
   Statement,
   StringLiteral,
   UnaryExpression,
 } from "@swc/core/types";
 import { Visitor } from "@swc/core/Visitor";
+import get from "lodash/get";
+import set from "lodash/set";
 
 declare module "@swc/core/types" {
+  type RuntimeGeneric = String | Number | Boolean | Object;
+  type RuntimeKV = [RuntimeGeneric, RuntimeGeneric];
+  type RuntimeObjectExpression = {
+    variableName: string;
+    pathName: string;
+  };
+
   interface Node {
-    _runtimeValue: any;
+    _runtimeValue: RuntimeGeneric | RuntimeKV | RuntimeObjectExpression;
   }
   interface Fn {
     _runtimeValue: Function;
@@ -60,12 +78,25 @@ export class RuntimeError extends Error {
   }
 }
 
-function asIdentifier(ctx: RuntimeContext, exp: Expression) {
+function asIdentifierPerformUpdate(
+  ctx: RuntimeContext,
+  exp: Expression
+): [string, Function] {
   switch (exp.type) {
     case "StringLiteral":
-      return exp.value;
+      return [exp.value, (v: any) => (ctx.mem[exp.value] = v)];
     case "Identifier":
-      return exp.value;
+      return [exp.value, (v: any) => (ctx.mem[exp.value] = v)];
+    case "MemberExpression": {
+      const { variableName, pathName } =
+        exp._runtimeValue as RuntimeObjectExpression;
+      return [
+        `${variableName}.${pathName}`,
+        (v: any) => set(ctx.mem, `${variableName}.${pathName}`, v),
+      ];
+    }
+    default:
+      throw new Error(`missing implement ${exp.type}`);
   }
 }
 
@@ -73,6 +104,11 @@ function resolveValue(ctx: RuntimeContext, n: Expression) {
   switch (n.type) {
     case "Identifier":
       return ctx.mem[n.value];
+
+    case "MemberExpression":
+      const { variableName, pathName } =
+        n._runtimeValue as RuntimeObjectExpression;
+      return get(ctx.mem[variableName], pathName);
 
     default:
       return n._runtimeValue;
@@ -94,10 +130,13 @@ export class TLiteExpVisitor extends Visitor {
 
   visitAssignmentExpression(n: AssignmentExpression) {
     super.visitAssignmentExpression(n);
-    const varName = asIdentifier(this.ctx, n.left as Expression);
+    const [varName, doUpdate] = asIdentifierPerformUpdate(
+      this.ctx,
+      n.left as Expression
+    );
     const varVal = n.right._runtimeValue;
-    this.ctx.mem[varName] = varVal;
-    this.ctx.addLog(`assign ${varName} = ${varVal}`);
+    doUpdate(varVal);
+    this.ctx.addLog(`assign ${varName} = ${JSON.stringify(varVal)}`);
     return n;
   }
 
@@ -202,6 +241,8 @@ export class TLiteExpVisitor extends Visitor {
     return n;
   }
 
+  // conditional
+
   visitConditionalExpression(n: ConditionalExpression): Expression {
     this.ctx.addLog(`exec if_branch_expression test`);
     n.test = this.visitExpression(n.test);
@@ -235,6 +276,101 @@ export class TLiteExpVisitor extends Visitor {
     this.ctx.addLog(`exec if_branch: ${condVal}`);
     return n;
   }
+
+  // array
+  visitArrayExpression(n: ArrayExpression): Expression {
+    super.visitArrayExpression(n);
+    n._runtimeValue = Array.from(
+      n.elements.map((itm) => itm.expression._runtimeValue)
+    );
+
+    this.ctx.addLog(`got array: ${JSON.stringify(n._runtimeValue)}`);
+    return n;
+  }
+
+  // object
+
+  visitObjectExpression(n: ObjectExpression): Expression {
+    super.visitObjectExpression(n);
+    n._runtimeValue = Object.fromEntries(
+      n.properties.map((itm) => itm._runtimeValue as RuntimeKV)
+    );
+
+    this.ctx.addLog(`got object: ${JSON.stringify(n._runtimeValue)}`);
+    return n;
+  }
+
+  visitKeyValueProperty(n: KeyValueProperty): SpreadElement | Property {
+    super.visitKeyValueProperty(n);
+
+    let key;
+    let val;
+
+    switch (n.value.type) {
+      case "Identifier":
+        val = this.ctx.mem[n.value.value];
+        break;
+
+      default:
+        val = n.value._runtimeValue;
+        break;
+    }
+
+    switch (n.key.type) {
+      case "Identifier":
+        key = n.key.value;
+        break;
+      default:
+        key = n._runtimeValue;
+        break;
+    }
+
+    this.ctx.addLog(`got kv pair: [${key},${val}]`);
+    n._runtimeValue = [key, val];
+    return n;
+  }
+
+  // object member
+
+  visitMemberExpression(n: MemberExpression): MemberExpression {
+    super.visitMemberExpression(n);
+
+    const propType = n.property.type;
+    let pathName;
+    switch (propType) {
+      case "Identifier":
+        pathName = n.property.value;
+        break;
+
+      default:
+        throw new Error(`unknown member expression property type ${propType}`);
+    }
+
+    const variableType = n.object.type;
+    let variableName;
+    switch (variableType) {
+      case "Identifier":
+        variableName = n.object.value;
+        break;
+      case "MemberExpression":
+        const parent = n.object._runtimeValue as RuntimeObjectExpression;
+        variableName = `${parent.variableName}.${parent.pathName}`;
+        break;
+
+      default:
+        throw new Error(
+          `unknown member expression object type ${variableType}`
+        );
+    }
+
+    n._runtimeValue = {
+      variableName,
+      pathName,
+    };
+    return n;
+  }
+
+  // basic type string, boolean, number, ...
 
   visitNumericLiteral(n: NumericLiteral) {
     const v = parseFloat(n.raw);
