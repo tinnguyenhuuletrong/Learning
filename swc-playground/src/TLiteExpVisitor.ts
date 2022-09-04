@@ -3,6 +3,7 @@ import {
   AssignmentExpression,
   BinaryExpression,
   BooleanLiteral,
+  CallExpression,
   ConditionalExpression,
   Expression,
   ExpressionStatement,
@@ -23,6 +24,7 @@ import {
   UnaryExpression,
 } from "@swc/core/types";
 import { Visitor } from "@swc/core/Visitor";
+import isFunction from "lodash/isFunction";
 import get from "lodash/get";
 import set from "lodash/set";
 
@@ -50,6 +52,7 @@ export class RuntimeContext {
   stack = [];
   mem = {};
   _logs = [];
+  funcDb: Record<string, Function> = {};
 
   private _opts: RuntimeContextOption;
 
@@ -103,7 +106,11 @@ function asIdentifierPerformUpdate(
 function resolveValue(ctx: RuntimeContext, n: Expression) {
   switch (n.type) {
     case "Identifier":
-      return ctx.mem[n.value];
+      const val = ctx.mem[n.value];
+      const func = ctx.funcDb[n.value];
+      const res = val || func;
+      if (!res) throw new Error(`resolveRuntimeValue failed for ${n.value}`);
+      return res;
 
     case "MemberExpression":
       const { variableName, pathName } =
@@ -281,7 +288,7 @@ export class TLiteExpVisitor extends Visitor {
   visitArrayExpression(n: ArrayExpression): Expression {
     super.visitArrayExpression(n);
     n._runtimeValue = Array.from(
-      n.elements.map((itm) => itm.expression._runtimeValue)
+      n.elements.map((itm) => resolveValue(this.ctx, itm.expression))
     );
 
     this.ctx.addLog(`got array: ${JSON.stringify(n._runtimeValue)}`);
@@ -367,6 +374,43 @@ export class TLiteExpVisitor extends Visitor {
       variableName,
       pathName,
     };
+    return n;
+  }
+
+  // function
+
+  visitCallExpression(n: CallExpression): Expression {
+    super.visitCallExpression(n);
+
+    const calleeType = n.callee.type;
+    let calleeFunc: Function;
+    let callThis = {};
+    let funcName;
+    switch (calleeType) {
+      case "Identifier":
+        funcName = n.callee.value;
+        calleeFunc = this.ctx.funcDb[n.callee.value];
+        if (!isFunction(calleeFunc))
+          throw new Error(
+            `call expression error function with name ${n.callee.value} not defined`
+          );
+        break;
+
+      default:
+        throw new Error(`unknown call expression callee type ${calleeType}`);
+    }
+
+    const args = n.arguments.map((itm) =>
+      resolveValue(this.ctx, itm.expression)
+    );
+    const res = calleeFunc.apply(callThis, args);
+
+    this.ctx.addLog(
+      `exec function call ${funcName}() : args ${JSON.stringify(
+        args
+      )} -> res ${res}`
+    );
+    n._runtimeValue = res;
     return n;
   }
 

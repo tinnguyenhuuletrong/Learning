@@ -1,4 +1,5 @@
 import * as swc from "@swc/core";
+import { isArray, isFunction } from "lodash";
 import { TLiteExpVisitor, RuntimeContext } from "../src/TLiteExpVisitor";
 
 describe("TLite expression", () => {
@@ -145,6 +146,47 @@ describe("TLite nestest mixed object", () => {
         items: ["table", "tv", "air-conditioner"],
       },
     });
+    expect(runtime).toMatchSnapshot();
+  });
+});
+
+describe("TLite function call", () => {
+  test("res = toUpper(toString(inp) + '_a')", async () => {
+    const exp = `
+    res = toUpper(toString(inp) + "_a")
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = 22;
+    ctx.funcDb["toUpper"] = (inp) => {
+      return String(inp).toUpperCase();
+    };
+    ctx.funcDb["toString"] = (inp) => String(inp);
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual("22_A");
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("res = res = filter([1, 2, 3, inp], isOdd)", async () => {
+    const exp = `
+    res = filter([1, 2, 3, inp], isOdd)
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = 21;
+    ctx.funcDb["isOdd"] = (inp) => parseInt(inp) % 2 !== 0;
+    ctx.funcDb["filter"] = (inp, func) => {
+      if (!isFunction(func)) throw new Error("arg1 is not a function");
+      if (!isArray(inp)) throw new Error("arg0 is not a array");
+      return inp.filter((itm) => func(itm));
+    };
+
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual([1, 3, 21]);
     expect(runtime).toMatchSnapshot();
   });
 });
