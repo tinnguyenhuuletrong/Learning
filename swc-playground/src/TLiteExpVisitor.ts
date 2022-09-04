@@ -59,6 +59,22 @@ function safeGetPropFromObject(obj: Object, k: string) {
   return obj[k];
 }
 
+export class RuntimeError extends Error {
+  ctx?: RuntimeContext = null;
+  extraInfo? = null;
+
+  constructor(
+    message: string,
+    { ctx, extraInfo }: { ctx: RuntimeContext; extraInfo?: any }
+  ) {
+    super(message);
+    this.name = "RuntimeError";
+
+    this.ctx = ctx;
+    this.extraInfo = extraInfo;
+  }
+}
+
 export class RuntimeContext {
   stack = [];
   mem = {};
@@ -78,7 +94,8 @@ export class RuntimeContext {
 
   pushStackFuncCall(params: Pattern[], args: any[]) {
     const isEnoughParam = params.length === args.length;
-    if (!isEnoughParam) throw new Error("not enough params");
+    if (!isEnoughParam)
+      throw new RuntimeError("not enough params", { ctx: this });
 
     const kvPairs = [];
     for (let i = 0; i < params.length; i++) {
@@ -89,7 +106,9 @@ export class RuntimeContext {
           break;
 
         default:
-          throw new Error(`pushStack unknown param type ${p.type}`);
+          throw new RuntimeError(`pushStack unknown param type ${p.type}`, {
+            ctx: this,
+          });
       }
     }
     this.stack.push(Object.fromEntries(kvPairs));
@@ -117,7 +136,10 @@ export class RuntimeContext {
           safeGetPropFromObject(this.topStack(), n.value) ||
           safeGetPropFromObject(this.mem, n.value) ||
           safeGetPropFromObject(this.funcDb, n.value);
-        if (!res) throw new Error(`resolveRuntimeValue failed for ${n.value}`);
+        if (!res)
+          throw new RuntimeError(`resolveRuntimeValue failed for ${n.value}`, {
+            ctx: this,
+          });
         return res;
 
       case "MemberExpression":
@@ -156,24 +178,8 @@ export class RuntimeContext {
         ];
       }
       default:
-        throw new Error(`missing implement ${exp.type}`);
+        throw new RuntimeError(`missing implement ${exp.type}`, { ctx: this });
     }
-  }
-}
-
-export class RuntimeError extends Error {
-  ctx?: RuntimeContext = null;
-  extraInfo? = null;
-
-  constructor(
-    message: string,
-    { ctx, extraInfo }: { ctx: RuntimeContext; extraInfo?: any }
-  ) {
-    super(message);
-    this.name = "RuntimeError";
-
-    this.ctx = ctx;
-    this.extraInfo = extraInfo;
   }
 }
 
@@ -217,7 +223,9 @@ export class TLiteExpVisitor extends Visitor {
         break;
 
       default:
-        throw new Error(`AssignmentExpression: unknown op ${op}`);
+        throw new RuntimeError(`AssignmentExpression: unknown op ${op}`, {
+          ctx: this.ctx,
+        });
     }
     doUpdate(res);
     n._runtimeValue = res;
@@ -253,7 +261,9 @@ export class TLiteExpVisitor extends Visitor {
         break;
 
       default:
-        throw new Error(`UnaryExpression: unknown op ${op}`);
+        throw new RuntimeError(`UnaryExpression: unknown op ${op}`, {
+          ctx: this.ctx,
+        });
     }
 
     n._runtimeValue = res;
@@ -320,7 +330,7 @@ export class TLiteExpVisitor extends Visitor {
         break;
 
       default:
-        throw new Error(`unknown op ${op}`);
+        throw new RuntimeError(`unknown op ${op}`, { ctx: this.ctx });
     }
     n._runtimeValue = res;
     this.ctx.addLog(`exec ${op} for v1:${v1}, v2:${v2} -> ${res}`);
@@ -429,7 +439,10 @@ export class TLiteExpVisitor extends Visitor {
         break;
 
       default:
-        throw new Error(`unknown member expression property type ${propType}`);
+        throw new RuntimeError(
+          `unknown member expression property type ${propType}`,
+          { ctx: this.ctx }
+        );
     }
 
     const variableType = n.object.type;
@@ -444,8 +457,9 @@ export class TLiteExpVisitor extends Visitor {
         break;
 
       default:
-        throw new Error(
-          `unknown member expression object type ${variableType}`
+        throw new RuntimeError(
+          `unknown member expression object type ${variableType}`,
+          { ctx: this.ctx }
         );
     }
 
@@ -470,13 +484,17 @@ export class TLiteExpVisitor extends Visitor {
         funcName = n.callee.value;
         calleeFunc = this.ctx.resolveRuntimeValue(n.callee);
         if (!isFunction(calleeFunc))
-          throw new Error(
-            `call expression error function with name ${n.callee.value} not defined`
+          throw new RuntimeError(
+            `call expression error function with name ${n.callee.value} not defined`,
+            { ctx: this.ctx }
           );
         break;
 
       default:
-        throw new Error(`unknown call expression callee type ${calleeType}`);
+        throw new RuntimeError(
+          `unknown call expression callee type ${calleeType}`,
+          { ctx: this.ctx }
+        );
     }
 
     const args = n.arguments.map((itm) =>
