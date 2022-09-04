@@ -30,6 +30,42 @@ TLiteExpVisitor {
 }
 `;
 
+exports[`TLite arrow function call f = i => { return i + 1}; res = f(1) * f(5) 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got arrow function",
+      "assign f = undefined",
+      "got num: 1",
+      "push stack {\\"i\\":1}",
+      "got num: 1",
+      "exec + for v1:1, v2:1 -> 2",
+      "got block return: 2",
+      "pop stack",
+      "exec function call f() : args [1] -> res 2",
+      "got num: 5",
+      "push stack {\\"i\\":5}",
+      "got num: 1",
+      "exec + for v1:5, v2:1 -> 6",
+      "got block return: 6",
+      "pop stack",
+      "exec function call f() : args [5] -> res 6",
+      "exec * for v1:2, v2:6 -> 12",
+      "assign res = 12",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "f": [Function],
+      "res": 12,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
 exports[`TLite arrow function call f = i => i + 1; res = f(1) * f(5) 1`] = `
 TLiteExpVisitor {
   "ctx": RuntimeContext {
@@ -58,6 +94,48 @@ TLiteExpVisitor {
     "mem": Object {
       "f": [Function],
       "res": 12,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite arrow function call res = map([1,2,3], itm => itm ** 2) 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got num: 1",
+      "got num: 2",
+      "got num: 3",
+      "got array: [1,2,3]",
+      "got arrow function",
+      "push stack {\\"itm\\":1}",
+      "got num: 2",
+      "exec ** for v1:1, v2:2 -> 1",
+      "pop stack",
+      "push stack {\\"itm\\":2}",
+      "got num: 2",
+      "exec ** for v1:2, v2:2 -> 4",
+      "pop stack",
+      "push stack {\\"itm\\":3}",
+      "got num: 2",
+      "exec ** for v1:3, v2:2 -> 9",
+      "pop stack",
+      "exec function call map() : args [[1,2,3],null] -> res 1,4,9",
+      "assign res = [1,4,9]",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {
+      "map": [Function],
+    },
+    "mem": Object {
+      "res": Array [
+        1,
+        4,
+        9,
+      ],
     },
     "stack": Array [],
   },
@@ -272,6 +350,90 @@ TLiteExpVisitor {
     "mem": Object {
       "inp": 3,
       "res": true,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite expression res = inp*=2 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got num: 2",
+      "assign inp *= 2",
+      "assign res = -2",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "inp": -2,
+      "res": -2,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite expression res = inp+=2 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got num: 2",
+      "assign inp += 2",
+      "assign res = 4",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "inp": 4,
+      "res": 4,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite expression res = inp/=2 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got num: 2",
+      "assign inp /= 2",
+      "assign res = 1",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "inp": 1,
+      "res": 1,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite expression res = inp-=2 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got num: 2",
+      "assign inp -= 2",
+      "assign res = 0",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "inp": 0,
+      "res": 0,
     },
     "stack": Array [],
   },

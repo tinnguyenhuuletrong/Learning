@@ -80,6 +80,50 @@ describe("TLite expression", () => {
     expect(runtime.ctx.mem["res"]).toBe(false);
     expect(runtime).toMatchSnapshot();
   });
+
+  test("res = inp+=2", async () => {
+    const exp = `res = inp +=2`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = 2;
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["res"]).toBe(4);
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("res = inp-=2", async () => {
+    const exp = `res = inp -=2`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = 2;
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["res"]).toBe(0);
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("res = inp*=2", async () => {
+    const exp = `res = inp *=2`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = -1;
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["res"]).toBe(-2);
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("res = inp/=2", async () => {
+    const exp = `res = inp /=2`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.mem["inp"] = 2;
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["res"]).toBe(1);
+    expect(runtime).toMatchSnapshot();
+  });
 });
 
 describe("TLite condition", () => {
@@ -203,6 +247,40 @@ describe("TLite arrow function call", () => {
     runtime.run(astTree, ctx);
 
     expect(runtime.ctx.mem["res"]).toEqual(12);
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("f = i => { return i + 1}; res = f(1) * f(5)", async () => {
+    const exp = `
+    f = i => {
+      return i + 1
+    }
+    res = f(1) * f(5)
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual(12);
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("res = map([1,2,3], itm => itm ** 2)", async () => {
+    const exp = `
+    res = map([1,2,3], itm => itm ** 2)
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    ctx.funcDb["map"] = (inp, func) => {
+      if (!isFunction(func)) throw new Error("arg1 is not a function");
+      if (!isArray(inp)) throw new Error("arg0 is not a array");
+      return inp.map((itm) => func(itm));
+    };
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual([1, 4, 9]);
     expect(runtime).toMatchSnapshot();
   });
 });

@@ -5,29 +5,17 @@ import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
 const code = `
-f = tmp => tmp + 1
-res = f(1) * f(5)
+res = map([1,2,3], itm => itm ** 2)
 `;
 
 const res = swc.parseSync(code);
 const ins = wrappedWithFuncCallLog(new TLiteExpVisitor());
 const ctx = new RuntimeContext();
-ctx.mem = { inp: "hello" };
-ctx.funcDb["toUpper"] = (inp) => {
-  return String(inp).toUpperCase();
-};
-ctx.funcDb["toString"] = (inp) => String(inp);
-ctx.funcDb["isOdd"] = (inp) => parseInt(inp) % 2 !== 0;
-ctx.funcDb["plusOne"] = (inp) => parseInt(inp) + 1;
+ctx.mem = { inp: 2 };
 ctx.funcDb["map"] = (inp, func) => {
   if (!isFunction(func)) throw new Error("arg1 is not a function");
   if (!isArray(inp)) throw new Error("arg0 is not a array");
   return inp.map((itm) => func(itm));
-};
-ctx.funcDb["filter"] = (inp, func) => {
-  if (!isFunction(func)) throw new Error("arg1 is not a function");
-  if (!isArray(inp)) throw new Error("arg0 is not a array");
-  return inp.filter((itm) => func(itm));
 };
 
 const finalVal = ins.run(res, ctx);

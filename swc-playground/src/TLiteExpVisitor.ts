@@ -3,6 +3,7 @@ import {
   ArrowFunctionExpression,
   AssignmentExpression,
   BinaryExpression,
+  BlockStatement,
   BooleanLiteral,
   CallExpression,
   ConditionalExpression,
@@ -17,6 +18,7 @@ import {
   ParenthesisExpression,
   Pattern,
   Property,
+  ReturnStatement,
   RuntimeGeneric,
   RuntimeKV,
   RuntimeObjectExpression,
@@ -51,6 +53,12 @@ type RuntimeContextOption = {
   debugTrace: boolean;
 };
 
+function safeGetPropFromObject(obj: Object, k: string) {
+  const keys = Object.keys(obj);
+  if (!keys.includes(k)) return undefined;
+  return obj[k];
+}
+
 export class RuntimeContext {
   stack = [];
   mem = {};
@@ -68,7 +76,7 @@ export class RuntimeContext {
     if (this._opts.debugTrace) this._logs.push(inp);
   }
 
-  pushStack(params: Pattern[], args: any[]) {
+  pushStackFuncCall(params: Pattern[], args: any[]) {
     const isEnoughParam = params.length === args.length;
     if (!isEnoughParam) throw new Error("not enough params");
 
@@ -89,12 +97,16 @@ export class RuntimeContext {
   }
 
   topStack() {
-    return this.stack[0] || RuntimeContext.EMPTY_OBJ;
+    return this.stack[this.stack.length - 1] || RuntimeContext.EMPTY_OBJ;
   }
 
   popStack() {
     this.addLog(`pop stack`);
     this.stack.pop();
+  }
+
+  activeMemArea() {
+    return this.stack[0] || this.mem;
   }
 
   resolveRuntimeValue(n: Expression) {
@@ -117,6 +129,36 @@ export class RuntimeContext {
         return n._runtimeValue;
     }
   }
+
+  performUpdateVariable(exp: Expression): [string, any, Function] {
+    const memArea = this.activeMemArea();
+
+    switch (exp.type) {
+      case "StringLiteral":
+        return [
+          exp.value,
+          memArea[exp.value],
+          (v: any) => (memArea[exp.value] = v),
+        ];
+      case "Identifier":
+        return [
+          exp.value,
+          memArea[exp.value],
+          (v: any) => (memArea[exp.value] = v),
+        ];
+      case "MemberExpression": {
+        const { variableName, pathName } =
+          exp._runtimeValue as RuntimeObjectExpression;
+        return [
+          `${variableName}.${pathName}`,
+          get(memArea, `${variableName}.${pathName}`),
+          (v: any) => set(memArea, `${variableName}.${pathName}`, v),
+        ];
+      }
+      default:
+        throw new Error(`missing implement ${exp.type}`);
+    }
+  }
 }
 
 export class RuntimeError extends Error {
@@ -135,34 +177,6 @@ export class RuntimeError extends Error {
   }
 }
 
-function asIdentifierPerformUpdate(
-  ctx: RuntimeContext,
-  exp: Expression
-): [string, Function] {
-  switch (exp.type) {
-    case "StringLiteral":
-      return [exp.value, (v: any) => (ctx.mem[exp.value] = v)];
-    case "Identifier":
-      return [exp.value, (v: any) => (ctx.mem[exp.value] = v)];
-    case "MemberExpression": {
-      const { variableName, pathName } =
-        exp._runtimeValue as RuntimeObjectExpression;
-      return [
-        `${variableName}.${pathName}`,
-        (v: any) => set(ctx.mem, `${variableName}.${pathName}`, v),
-      ];
-    }
-    default:
-      throw new Error(`missing implement ${exp.type}`);
-  }
-}
-
-function safeGetPropFromObject(obj: Object, k: string) {
-  const keys = Object.keys(obj);
-  if (!keys.includes(k)) return undefined;
-  return obj[k];
-}
-
 export class TLiteExpVisitor extends Visitor {
   ctx: RuntimeContext;
 
@@ -178,13 +192,37 @@ export class TLiteExpVisitor extends Visitor {
 
   visitAssignmentExpression(n: AssignmentExpression) {
     super.visitAssignmentExpression(n);
-    const [varName, doUpdate] = asIdentifierPerformUpdate(
-      this.ctx,
+    const [varName, currentVal, doUpdate] = this.ctx.performUpdateVariable(
       n.left as Expression
     );
-    const varVal = n.right._runtimeValue;
-    doUpdate(varVal);
-    this.ctx.addLog(`assign ${varName} = ${JSON.stringify(varVal)}`);
+    const nextVal = this.ctx.resolveRuntimeValue(n.right);
+    let res;
+    const op = n.operator;
+    switch (op) {
+      case "=":
+        res = nextVal;
+        doUpdate(nextVal);
+        break;
+      case "+=":
+        res = currentVal + nextVal;
+        break;
+      case "-=":
+        res = currentVal - +nextVal;
+        break;
+      case "*=":
+        res = currentVal * +nextVal;
+        break;
+      case "/=":
+        res = currentVal / +nextVal;
+        break;
+
+      default:
+        throw new Error(`AssignmentExpression: unknown op ${op}`);
+    }
+    doUpdate(res);
+    n._runtimeValue = res;
+
+    this.ctx.addLog(`assign ${varName} ${op} ${JSON.stringify(nextVal)}`);
     return n;
   }
 
@@ -460,7 +498,7 @@ export class TLiteExpVisitor extends Visitor {
     // const body = cloneDeep(e.body);
     const body = e.body;
     const funcHandler = (...args) => {
-      this.ctx.pushStack(e.params, args);
+      this.ctx.pushStackFuncCall(e.params, args);
       const bodyRet = this.visitArrowBody(body);
       this.ctx.popStack();
       return bodyRet._runtimeValue;
@@ -469,6 +507,19 @@ export class TLiteExpVisitor extends Visitor {
     this.ctx.addLog(`got arrow function`);
     e._runtimeValue = funcHandler;
     return e;
+  }
+
+  // block stms
+  visitBlockStatement(block: BlockStatement): BlockStatement {
+    super.visitBlockStatement(block);
+    const res = block.stmts.find(
+      (itm) => itm.type === "ReturnStatement"
+    ) as ReturnStatement;
+    if (res && res.argument) {
+      block._runtimeValue = this.ctx.resolveRuntimeValue(res.argument);
+      this.ctx.addLog(`got block return: ${block._runtimeValue}`);
+    }
+    return block;
   }
 
   // basic type string, boolean, number, ...
