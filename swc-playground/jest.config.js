@@ -4,4 +4,5 @@ module.exports = {
   testRegex: ["(/__tests__/.*|(\\.|/)(test|spec))\\.ts?$"],
   testEnvironment: "node",
   verbose: true,
+  collectCoverage: true,
 };

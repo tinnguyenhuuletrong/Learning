@@ -16,6 +16,19 @@ describe("TLite expression", () => {
     expect(runtime).toMatchSnapshot();
   });
 
+  test("res = 'hello'", async () => {
+    const exp = `
+      res = 'hello'
+      res = 'hi'
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+
+    runtime.run(astTree, new RuntimeContext());
+    expect(runtime.ctx.mem["res"]).toBe("hi");
+    expect(runtime).toMatchSnapshot();
+  });
+
   test("res = 1 + (3 * 5)**2", async () => {
     const exp = `res = 1 + (3 * 5)/2;`;
     const astTree = await swc.parse(exp);
@@ -138,6 +151,16 @@ describe("TLite condition", () => {
     expect(runtime).toMatchSnapshot();
   });
 
+  test("res = 2 > 18 ? 'mature' : 'teen'", async () => {
+    const exp = `res = 2 > 18 ? 'mature' : 'teen'`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["res"]).toBe("teen");
+    expect(runtime).toMatchSnapshot();
+  });
+
   test("if (inp%2 == 0) isEven = true else isEven = false", async () => {
     const exp = `
       if (inp%2 ==0) 
@@ -151,6 +174,21 @@ describe("TLite condition", () => {
     ctx.mem["inp"] = "22";
     runtime.run(astTree, ctx);
     expect(runtime.ctx.mem["isEven"]).toBe(true);
+    expect(runtime).toMatchSnapshot();
+  });
+
+  test("if (3%2 == 0) isEven = true else isEven = false", async () => {
+    const exp = `
+      if (3%2 ==0) 
+        isEven = true
+      else 
+        isEven = false
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+    expect(runtime.ctx.mem["isEven"]).toBe(false);
     expect(runtime).toMatchSnapshot();
   });
 });

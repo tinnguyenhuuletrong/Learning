@@ -142,6 +142,32 @@ TLiteExpVisitor {
 }
 `;
 
+exports[`TLite condition if (3%2 == 0) isEven = true else isEven = false 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "exec if_branch test",
+      "got num: 3",
+      "got num: 2",
+      "exec % for v1:3, v2:2 -> 1",
+      "got num: 0",
+      "exec == for v1:1, v2:0 -> false",
+      "got bool: false",
+      "assign isEven = false",
+      "exec if_branch: false",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "isEven": false,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
 exports[`TLite condition if (inp%2 == 0) isEven = true else isEven = false 1`] = `
 TLiteExpVisitor {
   "ctx": RuntimeContext {
@@ -162,6 +188,30 @@ TLiteExpVisitor {
     "mem": Object {
       "inp": "22",
       "isEven": true,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite condition res = 2 > 18 ? 'mature' : 'teen' 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "exec if_branch_expression test",
+      "got num: 2",
+      "got num: 18",
+      "exec > for v1:2, v2:18 -> false",
+      "got str: teen",
+      "exec if_branch_expression: false -> teen",
+      "assign res = \\"teen\\"",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "res": "teen",
     },
     "stack": Array [],
   },
@@ -235,6 +285,27 @@ TLiteExpVisitor {
     "mem": Object {
       "inp": "-1",
       "res": false,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
+exports[`TLite expression res = 'hello' 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got str: hello",
+      "assign res = \\"hello\\"",
+      "got str: hi",
+      "assign res = \\"hi\\"",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "res": "hi",
     },
     "stack": Array [],
   },
