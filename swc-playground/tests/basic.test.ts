@@ -190,3 +190,19 @@ describe("TLite function call", () => {
     expect(runtime).toMatchSnapshot();
   });
 });
+
+describe("TLite arrow function call", () => {
+  test("f = i => i + 1; res = f(1) * f(5)", async () => {
+    const exp = `
+    f = i => i + 1
+    res = f(1) * f(5)
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual(12);
+    expect(runtime).toMatchSnapshot();
+  });
+});

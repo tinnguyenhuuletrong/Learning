@@ -1,5 +1,6 @@
 import {
   ArrayExpression,
+  ArrowFunctionExpression,
   AssignmentExpression,
   BinaryExpression,
   BooleanLiteral,
@@ -14,6 +15,7 @@ import {
   NumericLiteral,
   ObjectExpression,
   ParenthesisExpression,
+  Pattern,
   Property,
   RuntimeGeneric,
   RuntimeKV,
@@ -27,6 +29,7 @@ import { Visitor } from "@swc/core/Visitor";
 import isFunction from "lodash/isFunction";
 import get from "lodash/get";
 import set from "lodash/set";
+import cloneDeep from "lodash/cloneDeep";
 
 declare module "@swc/core/types" {
   type RuntimeGeneric = String | Number | Boolean | Object;
@@ -54,6 +57,7 @@ export class RuntimeContext {
   _logs = [];
   funcDb: Record<string, Function> = {};
 
+  private static EMPTY_OBJ = Object.freeze({});
   private _opts: RuntimeContextOption;
 
   constructor(opts: RuntimeContextOption = { debugTrace: true }) {
@@ -62,6 +66,56 @@ export class RuntimeContext {
 
   addLog(inp: string) {
     if (this._opts.debugTrace) this._logs.push(inp);
+  }
+
+  pushStack(params: Pattern[], args: any[]) {
+    const isEnoughParam = params.length === args.length;
+    if (!isEnoughParam) throw new Error("not enough params");
+
+    const kvPairs = [];
+    for (let i = 0; i < params.length; i++) {
+      const p = params[i];
+      switch (p.type) {
+        case "Identifier":
+          kvPairs.push([p.value, args[i]]);
+          break;
+
+        default:
+          throw new Error(`pushStack unknown param type ${p.type}`);
+      }
+    }
+    this.stack.push(Object.fromEntries(kvPairs));
+    this.addLog(`push stack ${JSON.stringify(this.topStack())}`);
+  }
+
+  topStack() {
+    return this.stack[0] || RuntimeContext.EMPTY_OBJ;
+  }
+
+  popStack() {
+    this.addLog(`pop stack`);
+    this.stack.pop();
+  }
+
+  resolveRuntimeValue(n: Expression) {
+    switch (n.type) {
+      case "Identifier":
+        // stack -> heap -> global
+        const res =
+          safeGetPropFromObject(this.topStack(), n.value) ||
+          safeGetPropFromObject(this.mem, n.value) ||
+          safeGetPropFromObject(this.funcDb, n.value);
+        if (!res) throw new Error(`resolveRuntimeValue failed for ${n.value}`);
+        return res;
+
+      case "MemberExpression":
+        const { variableName, pathName } =
+          n._runtimeValue as RuntimeObjectExpression;
+        return get(this.mem[variableName], pathName);
+
+      default:
+        return n._runtimeValue;
+    }
   }
 }
 
@@ -103,23 +157,10 @@ function asIdentifierPerformUpdate(
   }
 }
 
-function resolveValue(ctx: RuntimeContext, n: Expression) {
-  switch (n.type) {
-    case "Identifier":
-      const val = ctx.mem[n.value];
-      const func = ctx.funcDb[n.value];
-      const res = val || func;
-      if (!res) throw new Error(`resolveRuntimeValue failed for ${n.value}`);
-      return res;
-
-    case "MemberExpression":
-      const { variableName, pathName } =
-        n._runtimeValue as RuntimeObjectExpression;
-      return get(ctx.mem[variableName], pathName);
-
-    default:
-      return n._runtimeValue;
-  }
+function safeGetPropFromObject(obj: Object, k: string) {
+  const keys = Object.keys(obj);
+  if (!keys.includes(k)) return undefined;
+  return obj[k];
 }
 
 export class TLiteExpVisitor extends Visitor {
@@ -157,7 +198,7 @@ export class TLiteExpVisitor extends Visitor {
     super.visitUnaryExpression(n);
 
     const op = n.operator;
-    const v = resolveValue(this.ctx, n.argument);
+    const v = this.ctx.resolveRuntimeValue(n.argument);
     let res;
     switch (op) {
       case "!":
@@ -186,8 +227,8 @@ export class TLiteExpVisitor extends Visitor {
     super.visitBinaryExpression(n);
     const op = n.operator;
     // can left / right be NumericLiteral / Expression / Identify
-    const v1 = resolveValue(this.ctx, n.left);
-    const v2 = resolveValue(this.ctx, n.right);
+    const v1 = this.ctx.resolveRuntimeValue(n.left);
+    const v2 = this.ctx.resolveRuntimeValue(n.right);
     let res;
     switch (op) {
       case "+":
@@ -288,7 +329,7 @@ export class TLiteExpVisitor extends Visitor {
   visitArrayExpression(n: ArrayExpression): Expression {
     super.visitArrayExpression(n);
     n._runtimeValue = Array.from(
-      n.elements.map((itm) => resolveValue(this.ctx, itm.expression))
+      n.elements.map((itm) => this.ctx.resolveRuntimeValue(itm.expression))
     );
 
     this.ctx.addLog(`got array: ${JSON.stringify(n._runtimeValue)}`);
@@ -389,7 +430,7 @@ export class TLiteExpVisitor extends Visitor {
     switch (calleeType) {
       case "Identifier":
         funcName = n.callee.value;
-        calleeFunc = this.ctx.funcDb[n.callee.value];
+        calleeFunc = this.ctx.resolveRuntimeValue(n.callee);
         if (!isFunction(calleeFunc))
           throw new Error(
             `call expression error function with name ${n.callee.value} not defined`
@@ -401,7 +442,7 @@ export class TLiteExpVisitor extends Visitor {
     }
 
     const args = n.arguments.map((itm) =>
-      resolveValue(this.ctx, itm.expression)
+      this.ctx.resolveRuntimeValue(itm.expression)
     );
     const res = calleeFunc.apply(callThis, args);
 
@@ -412,6 +453,22 @@ export class TLiteExpVisitor extends Visitor {
     );
     n._runtimeValue = res;
     return n;
+  }
+
+  // arrow function
+  visitArrowFunctionExpression(e: ArrowFunctionExpression): Expression {
+    // const body = cloneDeep(e.body);
+    const body = e.body;
+    const funcHandler = (...args) => {
+      this.ctx.pushStack(e.params, args);
+      const bodyRet = this.visitArrowBody(body);
+      this.ctx.popStack();
+      return bodyRet._runtimeValue;
+    };
+
+    this.ctx.addLog(`got arrow function`);
+    e._runtimeValue = funcHandler;
+    return e;
   }
 
   // basic type string, boolean, number, ...

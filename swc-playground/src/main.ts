@@ -5,10 +5,8 @@ import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
 const code = `
-res = filter(
-  map([1,2,3], plusOne), 
-  isOdd
-)
+f = tmp => tmp + 1
+res = f(1) * f(5)
 `;
 
 const res = swc.parseSync(code);
