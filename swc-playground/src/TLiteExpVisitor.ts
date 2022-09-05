@@ -215,7 +215,6 @@ export class TLiteExpVisitor extends Visitor {
     switch (op) {
       case "=":
         res = nextVal;
-        doUpdate(nextVal);
         break;
       case "+=":
         res = currentVal + nextVal;
