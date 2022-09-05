@@ -7,14 +7,17 @@ import {
   BooleanLiteral,
   CallExpression,
   ConditionalExpression,
+  Declaration,
   Expression,
   ExpressionStatement,
+  FunctionDeclaration,
   IfStatement,
   KeyValueProperty,
   MemberExpression,
   Module,
   NumericLiteral,
   ObjectExpression,
+  Param,
   ParenthesisExpression,
   Pattern,
   Property,
@@ -180,6 +183,11 @@ export class RuntimeContext {
       default:
         throw new RuntimeError(`missing implement ${exp.type}`, { ctx: this });
     }
+  }
+
+  registerFunc(name, funcHandler: Function) {
+    const memArea = this.activeMemArea();
+    memArea[name] = funcHandler;
   }
 }
 
@@ -470,8 +478,7 @@ export class TLiteExpVisitor extends Visitor {
     return n;
   }
 
-  // function
-
+  // function call
   visitCallExpression(n: CallExpression): Expression {
     super.visitCallExpression(n);
 
@@ -509,6 +516,27 @@ export class TLiteExpVisitor extends Visitor {
     );
     n._runtimeValue = res;
     return n;
+  }
+
+  // function declaration
+  visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
+    const funcName = decl.identifier.value;
+    const body = decl.body;
+
+    const funcHandler = (...args) => {
+      this.ctx.pushStackFuncCall(
+        decl.params.map((itm) => itm.pat),
+        args
+      );
+      const bodyRet = this.visitBlockStatement(body);
+      this.ctx.popStack();
+      return bodyRet._runtimeValue;
+    };
+
+    this.ctx.registerFunc(funcName, funcHandler);
+    this.ctx.addLog(`got decl function ${funcName}`);
+
+    return decl;
   }
 
   // arrow function

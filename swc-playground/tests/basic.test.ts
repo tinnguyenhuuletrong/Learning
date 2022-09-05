@@ -322,3 +322,23 @@ describe("TLite arrow function call", () => {
     expect(runtime).toMatchSnapshot();
   });
 });
+
+describe("TLite function declare", () => {
+  test("res = add(1,2) + mul(5,6)", async () => {
+    const exp = `
+    function add(a, b) {
+      c = a * 2
+      return a + b + c
+    }
+    mul = (a,b) => a * b
+    res = add(1,2) + mul(5,6)
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual(35);
+    expect(runtime).toMatchSnapshot();
+  });
+});

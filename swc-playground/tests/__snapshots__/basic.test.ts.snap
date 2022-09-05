@@ -568,6 +568,47 @@ TLiteExpVisitor {
 }
 `;
 
+exports[`TLite function declare res = add(1,2) + mul(5,6) 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got decl function add",
+      "got arrow function",
+      "assign mul = undefined",
+      "got num: 1",
+      "got num: 2",
+      "push stack {\\"a\\":1,\\"b\\":2}",
+      "got num: 2",
+      "exec * for v1:1, v2:2 -> 2",
+      "assign c = 2",
+      "exec + for v1:1, v2:2 -> 3",
+      "exec + for v1:3, v2:2 -> 5",
+      "got block return: 5",
+      "pop stack",
+      "exec function call add() : args [1,2] -> res 5",
+      "got num: 5",
+      "got num: 6",
+      "push stack {\\"a\\":5,\\"b\\":6}",
+      "exec * for v1:5, v2:6 -> 30",
+      "pop stack",
+      "exec function call mul() : args [5,6] -> res 30",
+      "exec + for v1:5, v2:30 -> 35",
+      "assign res = 35",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "add": [Function],
+      "mul": [Function],
+      "res": 35,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
 exports[`TLite nestest mixed object mixed obj type and dynamic props 1 1`] = `
 TLiteExpVisitor {
   "ctx": RuntimeContext {

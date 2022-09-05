@@ -5,7 +5,12 @@ import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
 const code = `
-res = map([1,2,3], itm => itm ** 2)
+function add(a, b) {
+  c = a * 2
+  return a + b + c
+}
+mul = (a,b) => a * b
+res = add(1,2) + mul(5,6)
 `;
 
 const res = swc.parseSync(code);
