@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "dev": "ts-node src/main",
+    "dev1": "ts-node src/mainAOT",
     "build": "tsc"
   },
   "author": "",
