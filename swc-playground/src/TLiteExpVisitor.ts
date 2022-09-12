@@ -1,3 +1,4 @@
+import type * as T from "./type";
 import {
   ArrayExpression,
   ArrowFunctionExpression,
@@ -35,22 +36,6 @@ import isFunction from "lodash/isFunction";
 import get from "lodash/get";
 import set from "lodash/set";
 import cloneDeep from "lodash/cloneDeep";
-
-declare module "@swc/core/types" {
-  type RuntimeGeneric = String | Number | Boolean | Object;
-  type RuntimeKV = [RuntimeGeneric, RuntimeGeneric];
-  type RuntimeObjectExpression = {
-    variableName: string;
-    pathName: string;
-  };
-
-  interface Node {
-    _runtimeValue: RuntimeGeneric | RuntimeKV | RuntimeObjectExpression;
-  }
-  interface Fn {
-    _runtimeValue: Function;
-  }
-}
 
 type RuntimeContextOption = {
   debugTrace: boolean;

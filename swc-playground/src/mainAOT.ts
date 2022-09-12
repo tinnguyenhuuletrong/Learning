@@ -8,7 +8,8 @@ import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
 const code = `
-res = inp + 2 ** (4/2)
+res = {a: 1, b: 2, d: inp}
+res.c = 10
 `;
 
 const res = swc.parseSync(code);
@@ -22,3 +23,5 @@ console.dir(
   },
   { depth: 10 }
 );
+
+console.log(ctx.toString());
