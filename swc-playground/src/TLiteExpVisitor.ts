@@ -47,6 +47,12 @@ function safeGetPropFromObject(obj: Object, k: string) {
   return obj[k];
 }
 
+class BlockReturnInt extends Error {
+  constructor(message, public value) {
+    super(message);
+  }
+}
+
 export class RuntimeError extends Error {
   ctx?: RuntimeContext = null;
   extraInfo? = null;
@@ -539,16 +545,29 @@ export class TLiteExpVisitor extends Visitor {
     return e;
   }
 
+  visitReturnStatement(stmt: ReturnStatement): Statement {
+    super.visitReturnStatement(stmt);
+    stmt._runtimeValue = this.ctx.resolveRuntimeValue(stmt.argument);
+    this.ctx.addLog(`got returnStatement ${stmt._runtimeValue}`);
+    if (stmt._runtimeValue)
+      throw new BlockReturnInt("got return", stmt._runtimeValue);
+    return stmt;
+  }
+
   // block stms
   visitBlockStatement(block: BlockStatement): BlockStatement {
-    super.visitBlockStatement(block);
-    const res = block.stmts.find(
-      (itm) => itm.type === "ReturnStatement"
-    ) as ReturnStatement;
-    if (res && res.argument) {
-      block._runtimeValue = this.ctx.resolveRuntimeValue(res.argument);
-      this.ctx.addLog(`got block return: ${block._runtimeValue}`);
+    let earlyReturnVal;
+    try {
+      super.visitBlockStatement(block);
+    } catch (error) {
+      if (error instanceof BlockReturnInt) {
+        earlyReturnVal = error.value;
+      } else throw error;
     }
+
+    block._runtimeValue = earlyReturnVal;
+    this.ctx.addLog(`got block return: ${block._runtimeValue}`);
+
     return block;
   }
 

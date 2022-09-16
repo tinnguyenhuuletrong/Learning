@@ -341,4 +341,37 @@ describe("TLite function declare", () => {
     expect(runtime.ctx.mem["res"]).toEqual(35);
     expect(runtime).toMatchSnapshot();
   });
+
+  test("function add(a,b){if(a<0)return-1;c=a*2;return a+b+c};res=add(-1,2)*add(5,10)", async () => {
+    const exp = `
+    function add(a, b) {
+      if (a<0) return -1
+      c = a * 2
+      return a + b + c
+    }
+    res = add(-1,2) * add(5, 10)
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual(-25);
+    expect(runtime).toMatchSnapshot();
+  });
+});
+
+describe("TLite minify script", () => {
+  test("function add(d,a){return d<0?-1:(d+a+2*d)}res=add(-1,2)*add(5,10);", async () => {
+    const exp = `
+    function add(d,a){return d<0?-1:(d+a+2*d)}res=add(-1,2)*add(5,10);
+    `;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteExpVisitor();
+    const ctx = new RuntimeContext();
+    runtime.run(astTree, ctx);
+
+    expect(runtime.ctx.mem["res"]).toEqual(-25);
+    expect(runtime).toMatchSnapshot();
+  });
 });

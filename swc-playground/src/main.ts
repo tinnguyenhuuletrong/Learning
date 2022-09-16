@@ -4,13 +4,13 @@ import { wrappedWithFuncCallLog } from "./proxyHelper";
 import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
+
 const code = `
 function add(a, b) {
-  c = a * 2
-  return a + b + c
+  if(a < 10) return 1
+  return a + b
 }
-mul = (a,b) => a * b
-res = add(1,2) + mul(5,6)
+res = add(1,2)
 `;
 
 const res = swc.parseSync(code);
