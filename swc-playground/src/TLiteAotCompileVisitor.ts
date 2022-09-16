@@ -1,9 +1,15 @@
 import type * as T from "./type";
 import {
+  ArrayExpression,
   AssignmentExpression,
   BinaryExpression,
   BooleanLiteral,
+  ConditionalExpression,
+  Declaration,
   Expression,
+  FunctionDeclaration,
+  Identifier,
+  IfStatement,
   KeyValueProperty,
   MemberExpression,
   Module,
@@ -24,6 +30,8 @@ export enum EOPS {
   MLOAD = "MLOAD",
   MSAVE = "MSAVE",
   BEXP = "BEXP",
+  BRANCH = "BRANCH",
+  FUNCDECLARE = "FUNCDECLARE",
 }
 
 export type ParamSPUSH = {
@@ -40,12 +48,25 @@ export type ParamMSAVE = {
   path: string;
   nextVal: Op;
 };
+export type ParamBRANCH = {
+  cond: Op[];
+  trueBranch: Op[];
+  falseBranch: Op[];
+};
+
+export type ParamFUNCDECLARE = {
+  name: string;
+  params: string[];
+  body: Op[];
+};
 export type AnyParam =
   | ParamSPUSH
   | ParamBEXP
   | ParamMLOAD
   | ParamSPOP
-  | ParamMSAVE;
+  | ParamMSAVE
+  | ParamFUNCDECLARE
+  | ParamBRANCH;
 
 export class Op {
   constructor(public op: EOPS, public params: AnyParam) {}
@@ -75,6 +96,28 @@ export class Op {
       case EOPS.BEXP: {
         const p = this.params as ParamBEXP;
         return `${this.op} - ${p[0]} {${p[1].toString()}} {${p[2].toString()}}`;
+      }
+
+      case EOPS.BRANCH: {
+        const p = this.params as ParamBRANCH;
+        return `${this.op} - 
+        if: 
+        \t${p.cond} 
+        true: 
+        \t${p.trueBranch}
+        false:
+        \t${p.falseBranch}`;
+      }
+
+      case EOPS.FUNCDECLARE: {
+        const p = this.params as ParamFUNCDECLARE;
+        return `${this.op} - 
+        name: 
+        \t${p.name} 
+        params: 
+        \t${p.params}
+        body:
+        \t${p.body}`;
       }
 
       default:
@@ -126,6 +169,13 @@ export class CompilerContext {
     }
   }
 
+  captureOps(visitFun: Function) {
+    const beginIndex = this.ops.length - 1;
+    visitFun();
+    const endIndex = this.ops.length - 1;
+    return this.ops.splice(beginIndex + 1, endIndex - beginIndex);
+  }
+
   toString() {
     return this.ops.map((itm) => itm.toString()).join("\n");
   }
@@ -138,6 +188,53 @@ export class TLiteAotCompileVisitor extends Visitor {
     this.ctx = ctx;
     const res = this.visitProgram(astCode);
     return res;
+  }
+
+  // conditional expression
+  visitConditionalExpression(n: ConditionalExpression): Expression {
+    const cond = this.ctx.captureOps(() => {
+      this.visitExpression(n.test);
+    });
+
+    const trueBranch = this.ctx.captureOps(() => {
+      this.visitExpression(n.consequent);
+    });
+
+    const falseBranch = this.ctx.captureOps(() => {
+      this.visitExpression(n.alternate);
+    });
+
+    const param: ParamBRANCH = {
+      cond,
+      trueBranch,
+      falseBranch,
+    };
+
+    this.ctx.ops.push(new Op(EOPS.BRANCH, param));
+    return n;
+  }
+
+  visitIfStatement(n: IfStatement) {
+    const cond = this.ctx.captureOps(() => {
+      this.visitExpression(n.test);
+    });
+
+    const trueBranch = this.ctx.captureOps(() => {
+      this.visitStatement(n.consequent);
+    });
+
+    const falseBranch = this.ctx.captureOps(() => {
+      this.visitOptionalStatement(n.alternate);
+    });
+
+    const param: ParamBRANCH = {
+      cond,
+      trueBranch,
+      falseBranch,
+    };
+
+    this.ctx.ops.push(new Op(EOPS.BRANCH, param));
+    return n;
   }
 
   // object member
@@ -222,6 +319,33 @@ export class TLiteAotCompileVisitor extends Visitor {
     }
     this.ctx.ops.push(op);
     return n;
+  }
+
+  // Function
+  visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
+    const funcName = decl.identifier.value;
+
+    const bodyOs = this.ctx.captureOps(() => {
+      this.visitBlockStatement(decl.body);
+    });
+    const params: any = decl.params.map((itm) => {
+      switch (itm.pat.type) {
+        case "Identifier":
+          return itm.pat.value;
+        default:
+          throw new Error("unknown function declare param");
+      }
+    });
+
+    const p: ParamFUNCDECLARE = {
+      name: funcName,
+      params,
+      body: bodyOs,
+    };
+    const op = new Op(EOPS.FUNCDECLARE, p);
+    this.ctx.ops.push(op);
+
+    return decl;
   }
 
   visitBinaryExpression(n: BinaryExpression) {
@@ -317,6 +441,23 @@ export class TLiteAotCompileVisitor extends Visitor {
     }
 
     this.ctx.ops.push(new Op(EOPS.SPUSH, { type: "kv", v: [key, val] }));
+    return n;
+  }
+
+  visitArrayExpression(n: ArrayExpression): Expression {
+    super.visitArrayExpression(n);
+    n._runtimeValue = n.elements.map((itm) => {
+      switch (itm.expression.type) {
+        case "Identifier":
+          return new Op(EOPS.MLOAD, { variable: itm.expression.value });
+        default:
+          return new Op(EOPS.SPOP, {});
+      }
+    });
+    this.ctx.ops.push(
+      new Op(EOPS.SPUSH, { type: "array", v: n._runtimeValue })
+    );
+
     return n;
   }
 }

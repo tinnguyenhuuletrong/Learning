@@ -8,8 +8,10 @@ import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
 const code = `
-res = {a: 1, b: 2, d: inp}
-res.c = 10
+function add(a,b) {
+  return a + b
+}
+res = add(1,2) + add(3,4)
 `;
 
 const res = swc.parseSync(code);
