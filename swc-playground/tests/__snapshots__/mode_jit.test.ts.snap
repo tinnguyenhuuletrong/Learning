@@ -662,6 +662,56 @@ TLiteExpVisitor {
 }
 `;
 
+exports[`TLite minify script function add(d,a){return d<0?-1:(d+a+2*d)}res=add(-1,2)*add(5,10); 1`] = `
+TLiteExpVisitor {
+  "ctx": RuntimeContext {
+    "_logs": Array [
+      "got decl function add",
+      "got num: 1",
+      "exec - for v:1 -> -1",
+      "got num: 2",
+      "push stack {\\"d\\":-1,\\"a\\":2}",
+      "exec if_branch_expression test",
+      "got num: 0",
+      "exec < for v1:-1, v2:0 -> true",
+      "got num: 1",
+      "exec - for v:1 -> -1",
+      "exec if_branch_expression: true -> -1",
+      "got returnStatement -1",
+      "got block return: -1",
+      "pop stack",
+      "exec function call add() : args [-1,2] -> res -1",
+      "got num: 5",
+      "got num: 10",
+      "push stack {\\"d\\":5,\\"a\\":10}",
+      "exec if_branch_expression test",
+      "got num: 0",
+      "exec < for v1:5, v2:0 -> false",
+      "exec + for v1:5, v2:10 -> 15",
+      "got num: 2",
+      "exec * for v1:2, v2:5 -> 10",
+      "exec + for v1:15, v2:10 -> 25",
+      "exec if_branch_expression: false -> 25",
+      "got returnStatement 25",
+      "got block return: 25",
+      "pop stack",
+      "exec function call add() : args [5,10] -> res 25",
+      "exec * for v1:-1, v2:25 -> -25",
+      "assign res = -25",
+    ],
+    "_opts": Object {
+      "debugTrace": true,
+    },
+    "funcDb": Object {},
+    "mem": Object {
+      "add": [Function],
+      "res": -25,
+    },
+    "stack": Array [],
+  },
+}
+`;
+
 exports[`TLite nestest mixed object mixed obj type and dynamic props 1 1`] = `
 TLiteExpVisitor {
   "ctx": RuntimeContext {

@@ -1,0 +1,658 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TLite aot compiler: array, object res = [1,2,{c:true}] 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "array",
+              "v": Array [
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "number",
+                    "v": 1,
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "number",
+                    "v": 2,
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "object",
+                    "v": Array [
+                      Object {
+                        "key": "c",
+                        "val": Op {
+                          "op": "SVAL",
+                          "params": Object {
+                            "type": "bool",
+                            "v": true,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: array, object res = [1,2,inp > 18,'name'] 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "array",
+              "v": Array [
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "number",
+                    "v": 1,
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "number",
+                    "v": 2,
+                  },
+                },
+                Op {
+                  "op": "BEXP",
+                  "params": Object {
+                    "op": ">",
+                    "v1": Op {
+                      "op": "SVAL",
+                      "params": Object {
+                        "type": "variable",
+                        "v": "inp",
+                      },
+                    },
+                    "v2": Op {
+                      "op": "SVAL",
+                      "params": Object {
+                        "type": "number",
+                        "v": 18,
+                      },
+                    },
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "string",
+                    "v": "name",
+                  },
+                },
+              ],
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: array, object res = {b:true, i: 1, v: inp, a: [1,3], o: {nestest: {}}} 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "object",
+              "v": Array [
+                Object {
+                  "key": "b",
+                  "val": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "bool",
+                      "v": true,
+                    },
+                  },
+                },
+                Object {
+                  "key": "i",
+                  "val": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 1,
+                    },
+                  },
+                },
+                Object {
+                  "key": "v",
+                  "val": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "variable",
+                      "v": "inp",
+                    },
+                  },
+                },
+                Object {
+                  "key": "a",
+                  "val": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "array",
+                      "v": Array [
+                        Op {
+                          "op": "SVAL",
+                          "params": Object {
+                            "type": "number",
+                            "v": 1,
+                          },
+                        },
+                        Op {
+                          "op": "SVAL",
+                          "params": Object {
+                            "type": "number",
+                            "v": 3,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                Object {
+                  "key": "o",
+                  "val": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "object",
+                      "v": Array [
+                        Object {
+                          "key": "nestest",
+                          "val": Op {
+                            "op": "SVAL",
+                            "params": Object {
+                              "type": "object",
+                              "v": Array [],
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment 1 + (3 * 5)**2 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "BEXP",
+        "params": Object {
+          "op": "+",
+          "v1": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "number",
+              "v": 1,
+            },
+          },
+          "v2": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": "**",
+              "v1": Op {
+                "op": "BEXP",
+                "params": Object {
+                  "op": "*",
+                  "v1": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 3,
+                    },
+                  },
+                  "v2": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 5,
+                    },
+                  },
+                },
+              },
+              "v2": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "number",
+                  "v": 2,
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = !(+inp < 2 || +inp > 5) 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "UEXP",
+            "params": Object {
+              "args": Array [
+                Op {
+                  "op": "BEXP",
+                  "params": Object {
+                    "op": "||",
+                    "v1": Op {
+                      "op": "BEXP",
+                      "params": Object {
+                        "op": "<",
+                        "v1": Op {
+                          "op": "UEXP",
+                          "params": Object {
+                            "args": Array [
+                              Op {
+                                "op": "SVAL",
+                                "params": Object {
+                                  "type": "variable",
+                                  "v": "inp",
+                                },
+                              },
+                            ],
+                            "op": "+",
+                          },
+                        },
+                        "v2": Op {
+                          "op": "SVAL",
+                          "params": Object {
+                            "type": "number",
+                            "v": 2,
+                          },
+                        },
+                      },
+                    },
+                    "v2": Op {
+                      "op": "BEXP",
+                      "params": Object {
+                        "op": ">",
+                        "v1": Op {
+                          "op": "UEXP",
+                          "params": Object {
+                            "args": Array [
+                              Op {
+                                "op": "SVAL",
+                                "params": Object {
+                                  "type": "variable",
+                                  "v": "inp",
+                                },
+                              },
+                            ],
+                            "op": "+",
+                          },
+                        },
+                        "v2": Op {
+                          "op": "SVAL",
+                          "params": Object {
+                            "type": "number",
+                            "v": 5,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+              "op": "!",
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = 'hello' 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "string",
+              "v": "hello",
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "string",
+              "v": "hi",
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = 1 + (3 * 5)/2 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": "+",
+              "v1": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "number",
+                  "v": 1,
+                },
+              },
+              "v2": Op {
+                "op": "BEXP",
+                "params": Object {
+                  "op": "/",
+                  "v1": Op {
+                    "op": "BEXP",
+                    "params": Object {
+                      "op": "*",
+                      "v1": Op {
+                        "op": "SVAL",
+                        "params": Object {
+                          "type": "number",
+                          "v": 3,
+                        },
+                      },
+                      "v2": Op {
+                        "op": "SVAL",
+                        "params": Object {
+                          "type": "number",
+                          "v": 5,
+                        },
+                      },
+                    },
+                  },
+                  "v2": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 2,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = inp < 2 || inp > 5 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": "||",
+              "v1": Op {
+                "op": "BEXP",
+                "params": Object {
+                  "op": "<",
+                  "v1": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "variable",
+                      "v": "inp",
+                    },
+                  },
+                  "v2": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 2,
+                    },
+                  },
+                },
+              },
+              "v2": Op {
+                "op": "BEXP",
+                "params": Object {
+                  "op": ">",
+                  "v1": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "variable",
+                      "v": "inp",
+                    },
+                  },
+                  "v2": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 5,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = inp <= 2 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": "<=",
+              "v1": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "variable",
+                  "v": "inp",
+                },
+              },
+              "v2": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "number",
+                  "v": 2,
+                },
+              },
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = inp > 2 && inp <= 5 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": "&&",
+              "v1": Op {
+                "op": "BEXP",
+                "params": Object {
+                  "op": ">",
+                  "v1": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "variable",
+                      "v": "inp",
+                    },
+                  },
+                  "v2": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 2,
+                    },
+                  },
+                },
+              },
+              "v2": Op {
+                "op": "BEXP",
+                "params": Object {
+                  "op": "<=",
+                  "v1": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "variable",
+                      "v": "inp",
+                    },
+                  },
+                  "v2": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "number",
+                      "v": 5,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: expression, assignment res = inp > 2 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": ">",
+              "v1": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "variable",
+                  "v": "inp",
+                },
+              },
+              "v2": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "number",
+                  "v": 2,
+                },
+              },
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;

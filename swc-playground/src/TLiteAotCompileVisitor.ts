@@ -16,33 +16,48 @@ import {
   NumericLiteral,
   ObjectExpression,
   Property,
+  PropertyName,
   RuntimeKV,
   RuntimeObjectExpression,
   SpreadElement,
   StringLiteral,
+  UnaryExpression,
 } from "@swc/core/types";
 import Visitor from "@swc/core/Visitor";
 import util from "util";
 
 export enum EOPS {
-  SPUSH = "SPUSH",
-  SPOP = "SPOP",
-  MLOAD = "MLOAD",
+  SVAL = "SVAL",
   MSAVE = "MSAVE",
+  UEXP = "UEXP",
   BEXP = "BEXP",
   BRANCH = "BRANCH",
   FUNCDECLARE = "FUNCDECLARE",
 }
 
-export type ParamSPUSH = {
-  type: "number" | "string" | "boolean";
-  v: any;
+type ParamSVAL_ObjectKV = { key: string; val: Op };
+type ParamSVAL_ArrayElement = Op;
+
+export type ParamSVAL = {
+  type: "number" | "string" | "boolean" | "variable" | "object" | "array";
+  v:
+    | number
+    | string
+    | boolean
+    | ParamSVAL_ObjectKV[]
+    | ParamSVAL_ArrayElement[];
 };
-export type ParamMLOAD = {
-  variable: string;
-};
+
 export type ParamSPOP = {};
-export type ParamBEXP = [string, Op, Op];
+export type ParamBEXP = {
+  op: string;
+  v1: Op;
+  v2: Op;
+};
+export type ParamUEXP = {
+  op: string;
+  args: Op[];
+};
 export type ParamMSAVE = {
   perform: string;
   path: string;
@@ -60,9 +75,8 @@ export type ParamFUNCDECLARE = {
   body: Op[];
 };
 export type AnyParam =
-  | ParamSPUSH
+  | ParamSVAL
   | ParamBEXP
-  | ParamMLOAD
   | ParamSPOP
   | ParamMSAVE
   | ParamFUNCDECLARE
@@ -73,29 +87,39 @@ export class Op {
 
   toString() {
     switch (this.op) {
-      case EOPS.SPUSH: {
-        const p = this.params as ParamSPUSH;
-        return `${this.op} - ${p.type} ${p.v}`;
-      }
+      case EOPS.SVAL: {
+        const p = this.params as ParamSVAL;
 
-      case EOPS.SPOP: {
-        const p = this.params as ParamSPOP;
-        return `${this.op}`;
-      }
+        switch (p.type) {
+          case "object": {
+            const kv = p.v as ParamSVAL_ObjectKV[];
+            return `${this.op} - ${p.type} {${kv.map(
+              (itm) => `${itm.key}:${itm.val}`
+            )}}`;
+          }
+          case "array": {
+            const kv = p.v as ParamSVAL_ArrayElement[];
+            return `${this.op} - ${p.type} [${p.v}]`;
+          }
 
-      case EOPS.MLOAD: {
-        const p = this.params as ParamMLOAD;
-        return `${this.op} - ${p.variable}`;
+          default:
+            return `${this.op} - ${p.type} ${p.v}`;
+        }
       }
 
       case EOPS.MSAVE: {
         const p = this.params as ParamMSAVE;
-        return `${this.op} - ${p.path} ${p.perform} {${p.nextVal.toString()}}`;
+        return `${this.op} - ${p.path} ${p.perform} ${p.nextVal.toString()}`;
       }
 
       case EOPS.BEXP: {
         const p = this.params as ParamBEXP;
-        return `${this.op} - ${p[0]} {${p[1].toString()}} {${p[2].toString()}}`;
+        return `${this.op} ${p.op} \nv1:${p.v1} \nv2:${p.v2}`;
+      }
+
+      case EOPS.UEXP: {
+        const p = this.params as ParamUEXP;
+        return `${this.op} ${p.op} (${p.args})`;
       }
 
       case EOPS.BRANCH: {
@@ -145,35 +169,33 @@ export class CompilerError extends Error {
 export class CompilerContext {
   ops: Op[] = [];
 
-  resolveRuntimeValue(n: Expression) {
-    switch (n.type) {
-      case "Identifier":
-        // stack -> heap -> global
-        // const res =
-        //   safeGetPropFromObject(this.topStack(), n.value) ||
-        //   safeGetPropFromObject(this.mem, n.value) ||
-        //   safeGetPropFromObject(this.funcDb, n.value);
-        // if (!res)
-        //   throw new RuntimeError(`resolveRuntimeValue failed for ${n.value}`, {
-        //     ctx: this,
-        //   });
-        return new Op(EOPS.MLOAD, { variable: n.value });
+  // resolveRuntimeValue(n: Expression) {
+  //   switch (n.type) {
+  //     case "MemberExpression":
+  //       const { variableName, pathName } =
+  //         n._runtimeValue as RuntimeObjectExpression;
+  //       return new Op(EOPS.MLOAD, { variable: `${variableName}.${pathName}` });
 
-      case "MemberExpression":
-        const { variableName, pathName } =
-          n._runtimeValue as RuntimeObjectExpression;
-        return new Op(EOPS.MLOAD, { variable: `${variableName}.${pathName}` });
-
-      default:
-        return new Op(EOPS.SPOP, {});
-    }
-  }
+  //     default:
+  //       return new Op(EOPS.SPOP, {});
+  //   }
+  // }
 
   captureOps(visitFun: Function) {
     const beginIndex = this.ops.length - 1;
     visitFun();
     const endIndex = this.ops.length - 1;
     return this.ops.splice(beginIndex + 1, endIndex - beginIndex);
+  }
+
+  captureOp(visitFun: Function) {
+    const ops = this.captureOps(visitFun);
+    if (ops.length != 1) {
+      throw new CompilerError(`captureOp has ${ops.length}. expected 1 op`, {
+        ctx: this,
+      });
+    }
+    return ops[0];
   }
 
   toString() {
@@ -280,47 +302,6 @@ export class TLiteAotCompileVisitor extends Visitor {
     return n;
   }
 
-  visitAssignmentExpression(n: AssignmentExpression) {
-    super.visitAssignmentExpression(n);
-    const lexp = n.left as Expression;
-    const perform = n.operator;
-    const nextVal = this.ctx.resolveRuntimeValue(n.right);
-
-    let op;
-    switch (lexp.type) {
-      case "StringLiteral":
-        op = new Op(EOPS.MSAVE, {
-          perform,
-          path: lexp.value,
-          nextVal,
-        });
-        break;
-      case "Identifier":
-        op = new Op(EOPS.MSAVE, {
-          perform,
-          path: lexp.value,
-          nextVal,
-        });
-        break;
-
-      case "MemberExpression": {
-        const { variableName, pathName } = (lexp as any)._runtimeValue;
-        op = new Op(EOPS.MSAVE, {
-          perform,
-          path: `${variableName}.${pathName}`,
-          nextVal,
-        });
-        break;
-      }
-      default:
-        throw new CompilerError(`missing implement ${lexp.type}`, {
-          ctx: this.ctx,
-        });
-    }
-    this.ctx.ops.push(op);
-    return n;
-  }
-
   // Function
   visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
     const funcName = decl.identifier.value;
@@ -348,12 +329,75 @@ export class TLiteAotCompileVisitor extends Visitor {
     return decl;
   }
 
+  // --------------
+  // assignment
+  //  =, +=, ....
+  // --------------
+
+  visitAssignmentExpression(n: AssignmentExpression) {
+    const lexp = n.left as Expression;
+    const perform = n.operator;
+
+    const nextVal = this.ctx.captureOp(() => {
+      n.right = this.visitExpression(n.right);
+    });
+
+    let op;
+    switch (lexp.type) {
+      case "StringLiteral":
+      case "Identifier":
+        op = new Op(EOPS.MSAVE, {
+          perform,
+          path: lexp.value,
+          nextVal,
+        });
+        break;
+
+      case "MemberExpression": {
+        const { variableName, pathName } = (lexp as any)._runtimeValue;
+        op = new Op(EOPS.MSAVE, {
+          perform,
+          path: `${variableName}.${pathName}`,
+          nextVal,
+        });
+        break;
+      }
+      default:
+        throw new CompilerError(`missing implement ${lexp.type}`, {
+          ctx: this.ctx,
+        });
+    }
+    this.ctx.ops.push(op);
+    return n;
+  }
+
+  // --------------
+  // expression
+  //  Binary, Unary
+  // --------------
+
+  visitUnaryExpression(n: UnaryExpression): Expression {
+    const argOp = this.ctx.captureOps(() => {
+      this.visitExpression(n.argument);
+    });
+    const p: ParamUEXP = {
+      op: n.operator,
+      args: argOp,
+    };
+    const op = new Op(EOPS.UEXP, p);
+    this.ctx.ops.push(op);
+    return n;
+  }
+
   visitBinaryExpression(n: BinaryExpression) {
-    super.visitBinaryExpression(n);
     const op = n.operator;
     // can left / right be NumericLiteral / Expression / Identify
-    const v1 = this.ctx.resolveRuntimeValue(n.left);
-    const v2 = this.ctx.resolveRuntimeValue(n.right);
+    const v1 = this.ctx.captureOp(() => {
+      this.visitExpression(n.left);
+    });
+    const v2 = this.ctx.captureOp(() => {
+      this.visitExpression(n.right);
+    });
     let res;
     switch (op) {
       case "+":
@@ -380,8 +424,12 @@ export class TLiteAotCompileVisitor extends Visitor {
 
       case "&&":
       case "||":
-        // res = `BEXP:${op}:${v1}:${v2}`;
-        res = new Op(EOPS.BEXP, [op, v1, v2]);
+        const p: ParamBEXP = {
+          op,
+          v1,
+          v2,
+        };
+        res = new Op(EOPS.BEXP, p);
         break;
       default:
         throw new CompilerError(`unknown op ${op}`, { ctx: this.ctx });
@@ -390,73 +438,81 @@ export class TLiteAotCompileVisitor extends Visitor {
     return n;
   }
 
+  // -----------------
+  // Leaf node
+  //  string, number, boolean, obj, arr
+  // -----------------
+
   visitNumericLiteral(n: NumericLiteral) {
     const v = parseFloat(n.raw);
-    this.ctx.ops.push(new Op(EOPS.SPUSH, { type: "number", v }));
+    this.ctx.ops.push(new Op(EOPS.SVAL, { type: "number", v }));
     return n;
   }
 
   visitStringLiteral(n: StringLiteral) {
     const v = n.value;
-    this.ctx.ops.push(new Op(EOPS.SPUSH, { type: "string", v }));
+    this.ctx.ops.push(new Op(EOPS.SVAL, { type: "string", v }));
     return n;
   }
 
   visitBooleanLiteral(n: BooleanLiteral) {
     const v = n.value;
-    this.ctx.ops.push(new Op(EOPS.SPUSH, { type: "bool", v }));
+    this.ctx.ops.push(new Op(EOPS.SVAL, { type: "bool", v }));
     return n;
   }
 
-  // object
+  visitIdentifierReference(i: Identifier): Identifier {
+    const v = i.value;
+    this.ctx.ops.push(new Op(EOPS.SVAL, { type: "variable", v }));
+    return i;
+  }
+
+  // // object
   visitObjectExpression(n: ObjectExpression): Expression {
-    super.visitObjectExpression(n);
-    n._runtimeValue = n.properties.map((itm) => new Op(EOPS.SPOP, {}));
-    this.ctx.ops.push(
-      new Op(EOPS.SPUSH, { type: "object", v: n._runtimeValue })
-    );
-    return n;
-  }
+    const properties: ParamSVAL_ObjectKV[] = [];
 
-  visitKeyValueProperty(n: KeyValueProperty): SpreadElement | Property {
-    super.visitKeyValueProperty(n);
+    const resoveKeyAsString = (p: PropertyName) => {
+      switch (p.type) {
+        case "NumericLiteral":
+        case "Identifier":
+        case "StringLiteral":
+          return p.value.toString();
 
-    let key;
-    let val;
+        default:
+          throw new CompilerError(
+            `Not yet support object prop key-type ${p.type}`,
+            { ctx: this.ctx }
+          );
+      }
+    };
 
-    switch (n.value.type) {
-      case "Identifier":
-        val = new Op(EOPS.MLOAD, { variable: n.value.value });
-        break;
+    for (const it of n.properties) {
+      switch (it.type) {
+        case "KeyValueProperty":
+          const expOp = this.ctx.captureOp(() => {
+            this.visitExpression(it.value);
+          });
+          const key = resoveKeyAsString(it.key);
+          properties.push({ key, val: expOp });
+          break;
 
-      default:
-        val = new Op(EOPS.SPOP, {});
-        break;
+        default:
+          throw new CompilerError(
+            `Not yet support object prop type ${it.type}`,
+            { ctx: this.ctx }
+          );
+      }
     }
-
-    switch (n.key.type) {
-      case "Identifier":
-        key = n.key.value;
-        break;
-    }
-
-    this.ctx.ops.push(new Op(EOPS.SPUSH, { type: "kv", v: [key, val] }));
+    this.ctx.ops.push(new Op(EOPS.SVAL, { type: "object", v: properties }));
     return n;
   }
 
   visitArrayExpression(n: ArrayExpression): Expression {
-    super.visitArrayExpression(n);
-    n._runtimeValue = n.elements.map((itm) => {
-      switch (itm.expression.type) {
-        case "Identifier":
-          return new Op(EOPS.MLOAD, { variable: itm.expression.value });
-        default:
-          return new Op(EOPS.SPOP, {});
-      }
+    const elements = this.ctx.captureOps(() => {
+      super.visitArrayExpression(n);
     });
-    this.ctx.ops.push(
-      new Op(EOPS.SPUSH, { type: "array", v: n._runtimeValue })
-    );
+
+    this.ctx.ops.push(new Op(EOPS.SVAL, { type: "array", v: elements }));
 
     return n;
   }

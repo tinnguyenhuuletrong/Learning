@@ -8,10 +8,8 @@ import { isArray, isFunction } from "lodash";
 
 // https://astexplorer.net/
 const code = `
-function add(a,b) {
-  return a + b
-}
-res = add(1,2) + add(3,4)
+res = {name: "a"}
+res.age = 10
 `;
 
 const res = swc.parseSync(code);
@@ -23,7 +21,8 @@ console.dir(
   {
     ctx: ctx,
   },
-  { depth: 10 }
+  { depth: 20 }
 );
 
 console.log(ctx.toString());
+console.log(code);
