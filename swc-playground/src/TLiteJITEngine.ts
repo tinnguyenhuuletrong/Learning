@@ -182,7 +182,7 @@ export class RuntimeContext {
   }
 }
 
-export class TLiteExpVisitor extends Visitor {
+export class TLiteJITEngine extends Visitor {
   ctx: RuntimeContext;
 
   constructor() {

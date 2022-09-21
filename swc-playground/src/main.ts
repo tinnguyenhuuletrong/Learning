@@ -1,5 +1,5 @@
 import * as swc from "@swc/core";
-import { TLiteExpVisitor, RuntimeContext } from "./TLiteExpVisitor";
+import { TLiteJITEngine, RuntimeContext } from "./TLiteJITEngine";
 import { wrappedWithFuncCallLog } from "./proxyHelper";
 import { isArray, isFunction } from "lodash";
 
@@ -14,7 +14,7 @@ res = add(1,2)
 `;
 
 const res = swc.parseSync(code);
-const ins = wrappedWithFuncCallLog(new TLiteExpVisitor());
+const ins = wrappedWithFuncCallLog(new TLiteJITEngine());
 const ctx = new RuntimeContext();
 ctx.mem = { inp: 2 };
 ctx.funcDb["map"] = (inp, func) => {

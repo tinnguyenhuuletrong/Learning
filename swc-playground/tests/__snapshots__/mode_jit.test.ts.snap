@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TLite array res = [1,2,inp > 18,'name'] 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 1",
@@ -31,7 +31,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite arrow function call f = i => { return i + 1}; res = f(1) * f(5) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got arrow function",
@@ -69,7 +69,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite arrow function call f = i => i + 1; res = f(1) * f(5) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got arrow function",
@@ -103,7 +103,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite arrow function call res = map([1,2,3], itm => itm ** 2) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 1",
@@ -145,7 +145,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite condition if (3%2 == 0) isEven = true else isEven = false 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "exec if_branch test",
@@ -171,7 +171,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite condition if (inp%2 == 0) isEven = true else isEven = false 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "exec if_branch test",
@@ -197,7 +197,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite condition res = 2 > 18 ? 'mature' : 'teen' 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "exec if_branch_expression test",
@@ -221,7 +221,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite condition res = inp > 18 ? 'mature' : 'teen' 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "exec if_branch_expression test",
@@ -245,7 +245,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression 1 + (3 * 5)**2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 1",
@@ -267,7 +267,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = !(+inp < 2 || +inp > 5) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "exec + for v:-1 -> -1",
@@ -294,7 +294,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = 'hello' 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got str: hello",
@@ -315,7 +315,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = 1 + (3 * 5)**2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 1",
@@ -340,7 +340,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp < 2 || inp > 5 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -364,7 +364,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp <= 2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -385,7 +385,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp > 2 && inp <= 5 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -409,7 +409,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp > 2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -430,7 +430,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp*=2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -451,7 +451,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp+=2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -472,7 +472,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp/=2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -493,7 +493,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite expression res = inp-=2 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 2",
@@ -514,7 +514,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite function call res = res = filter([1, 2, 3, inp], isOdd) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got num: 1",
@@ -545,7 +545,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite function call res = toUpper(toString(inp) + '_a') 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "exec function call toString() : args [22] -> res 22",
@@ -571,7 +571,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite function declare function add(a,b){if(a<0)return-1;c=a*2;return a+b+c};res=add(-1,2)*add(5,10) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got decl function add",
@@ -621,7 +621,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite function declare res = add(1,2) + mul(5,6) 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got decl function add",
@@ -663,7 +663,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite minify script function add(d,a){return d<0?-1:(d+a+2*d)}res=add(-1,2)*add(5,10); 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got decl function add",
@@ -713,7 +713,7 @@ TLiteExpVisitor {
 `;
 
 exports[`TLite nestest mixed object mixed obj type and dynamic props 1 1`] = `
-TLiteExpVisitor {
+TLiteJITEngine {
   "ctx": RuntimeContext {
     "_logs": Array [
       "got str: mr.A",

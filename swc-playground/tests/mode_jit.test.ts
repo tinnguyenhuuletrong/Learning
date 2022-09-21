@@ -1,12 +1,12 @@
 import * as swc from "@swc/core";
 import { isArray, isFunction } from "lodash";
-import { TLiteExpVisitor, RuntimeContext } from "../src/TLiteExpVisitor";
+import { TLiteJITEngine, RuntimeContext } from "../src/TLiteJITEngine";
 
 describe("TLite expression", () => {
   test("1 + (3 * 5)**2", async () => {
     const exp = `1 + (3 * 5)**2;`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
 
     const finalVal = runtime.run(astTree, new RuntimeContext());
     expect(
@@ -22,7 +22,7 @@ describe("TLite expression", () => {
       res = 'hi'
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
 
     runtime.run(astTree, new RuntimeContext());
     expect(runtime.ctx.mem["res"]).toBe("hi");
@@ -32,7 +32,7 @@ describe("TLite expression", () => {
   test("res = 1 + (3 * 5)**2", async () => {
     const exp = `res = 1 + (3 * 5)/2;`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
 
     runtime.run(astTree, new RuntimeContext());
     expect(runtime.ctx.mem["res"]).toBe(8.5);
@@ -42,7 +42,7 @@ describe("TLite expression", () => {
   test("res = inp > 2", async () => {
     const exp = `res = inp > 2`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 3;
     runtime.run(astTree, ctx);
@@ -53,7 +53,7 @@ describe("TLite expression", () => {
   test("res = inp <= 2", async () => {
     const exp = `res = inp <= 2`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 2;
     runtime.run(astTree, ctx);
@@ -64,7 +64,7 @@ describe("TLite expression", () => {
   test("res = inp > 2 && inp <= 5", async () => {
     const exp = `res = inp > 2 && inp <= 5`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 10;
     runtime.run(astTree, ctx);
@@ -75,7 +75,7 @@ describe("TLite expression", () => {
   test("res = inp < 2 || inp > 5", async () => {
     const exp = `res = inp < 2 || inp > 5`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = -1;
     runtime.run(astTree, ctx);
@@ -86,7 +86,7 @@ describe("TLite expression", () => {
   test("res = !(+inp < 2 || +inp > 5)", async () => {
     const exp = `res = !(+inp < 2 || +inp > 5)`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = "-1";
     runtime.run(astTree, ctx);
@@ -97,7 +97,7 @@ describe("TLite expression", () => {
   test("res = inp+=2", async () => {
     const exp = `res = inp +=2`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 2;
     runtime.run(astTree, ctx);
@@ -108,7 +108,7 @@ describe("TLite expression", () => {
   test("res = inp-=2", async () => {
     const exp = `res = inp -=2`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 2;
     runtime.run(astTree, ctx);
@@ -119,7 +119,7 @@ describe("TLite expression", () => {
   test("res = inp*=2", async () => {
     const exp = `res = inp *=2`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = -1;
     runtime.run(astTree, ctx);
@@ -130,7 +130,7 @@ describe("TLite expression", () => {
   test("res = inp/=2", async () => {
     const exp = `res = inp /=2`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 2;
     runtime.run(astTree, ctx);
@@ -143,7 +143,7 @@ describe("TLite condition", () => {
   test("res = inp > 18 ? 'mature' : 'teen'", async () => {
     const exp = `res = inp > 18 ? 'mature' : 'teen'`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = "22";
     runtime.run(astTree, ctx);
@@ -154,7 +154,7 @@ describe("TLite condition", () => {
   test("res = 2 > 18 ? 'mature' : 'teen'", async () => {
     const exp = `res = 2 > 18 ? 'mature' : 'teen'`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
     expect(runtime.ctx.mem["res"]).toBe("teen");
@@ -169,7 +169,7 @@ describe("TLite condition", () => {
         isEven = false
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = "22";
     runtime.run(astTree, ctx);
@@ -185,7 +185,7 @@ describe("TLite condition", () => {
         isEven = false
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
     expect(runtime.ctx.mem["isEven"]).toBe(false);
@@ -197,7 +197,7 @@ describe("TLite array", () => {
   test("res = [1,2,inp > 18,'name']", async () => {
     const exp = `res = [1,2,inp > 18,'name']`;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = "22";
     runtime.run(astTree, ctx);
@@ -214,7 +214,7 @@ describe("TLite nestest mixed object", () => {
     res.house.items = ["table", "tv", "air-conditioner"]
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 22;
     runtime.run(astTree, ctx);
@@ -238,7 +238,7 @@ describe("TLite function call", () => {
     res = toUpper(toString(inp) + "_a")
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 22;
     ctx.funcDb["toUpper"] = (inp) => {
@@ -256,7 +256,7 @@ describe("TLite function call", () => {
     res = filter([1, 2, 3, inp], isOdd)
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.mem["inp"] = 21;
     ctx.funcDb["isOdd"] = (inp) => parseInt(inp) % 2 !== 0;
@@ -280,7 +280,7 @@ describe("TLite arrow function call", () => {
     res = f(1) * f(5)
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
 
@@ -296,7 +296,7 @@ describe("TLite arrow function call", () => {
     res = f(1) * f(5)
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
 
@@ -309,7 +309,7 @@ describe("TLite arrow function call", () => {
     res = map([1,2,3], itm => itm ** 2)
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     ctx.funcDb["map"] = (inp, func) => {
       if (!isFunction(func)) throw new Error("arg1 is not a function");
@@ -334,7 +334,7 @@ describe("TLite function declare", () => {
     res = add(1,2) + mul(5,6)
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
 
@@ -352,7 +352,7 @@ describe("TLite function declare", () => {
     res = add(-1,2) * add(5, 10)
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
 
@@ -367,7 +367,7 @@ describe("TLite minify script", () => {
     function add(d,a){return d<0?-1:(d+a+2*d)}res=add(-1,2)*add(5,10);
     `;
     const astTree = await swc.parse(exp);
-    const runtime = new TLiteExpVisitor();
+    const runtime = new TLiteJITEngine();
     const ctx = new RuntimeContext();
     runtime.run(astTree, ctx);
 
