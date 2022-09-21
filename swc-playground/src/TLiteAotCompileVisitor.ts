@@ -255,12 +255,12 @@ export class TLiteAotCompileVisitor extends Visitor {
   // --------------
 
   visitUnaryExpression(n: UnaryExpression): Expression {
-    const argOp = this.ctx.captureOps(() => {
+    const argOp = this.ctx.captureOp(() => {
       this.visitExpression(n.argument);
     });
     const p: ParamUEXP = {
       op: n.operator,
-      args: argOp,
+      arg: argOp,
     };
     const op = new Op(EOPS.UEXP, p);
     this.ctx.ops.push(op);

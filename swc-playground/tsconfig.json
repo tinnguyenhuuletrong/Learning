@@ -12,5 +12,6 @@
     "skipLibCheck": true,
     "isolatedModules": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/main.ts", "src/mainAOT.ts", "src/proxyHelper.ts"]
 }

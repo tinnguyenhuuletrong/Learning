@@ -1,4 +1,8 @@
-import { AssignmentOperator, BinaryOperator } from "@swc/core/types";
+import {
+  AssignmentOperator,
+  BinaryOperator,
+  UnaryOperator,
+} from "@swc/core/types";
 import util from "util";
 
 export enum EOPS {
@@ -29,8 +33,8 @@ export type ParamBEXP = {
   v2: Op;
 };
 export type ParamUEXP = {
-  op: string;
-  args: Op[];
+  op: UnaryOperator;
+  arg: Op;
 };
 export type ParamMEXP = {
   obj: Op;
@@ -96,7 +100,7 @@ export class Op {
 
       case EOPS.UEXP: {
         const p = this.params as ParamUEXP;
-        return `${this.op} ${p.op} (${p.args})`;
+        return `${this.op} ${p.op} (${p.arg})`;
       }
 
       case EOPS.BRANCH: {

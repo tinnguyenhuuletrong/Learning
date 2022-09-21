@@ -1,4 +1,12 @@
-import { EOPS, Op, ParamBEXP, ParamMSAVE, ParamSVAL } from "./type.aot";
+import {
+  EOPS,
+  Op,
+  ParamBEXP,
+  ParamMSAVE,
+  ParamSVAL,
+  ParamSVAL_ObjectKV,
+  ParamUEXP,
+} from "./type.aot";
 
 export class RuntimeAotError extends Error {
   ctx: any;
@@ -58,9 +66,40 @@ export class TLiteAotEngine {
       case EOPS.MSAVE:
         return this._exeMSAVE(op.params as ParamMSAVE);
 
+      case EOPS.UEXP:
+        return this._exeUEXP(op.params as ParamUEXP);
+
       default:
         throw new RuntimeAotError(`unknown op ${op.op}`, { ctx: this.ctx });
     }
+  }
+
+  private _exeUEXP(p: ParamUEXP) {
+    const uOp = p.op;
+    const v = this._exe(p.arg);
+
+    let res;
+    switch (uOp) {
+      case "!":
+        res = !v;
+        break;
+      case "+":
+        res = +v;
+        break;
+      case "-":
+        res = -v;
+        break;
+      case "~":
+        res = ~v;
+        break;
+
+      default:
+        throw new RuntimeAotError(`UEXP: unknown op ${uOp}`, {
+          ctx: this.ctx,
+        });
+    }
+    this.ctx.addLog(`resolve BEXP ${uOp} v:${v} - ${res}`);
+    return res;
   }
 
   private _exeMSAVE(p: ParamMSAVE) {
@@ -100,22 +139,43 @@ export class TLiteAotEngine {
 
   private _exeSVAL(p: ParamSVAL) {
     let res: any = undefined;
+    let log = "";
     switch (p.type) {
       case "string":
         res = String(p.v);
+        log = `resolve value type ${p.type} - ${res}`;
         break;
 
       case "number":
         res = parseFloat(p.v as any);
+        log = `resolve value type ${p.type} - ${res}`;
         break;
 
       case "bool":
         res = !!p.v;
+        log = `resolve value type ${p.type} - ${res}`;
         break;
 
       case "variable": {
         const tmp = p.v as "string";
         res = this.ctx.mem[tmp];
+        log = `resolve value type ${p.type}:${tmp} - ${res}`;
+        break;
+      }
+
+      case "array": {
+        const tmp = p.v as Op[];
+        res = tmp.map((itm) => this._exe(itm));
+        log = `resolve value type ${p.type} - ${res}`;
+        break;
+      }
+
+      case "object": {
+        const tmp = p.v as ParamSVAL_ObjectKV[];
+        res = Object.fromEntries(
+          tmp.map((itm) => [itm.key, this._exe(itm.val)])
+        );
+        log = `resolve value type ${p.type} - ${res}`;
         break;
       }
 
@@ -124,7 +184,7 @@ export class TLiteAotEngine {
           ctx: this.ctx,
         });
     }
-    this.ctx.addLog(`resolve value type ${p.type} - ${res}`);
+    this.ctx.addLog(log);
     return res;
   }
 
