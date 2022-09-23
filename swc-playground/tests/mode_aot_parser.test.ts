@@ -217,3 +217,55 @@ describe("TLite aot compiler: array, object", () => {
     expect(rtCtx._logs).toMatchSnapshot();
   });
 });
+
+describe("TLite aot compiler: condition, condition exp", () => {
+  test("res = inp > 18 ? 'mature' : 'teen'", async () => {
+    const exp = `res = inp > 18 ? 'mature' : 'teen'`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteAotCompileVisitor();
+    const ctx = new CompilerContext();
+    runtime.run(astTree, ctx);
+    expect(runtime).toMatchSnapshot();
+    console.log(exp);
+    console.log(ctx.toString());
+
+    const { res, ctx: rtCtx } = run(ctx.ops, { mem: { inp: 19 } });
+    expect(rtCtx.mem["res"]).toEqual("mature");
+    expect(rtCtx._logs).toMatchSnapshot();
+  });
+
+  test("if (inp%2 == 0) isEven = true else isEven = false'", async () => {
+    const exp = `if (inp%2 == 0) {isEven = true} else {isEven = false}`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteAotCompileVisitor();
+    const ctx = new CompilerContext();
+    runtime.run(astTree, ctx);
+    expect(runtime).toMatchSnapshot();
+    console.log(exp);
+    console.log(ctx.toString());
+
+    const { res, ctx: rtCtx } = run(ctx.ops, { mem: { inp: 19 } });
+    expect(rtCtx.mem["isEven"]).toEqual(false);
+    expect(rtCtx._logs).toMatchSnapshot();
+  });
+
+  test("if (inp%2 == 0) {isEven = true; nextVal = inp+1} else {isEven = false; nextVal = inp-1}", async () => {
+    const exp = `if (inp%2 == 0) {isEven = true; nextVal = inp+1} else {isEven = false; nextVal = inp-1}`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteAotCompileVisitor();
+    const ctx = new CompilerContext();
+    runtime.run(astTree, ctx);
+    expect(runtime).toMatchSnapshot();
+    console.log(exp);
+    console.log(ctx.toString());
+
+    const { res, ctx: rtCtx } = run(ctx.ops, { mem: { inp: 19 } });
+    expect(rtCtx.mem).toEqual({
+      inp: 19,
+      isEven: false,
+      nextVal: 18,
+    });
+
+    expect(rtCtx._logs).toMatchSnapshot();
+  });
+});

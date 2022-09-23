@@ -47,7 +47,8 @@ export type ParamMSAVE = {
   nextVal: Op;
 };
 export type ParamBRANCH = {
-  cond: Op[];
+  isExp: boolean;
+  cond: Op;
   trueBranch: Op[];
   falseBranch: Op[];
 };
@@ -98,7 +99,7 @@ export class Op {
 
       case EOPS.BEXP: {
         const p = this.params as ParamBEXP;
-        return `${this.op} ${p.op} \nv1:${p.v1} \nv2:${p.v2}`;
+        return `${this.op} ${p.op} v1:${p.v1} v2:${p.v2}`;
       }
 
       case EOPS.UEXP: {
@@ -108,13 +109,9 @@ export class Op {
 
       case EOPS.BRANCH: {
         const p = this.params as ParamBRANCH;
-        return `${this.op} - 
-        if: 
-        \t${p.cond} 
-        true: 
-        \t${p.trueBranch}
-        false:
-        \t${p.falseBranch}`;
+        return `${this.op}:${p.isExp ? "exp" : ""} - \n\tif: ${
+          p.cond
+        } \n\ttrue: ${p.trueBranch} \n\tfalse: ${p.falseBranch}`;
       }
 
       case EOPS.FUNCDECLARE: {

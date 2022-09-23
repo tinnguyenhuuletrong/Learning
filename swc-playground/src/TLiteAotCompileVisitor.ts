@@ -148,51 +148,53 @@ export class TLiteAotCompileVisitor extends Visitor {
   }
 
   // conditional expression
-  // visitConditionalExpression(n: ConditionalExpression): Expression {
-  //   const cond = this.ctx.captureOps(() => {
-  //     this.visitExpression(n.test);
-  //   });
+  visitConditionalExpression(n: ConditionalExpression): Expression {
+    const cond = this.ctx.captureRightExp(() => {
+      this.visitExpression(n.test);
+    });
 
-  //   const trueBranch = this.ctx.captureOps(() => {
-  //     this.visitExpression(n.consequent);
-  //   });
+    const trueBranch = this.ctx.captureArrayItmExp(() => {
+      this.visitExpression(n.consequent);
+    });
 
-  //   const falseBranch = this.ctx.captureOps(() => {
-  //     this.visitExpression(n.alternate);
-  //   });
+    const falseBranch = this.ctx.captureArrayItmExp(() => {
+      this.visitExpression(n.alternate);
+    });
 
-  //   const param: ParamBRANCH = {
-  //     cond,
-  //     trueBranch,
-  //     falseBranch,
-  //   };
+    const param: ParamBRANCH = {
+      isExp: true,
+      cond,
+      trueBranch,
+      falseBranch,
+    };
 
-  //   this.ctx.ops.push(new Op(EOPS.BRANCH, param));
-  //   return n;
-  // }
+    this.ctx.ops.push(new Op(EOPS.BRANCH, param));
+    return n;
+  }
 
-  // visitIfStatement(n: IfStatement) {
-  //   const cond = this.ctx.captureOps(() => {
-  //     this.visitExpression(n.test);
-  //   });
+  visitIfStatement(n: IfStatement) {
+    const cond = this.ctx.captureRightExp(() => {
+      this.visitExpression(n.test);
+    });
 
-  //   const trueBranch = this.ctx.captureOps(() => {
-  //     this.visitStatement(n.consequent);
-  //   });
+    const trueBranch = this.ctx.captureArrayItmExp(() => {
+      this.visitStatement(n.consequent);
+    });
 
-  //   const falseBranch = this.ctx.captureOps(() => {
-  //     this.visitOptionalStatement(n.alternate);
-  //   });
+    const falseBranch = this.ctx.captureArrayItmExp(() => {
+      this.visitOptionalStatement(n.alternate);
+    });
 
-  //   const param: ParamBRANCH = {
-  //     cond,
-  //     trueBranch,
-  //     falseBranch,
-  //   };
+    const param: ParamBRANCH = {
+      isExp: false,
+      cond,
+      trueBranch,
+      falseBranch,
+    };
 
-  //   this.ctx.ops.push(new Op(EOPS.BRANCH, param));
-  //   return n;
-  // }
+    this.ctx.ops.push(new Op(EOPS.BRANCH, param));
+    return n;
+  }
 
   // object member
   visitMemberExpression(n: MemberExpression): MemberExpression {

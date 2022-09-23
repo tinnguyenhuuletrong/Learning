@@ -2,6 +2,7 @@ import {
   EOPS,
   Op,
   ParamBEXP,
+  ParamBRANCH,
   ParamMSAVE,
   ParamSVAL,
   ParamSVAL_ObjectKV,
@@ -71,9 +72,29 @@ export class TLiteAotEngine {
       case EOPS.UEXP:
         return this._exeUEXP(op.params as ParamUEXP);
 
+      case EOPS.BRANCH:
+        return this._exeBRANCH(op.params as ParamBRANCH);
+
       default:
         throw new RuntimeAotError(`unknown op ${op.op}`, { ctx: this.ctx });
     }
+  }
+
+  private _exeBRANCH(p: ParamBRANCH) {
+    const isExp = p.isExp;
+    const conVal = this._exe(p.cond);
+
+    this.ctx.addLog(`pick BRANCH ${conVal}`);
+
+    if (isExp) {
+      return conVal ? this._exe(p.trueBranch[0]) : this._exe(p.falseBranch[0]);
+    }
+
+    const ops = conVal ? p.trueBranch : p.falseBranch;
+    for (let i = 0; i < ops.length; i++) {
+      this._exe(ops[i]);
+    }
+    return null;
   }
 
   private _exeUEXP(p: ParamUEXP) {
