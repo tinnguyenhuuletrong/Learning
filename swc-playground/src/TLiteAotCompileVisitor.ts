@@ -26,6 +26,8 @@ import {
   ParamUEXP,
   ParamBEXP,
   ParamSVAL_ObjectKV,
+  ParamMEXP,
+  ParamSVAL,
 } from "./type.aot";
 
 export class CompilerError extends Error {
@@ -76,6 +78,61 @@ export class CompilerContext {
     return ops[0];
   }
 
+  private _optimizeMEXP2DotString(op: Op) {
+    if (op.op !== EOPS.MEXP) {
+      switch (op.op) {
+        case EOPS.SVAL:
+          const p = op.params as ParamSVAL;
+          if (p.type === "variable") return p.v;
+
+        default:
+          throw new CompilerError(
+            `optimizeMEXPToString can not resolve support ${op}`,
+            {
+              ctx: this,
+            }
+          );
+      }
+    }
+    const p = op.params as ParamMEXP;
+
+    return `${this._optimizeMEXP2DotString(p.obj)}.${p.path}`;
+  }
+
+  private _optimizeOp(inp: Op): Op {
+    if (inp.op === EOPS.MEXP) {
+      const variableName = this._optimizeMEXP2DotString(inp);
+      return new Op(EOPS.SVAL, {
+        type: "variable",
+        v: variableName,
+      } as ParamSVAL);
+    }
+    return inp;
+  }
+
+  captureLeftExpAsPath(visitFun: Function): string {
+    let lop = this.captureOp(visitFun);
+    if (lop.op !== EOPS.MEXP)
+      throw new CompilerError(
+        `captureLeftExpAsPath expected MEXP op. got ${lop.op}`,
+        {
+          ctx: this,
+        }
+      );
+    return this._optimizeMEXP2DotString(lop);
+  }
+
+  captureRightExp(visitFun: Function) {
+    let rop = this.captureOp(visitFun);
+    return this._optimizeOp(rop);
+  }
+
+  captureArrayItmExp(visitFun: Function) {
+    let ops = this.captureOps(visitFun);
+    ops = ops.map(this._optimizeOp.bind(this));
+    return ops;
+  }
+
   toString() {
     return this.ops.map((itm) => itm.toString()).join("\n");
   }
@@ -91,121 +148,108 @@ export class TLiteAotCompileVisitor extends Visitor {
   }
 
   // conditional expression
-  visitConditionalExpression(n: ConditionalExpression): Expression {
-    const cond = this.ctx.captureOps(() => {
-      this.visitExpression(n.test);
-    });
+  // visitConditionalExpression(n: ConditionalExpression): Expression {
+  //   const cond = this.ctx.captureOps(() => {
+  //     this.visitExpression(n.test);
+  //   });
 
-    const trueBranch = this.ctx.captureOps(() => {
-      this.visitExpression(n.consequent);
-    });
+  //   const trueBranch = this.ctx.captureOps(() => {
+  //     this.visitExpression(n.consequent);
+  //   });
 
-    const falseBranch = this.ctx.captureOps(() => {
-      this.visitExpression(n.alternate);
-    });
+  //   const falseBranch = this.ctx.captureOps(() => {
+  //     this.visitExpression(n.alternate);
+  //   });
 
-    const param: ParamBRANCH = {
-      cond,
-      trueBranch,
-      falseBranch,
-    };
+  //   const param: ParamBRANCH = {
+  //     cond,
+  //     trueBranch,
+  //     falseBranch,
+  //   };
 
-    this.ctx.ops.push(new Op(EOPS.BRANCH, param));
-    return n;
-  }
+  //   this.ctx.ops.push(new Op(EOPS.BRANCH, param));
+  //   return n;
+  // }
 
-  visitIfStatement(n: IfStatement) {
-    const cond = this.ctx.captureOps(() => {
-      this.visitExpression(n.test);
-    });
+  // visitIfStatement(n: IfStatement) {
+  //   const cond = this.ctx.captureOps(() => {
+  //     this.visitExpression(n.test);
+  //   });
 
-    const trueBranch = this.ctx.captureOps(() => {
-      this.visitStatement(n.consequent);
-    });
+  //   const trueBranch = this.ctx.captureOps(() => {
+  //     this.visitStatement(n.consequent);
+  //   });
 
-    const falseBranch = this.ctx.captureOps(() => {
-      this.visitOptionalStatement(n.alternate);
-    });
+  //   const falseBranch = this.ctx.captureOps(() => {
+  //     this.visitOptionalStatement(n.alternate);
+  //   });
 
-    const param: ParamBRANCH = {
-      cond,
-      trueBranch,
-      falseBranch,
-    };
+  //   const param: ParamBRANCH = {
+  //     cond,
+  //     trueBranch,
+  //     falseBranch,
+  //   };
 
-    this.ctx.ops.push(new Op(EOPS.BRANCH, param));
-    return n;
-  }
+  //   this.ctx.ops.push(new Op(EOPS.BRANCH, param));
+  //   return n;
+  // }
 
   // object member
   visitMemberExpression(n: MemberExpression): MemberExpression {
-    // super.visitMemberExpression(n);
+    const obj = this.ctx.captureOp(() => {
+      this.visitExpression(n.object);
+    });
 
-    // const propType = n.property.type;
-    // let pathName;
-    // switch (propType) {
-    //   case "Identifier":
-    //     pathName = n.property.value;
-    //     break;
+    let path;
+    switch (n.property.type) {
+      case "Identifier":
+        {
+          path = n.property.value;
+        }
+        break;
+      default:
+        throw new CompilerError(
+          `missing implement MemberExpression prop ${n.property.type}`,
+          {
+            ctx: this.ctx,
+          }
+        );
+    }
 
-    //   default:
-    //     throw new CompilerError(
-    //       `unknown member expression property type ${propType}`,
-    //       { ctx: this.ctx }
-    //     );
-    // }
-
-    // const variableType = n.object.type;
-    // let variableName;
-    // switch (variableType) {
-    //   case "Identifier":
-    //     variableName = n.object.value;
-    //     break;
-    //   case "MemberExpression":
-    //     const parent = n.object._runtimeValue as RuntimeObjectExpression;
-    //     variableName = `${parent.variableName}.${parent.pathName}`;
-    //     break;
-
-    //   default:
-    //     throw new CompilerError(
-    //       `unknown member expression object type ${variableType}`,
-    //       { ctx: this.ctx }
-    //     );
-    // }
-
-    // n._runtimeValue = {
-    //   variableName,
-    //   pathName,
-    // };
+    const p: ParamMEXP = {
+      obj,
+      path,
+    };
+    this.ctx.ops.push(new Op(EOPS.MEXP, p));
     return n;
   }
 
   // Function
-  visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
-    const funcName = decl.identifier.value;
+  // visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
+  //   const funcName = decl.identifier.value;
 
-    const bodyOs = this.ctx.captureOps(() => {
-      this.visitBlockStatement(decl.body);
-    });
-    const params: any = decl.params.map((itm) => {
-      switch (itm.pat.type) {
-        case "Identifier":
-          return itm.pat.value;
-        default:
-          throw new Error("unknown function declare param");
-      }
-    });
+  //   const bodyOs = this.ctx.captureOps(() => {
+  //     this.visitBlockStatement(decl.body);
+  //   });
+  //   const params: any = decl.params.map((itm) => {
+  //     switch (itm.pat.type) {
+  //       case "Identifier":
+  //         return itm.pat.value;
+  //       default:
+  //         throw new Error("unknown function declare param");
+  //     }
+  //   });
 
-    const p: ParamFUNCDECLARE = {
-      name: funcName,
-      params,
-      body: bodyOs,
-    };
-    const op = new Op(EOPS.FUNCDECLARE, p);
-    this.ctx.ops.push(op);
+  //   const p: ParamFUNCDECLARE = {
+  //     name: funcName,
+  //     params,
+  //     body: bodyOs,
+  //   };
+  //   const op = new Op(EOPS.FUNCDECLARE, p);
+  //   this.ctx.ops.push(op);
 
-    return decl;
-  }
+  //   return decl;
+  // }
 
   // --------------
   // assignment
@@ -216,7 +260,7 @@ export class TLiteAotCompileVisitor extends Visitor {
     const lexp = n.left as Expression;
     const perform = n.operator;
 
-    const nextVal = this.ctx.captureOp(() => {
+    let nextVal = this.ctx.captureRightExp(() => {
       n.right = this.visitExpression(n.right);
     });
 
@@ -231,15 +275,18 @@ export class TLiteAotCompileVisitor extends Visitor {
         });
         break;
 
-      // case "MemberExpression": {
-      //   const { variableName, pathName } = (lexp as any)._runtimeValue;
-      //   op = new Op(EOPS.MSAVE, {
-      //     perform,
-      //     path: `${variableName}.${pathName}`,
-      //     nextVal,
-      //   });
-      //   break;
-      // }
+      case "MemberExpression": {
+        const path = this.ctx.captureLeftExpAsPath(() => {
+          this.visitExpression(lexp);
+        });
+
+        op = new Op(EOPS.MSAVE, {
+          perform,
+          path,
+          nextVal,
+        });
+        break;
+      }
       default:
         throw new CompilerError(`missing implement ${lexp.type}`, {
           ctx: this.ctx,
@@ -255,7 +302,7 @@ export class TLiteAotCompileVisitor extends Visitor {
   // --------------
 
   visitUnaryExpression(n: UnaryExpression): Expression {
-    const argOp = this.ctx.captureOp(() => {
+    const argOp = this.ctx.captureRightExp(() => {
       this.visitExpression(n.argument);
     });
     const p: ParamUEXP = {
@@ -270,10 +317,10 @@ export class TLiteAotCompileVisitor extends Visitor {
   visitBinaryExpression(n: BinaryExpression) {
     const op = n.operator;
     // can left / right be NumericLiteral / Expression / Identify
-    const v1 = this.ctx.captureOp(() => {
+    const v1 = this.ctx.captureRightExp(() => {
       this.visitExpression(n.left);
     });
-    const v2 = this.ctx.captureOp(() => {
+    const v2 = this.ctx.captureRightExp(() => {
       this.visitExpression(n.right);
     });
     let res;
@@ -367,7 +414,7 @@ export class TLiteAotCompileVisitor extends Visitor {
     for (const it of n.properties) {
       switch (it.type) {
         case "KeyValueProperty":
-          const expOp = this.ctx.captureOp(() => {
+          const expOp = this.ctx.captureRightExp(() => {
             this.visitExpression(it.value);
           });
           const key = resoveKeyAsString(it.key);
@@ -386,7 +433,7 @@ export class TLiteAotCompileVisitor extends Visitor {
   }
 
   visitArrayExpression(n: ArrayExpression): Expression {
-    const elements = this.ctx.captureOps(() => {
+    const elements = this.ctx.captureArrayItmExp(() => {
       super.visitArrayExpression(n);
     });
 

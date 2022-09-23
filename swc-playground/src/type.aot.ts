@@ -10,6 +10,7 @@ export enum EOPS {
   MSAVE = "MSAVE",
   UEXP = "UEXP",
   BEXP = "BEXP",
+  MEXP = "MEXP",
   BRANCH = "BRANCH",
   FUNCDECLARE = "FUNCDECLARE",
 }
@@ -38,7 +39,7 @@ export type ParamUEXP = {
 };
 export type ParamMEXP = {
   obj: Op;
-  prop: Op;
+  path: string;
 };
 export type ParamMSAVE = {
   perform: AssignmentOperator;
@@ -58,7 +59,9 @@ export type ParamFUNCDECLARE = {
 };
 export type AnyParam =
   | ParamSVAL
+  | ParamUEXP
   | ParamBEXP
+  | ParamMEXP
   | ParamSPOP
   | ParamMSAVE
   | ParamFUNCDECLARE

@@ -7,6 +7,8 @@ import {
   ParamSVAL_ObjectKV,
   ParamUEXP,
 } from "./type.aot";
+import set from "lodash/set";
+import get from "lodash/get";
 
 export class RuntimeAotError extends Error {
   ctx: any;
@@ -33,11 +35,11 @@ export class RuntimeAotContext {
   }
 
   memGet(k: string) {
-    return this.mem[k];
+    return get(this.mem, k);
   }
 
   memSet(k: string, v: any) {
-    this.mem[k] = v;
+    set(this.mem, k, v);
   }
 }
 
@@ -158,7 +160,7 @@ export class TLiteAotEngine {
 
       case "variable": {
         const tmp = p.v as "string";
-        res = this.ctx.mem[tmp];
+        res = this.ctx.memGet(tmp);
         log = `resolve value type ${p.type}:${tmp} - ${res}`;
         break;
       }

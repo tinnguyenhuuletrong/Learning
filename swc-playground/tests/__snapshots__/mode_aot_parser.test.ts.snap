@@ -145,6 +145,187 @@ Array [
 ]
 `;
 
+exports[`TLite aot compiler: array, object res = {}; res.a=1; res.b='hi'; res.c.c1.c2 = true, res.d = res.a /2; res.f=inp; res.e=[-1, res.d, res.c.c1.c2, res.f]; 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "object",
+              "v": Array [],
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "number",
+              "v": 1,
+            },
+          },
+          "path": "res.a",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "string",
+              "v": "hi",
+            },
+          },
+          "path": "res.b",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "bool",
+              "v": true,
+            },
+          },
+          "path": "res.c.c1.c2",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "BEXP",
+            "params": Object {
+              "op": "/",
+              "v1": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "variable",
+                  "v": "res.a",
+                },
+              },
+              "v2": Op {
+                "op": "SVAL",
+                "params": Object {
+                  "type": "number",
+                  "v": 2,
+                },
+              },
+            },
+          },
+          "path": "res.d",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "variable",
+              "v": "inp",
+            },
+          },
+          "path": "res.f",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "array",
+              "v": Array [
+                Op {
+                  "op": "UEXP",
+                  "params": Object {
+                    "arg": Op {
+                      "op": "SVAL",
+                      "params": Object {
+                        "type": "number",
+                        "v": 1,
+                      },
+                    },
+                    "op": "-",
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "variable",
+                    "v": "res.d",
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "variable",
+                    "v": "res.c.c1.c2",
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "variable",
+                    "v": "res.f",
+                  },
+                },
+              ],
+            },
+          },
+          "path": "res.e",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: array, object res = {}; res.a=1; res.b='hi'; res.c.c1.c2 = true, res.d = res.a /2; res.f=inp; res.e=[-1, res.d, res.c.c1.c2, res.f]; 2`] = `
+Array [
+  "resolve value type object - [object Object]",
+  "do res = [object Object]",
+  "resolve value type number - 1",
+  "do res.a = 1",
+  "resolve value type string - hi",
+  "do res.b = hi",
+  "resolve value type bool - true",
+  "do res.c.c1.c2 = true",
+  "resolve value type variable:res.a - 1",
+  "resolve value type number - 2",
+  "resolve BEXP / v1:1 v2:2 - 0.5",
+  "do res.d = 0.5",
+  "resolve value type variable:inp - 999",
+  "do res.f = 999",
+  "resolve value type number - 1",
+  "resolve BEXP - v:1 - -1",
+  "resolve value type variable:res.d - 0.5",
+  "resolve value type variable:res.c.c1.c2 - true",
+  "resolve value type variable:res.f - 999",
+  "resolve value type array - -1,0.5,true,999",
+  "do res.e = -1,0.5,true,999",
+]
+`;
+
 exports[`TLite aot compiler: array, object res = {b:true, i: 1, v: inp, a: [1,3], o: {nestest: {}}} 1`] = `
 TLiteAotCompileVisitor {
   "ctx": CompilerContext {

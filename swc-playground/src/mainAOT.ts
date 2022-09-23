@@ -14,10 +14,13 @@ import { Op } from "./type.aot";
 
 // https://astexplorer.net/
 const code = `
-res = 5 + (1 * 2) ** 3
-res1 = "hello"
-res2 = true
-res3 = 1.4
+res = {}; 
+res.a=1; 
+res.b='hi'; 
+res.c.c1.c2 = true, 
+res.d = res.a /2; 
+res.f=inp;
+res.e=[-1, res.d, res.c.c1.c2, res.f];
 `;
 
 const ops = compile(code);
@@ -44,6 +47,7 @@ function compile(code: string) {
 function run(ops: Op[]) {
   const runtime = new TLiteAotEngine();
   const ctx = new RuntimeAotContext({ debugTrace: true });
+  ctx.mem["inp"] = 999;
   const res = runtime.run(ops, ctx);
 
   console.log(res);

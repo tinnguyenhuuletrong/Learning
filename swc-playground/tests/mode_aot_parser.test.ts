@@ -194,4 +194,26 @@ describe("TLite aot compiler: array, object", () => {
     });
     expect(rtCtx._logs).toMatchSnapshot();
   });
+
+  test("res = {}; res.a=1; res.b='hi'; res.c.c1.c2 = true, res.d = res.a /2; res.f=inp; res.e=[-1, res.d, res.c.c1.c2, res.f];", async () => {
+    const exp = `res = {}; res.a=1; res.b='hi'; res.c.c1.c2 = true, res.d = res.a /2; res.f=inp; res.e=[-1, res.d, res.c.c1.c2, res.f];`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteAotCompileVisitor();
+    const ctx = new CompilerContext();
+    runtime.run(astTree, ctx);
+    expect(runtime).toMatchSnapshot();
+    console.log(exp);
+    console.log(ctx.toString());
+
+    const { res, ctx: rtCtx } = run(ctx.ops, { mem: { inp: 999 } });
+    expect(rtCtx.mem["res"]).toEqual({
+      a: 1,
+      b: "hi",
+      c: { c1: { c2: true } },
+      d: 0.5,
+      f: 999,
+      e: [-1, 0.5, true, 999],
+    });
+    expect(rtCtx._logs).toMatchSnapshot();
+  });
 });
