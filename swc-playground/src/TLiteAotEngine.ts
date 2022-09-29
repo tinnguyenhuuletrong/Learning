@@ -3,6 +3,7 @@ import {
   Op,
   ParamBEXP,
   ParamBRANCH,
+  ParamFUNCALL,
   ParamMSAVE,
   ParamSVAL,
   ParamSVAL_ObjectKV,
@@ -24,6 +25,7 @@ type RuntimeAotContextOption = {
 };
 export class RuntimeAotContext {
   mem = {};
+  func: Record<string, Function> = {};
   _logs = [];
   _opts: RuntimeAotContextOption;
 
@@ -41,6 +43,10 @@ export class RuntimeAotContext {
 
   memSet(k: string, v: any) {
     set(this.mem, k, v);
+  }
+
+  getFunc(name: string): Function | undefined {
+    return this.func[name]?.bind(this);
   }
 }
 
@@ -75,9 +81,26 @@ export class TLiteAotEngine {
       case EOPS.BRANCH:
         return this._exeBRANCH(op.params as ParamBRANCH);
 
+      case EOPS.FUNCALL:
+        return this._exeFUNCALL(op.params as ParamFUNCALL);
+
       default:
         throw new RuntimeAotError(`unknown op ${op.op}`, { ctx: this.ctx });
     }
+  }
+
+  private _exeFUNCALL(p: ParamFUNCALL) {
+    const args = p.args.map((itm) => this._exe(itm));
+    const func = this.ctx.getFunc(p.name);
+    if (!func)
+      throw new RuntimeAotError(`FUNCALL. function ${p.name} not found`, {
+        ctx: this.ctx,
+      });
+
+    const res = func(...args);
+
+    this.ctx.addLog(`resolve FUNCALL ${p.name} args:${args} - ${res}`);
+    return res;
   }
 
   private _exeBRANCH(p: ParamBRANCH) {

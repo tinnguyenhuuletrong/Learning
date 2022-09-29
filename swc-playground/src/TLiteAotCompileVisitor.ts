@@ -3,6 +3,7 @@ import {
   AssignmentExpression,
   BinaryExpression,
   BooleanLiteral,
+  CallExpression,
   ConditionalExpression,
   Declaration,
   Expression,
@@ -22,12 +23,12 @@ import {
   Op,
   ParamBRANCH,
   EOPS,
-  ParamFUNCDECLARE,
   ParamUEXP,
   ParamBEXP,
   ParamSVAL_ObjectKV,
   ParamMEXP,
   ParamSVAL,
+  ParamFUNCALL,
 } from "./type.aot";
 
 export class CompilerError extends Error {
@@ -110,11 +111,11 @@ export class CompilerContext {
     return inp;
   }
 
-  captureLeftExpAsPath(visitFun: Function): string {
+  captureLeftMExpAsPath(visitFun: Function): string {
     let lop = this.captureOp(visitFun);
     if (lop.op !== EOPS.MEXP)
       throw new CompilerError(
-        `captureLeftExpAsPath expected MEXP op. got ${lop.op}`,
+        `captureLeftMExpAsPath expected MEXP op. got ${lop.op}`,
         {
           ctx: this,
         }
@@ -125,6 +126,21 @@ export class CompilerContext {
   captureRightExp(visitFun: Function) {
     let rop = this.captureOp(visitFun);
     return this._optimizeOp(rop);
+  }
+
+  captureLeftExpAsPath(visitFun: Function): string {
+    let lop = this.captureOp(visitFun);
+    if (lop.op === EOPS.MEXP) return this._optimizeMEXP2DotString(lop);
+    else if (lop.op === EOPS.SVAL) {
+      const p = lop.params as ParamSVAL;
+      return p.v.toString();
+    } else
+      throw new CompilerError(
+        `captureLeftExpAsPath can't resolve op ${lop.op}`,
+        {
+          ctx: this,
+        }
+      );
   }
 
   captureArrayItmExp(visitFun: Function) {
@@ -143,22 +159,22 @@ export class TLiteAotCompileVisitor extends Visitor {
 
   run(astCode: Module, ctx: CompilerContext) {
     this.ctx = ctx;
-    const res = this.visitProgram(astCode);
+    const res = super.visitProgram(astCode);
     return res;
   }
 
   // conditional expression
   visitConditionalExpression(n: ConditionalExpression): Expression {
     const cond = this.ctx.captureRightExp(() => {
-      this.visitExpression(n.test);
+      super.visitExpression(n.test);
     });
 
     const trueBranch = this.ctx.captureArrayItmExp(() => {
-      this.visitExpression(n.consequent);
+      super.visitExpression(n.consequent);
     });
 
     const falseBranch = this.ctx.captureArrayItmExp(() => {
-      this.visitExpression(n.alternate);
+      super.visitExpression(n.alternate);
     });
 
     const param: ParamBRANCH = {
@@ -174,15 +190,15 @@ export class TLiteAotCompileVisitor extends Visitor {
 
   visitIfStatement(n: IfStatement) {
     const cond = this.ctx.captureRightExp(() => {
-      this.visitExpression(n.test);
+      super.visitExpression(n.test);
     });
 
     const trueBranch = this.ctx.captureArrayItmExp(() => {
-      this.visitStatement(n.consequent);
+      super.visitStatement(n.consequent);
     });
 
     const falseBranch = this.ctx.captureArrayItmExp(() => {
-      this.visitOptionalStatement(n.alternate);
+      super.visitOptionalStatement(n.alternate);
     });
 
     const param: ParamBRANCH = {
@@ -199,7 +215,7 @@ export class TLiteAotCompileVisitor extends Visitor {
   // object member
   visitMemberExpression(n: MemberExpression): MemberExpression {
     const obj = this.ctx.captureOp(() => {
-      this.visitExpression(n.object);
+      super.visitExpression(n.object);
     });
 
     let path;
@@ -226,32 +242,23 @@ export class TLiteAotCompileVisitor extends Visitor {
     return n;
   }
 
-  // Function
-  // visitFunctionDeclaration(decl: FunctionDeclaration): Declaration {
-  //   const funcName = decl.identifier.value;
+  // Function call
+  visitCallExpression(n: CallExpression): Expression {
+    const lexp = n.callee as Expression;
+    const calee = this.ctx.captureLeftExpAsPath(() => {
+      super.visitExpression(lexp);
+    });
+    const args = this.ctx.captureArrayItmExp(() => {
+      super.visitArguments(n.arguments);
+    });
 
-  //   const bodyOs = this.ctx.captureOps(() => {
-  //     this.visitBlockStatement(decl.body);
-  //   });
-  //   const params: any = decl.params.map((itm) => {
-  //     switch (itm.pat.type) {
-  //       case "Identifier":
-  //         return itm.pat.value;
-  //       default:
-  //         throw new Error("unknown function declare param");
-  //     }
-  //   });
-
-  //   const p: ParamFUNCDECLARE = {
-  //     name: funcName,
-  //     params,
-  //     body: bodyOs,
-  //   };
-  //   const op = new Op(EOPS.FUNCDECLARE, p);
-  //   this.ctx.ops.push(op);
-
-  //   return decl;
-  // }
+    const p: ParamFUNCALL = {
+      name: calee,
+      args,
+    };
+    this.ctx.ops.push(new Op(EOPS.FUNCALL, p));
+    return n;
+  }
 
   // --------------
   // assignment
@@ -263,7 +270,7 @@ export class TLiteAotCompileVisitor extends Visitor {
     const perform = n.operator;
 
     let nextVal = this.ctx.captureRightExp(() => {
-      n.right = this.visitExpression(n.right);
+      n.right = super.visitExpression(n.right);
     });
 
     let op;
@@ -278,8 +285,8 @@ export class TLiteAotCompileVisitor extends Visitor {
         break;
 
       case "MemberExpression": {
-        const path = this.ctx.captureLeftExpAsPath(() => {
-          this.visitExpression(lexp);
+        const path = this.ctx.captureLeftMExpAsPath(() => {
+          super.visitExpression(lexp);
         });
 
         op = new Op(EOPS.MSAVE, {
@@ -305,7 +312,7 @@ export class TLiteAotCompileVisitor extends Visitor {
 
   visitUnaryExpression(n: UnaryExpression): Expression {
     const argOp = this.ctx.captureRightExp(() => {
-      this.visitExpression(n.argument);
+      super.visitExpression(n.argument);
     });
     const p: ParamUEXP = {
       op: n.operator,
@@ -320,10 +327,10 @@ export class TLiteAotCompileVisitor extends Visitor {
     const op = n.operator;
     // can left / right be NumericLiteral / Expression / Identify
     const v1 = this.ctx.captureRightExp(() => {
-      this.visitExpression(n.left);
+      super.visitExpression(n.left);
     });
     const v2 = this.ctx.captureRightExp(() => {
-      this.visitExpression(n.right);
+      super.visitExpression(n.right);
     });
     let res;
     switch (op) {
@@ -417,7 +424,7 @@ export class TLiteAotCompileVisitor extends Visitor {
       switch (it.type) {
         case "KeyValueProperty":
           const expOp = this.ctx.captureRightExp(() => {
-            this.visitExpression(it.value);
+            super.visitExpression(it.value);
           });
           const key = resoveKeyAsString(it.key);
           properties.push({ key, val: expOp });

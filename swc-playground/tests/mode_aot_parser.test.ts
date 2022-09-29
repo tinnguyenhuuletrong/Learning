@@ -7,10 +7,12 @@ import {
 import { TLiteAotEngine, RuntimeAotContext } from "../src/TLiteAotEngine";
 import { Op } from "../src/type.aot";
 
-function run(ops: Op[], { mem = {} }: { mem: any }) {
+function run(ops: Op[], { mem = {}, func = {} }: { mem: any; func?: any }) {
   const runtime = new TLiteAotEngine();
   const ctx = new RuntimeAotContext({ debugTrace: true });
   ctx.mem = mem;
+  ctx.func = func;
+
   const res = runtime.run(ops, ctx);
 
   return { ctx, res };
@@ -264,6 +266,50 @@ describe("TLite aot compiler: condition, condition exp", () => {
       inp: 19,
       isEven: false,
       nextVal: 18,
+    });
+
+    expect(rtCtx._logs).toMatchSnapshot();
+  });
+});
+
+describe("TLite aot compiler: func call", () => {
+  test("tmp = {a: {b: 'VIETNAM'}}; res = concat(inp, toUpper('hello'), tmp.a.b)", async () => {
+    const exp = `tmp = {a: {b: 'VIETNAM'}}; res = concat(inp, toUpper('hello'), tmp.a.b)`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteAotCompileVisitor();
+    const ctx = new CompilerContext();
+    runtime.run(astTree, ctx);
+    expect(runtime).toMatchSnapshot();
+    console.log(exp);
+    console.log(ctx.toString());
+
+    const { res, ctx: rtCtx } = run(ctx.ops, {
+      mem: { inp: "TLite" },
+      func: {
+        toUpper: (a) => String(a).toUpperCase(),
+        concat: (...args) => args.join(" "),
+      },
+    });
+
+    expect(rtCtx.mem["res"]).toEqual("TLite HELLO VIETNAM");
+    expect(rtCtx._logs).toMatchSnapshot();
+  });
+
+  test("echo('hi')", async () => {
+    const exp = `echo('hi')`;
+    const astTree = await swc.parse(exp);
+    const runtime = new TLiteAotCompileVisitor();
+    const ctx = new CompilerContext();
+    runtime.run(astTree, ctx);
+    expect(runtime).toMatchSnapshot();
+    console.log(exp);
+    console.log(ctx.toString());
+
+    const { res, ctx: rtCtx } = run(ctx.ops, {
+      mem: {},
+      func: {
+        echo: (...args) => console.log(...["i am echo man", args]),
+      },
     });
 
     expect(rtCtx._logs).toMatchSnapshot();

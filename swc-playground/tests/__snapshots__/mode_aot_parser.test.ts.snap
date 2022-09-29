@@ -1279,3 +1279,138 @@ Array [
   "do res = true",
 ]
 `;
+
+exports[`TLite aot compiler: func call echo('hi') 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "FUNCALL",
+        "params": Object {
+          "args": Array [
+            Op {
+              "op": "SVAL",
+              "params": Object {
+                "type": "string",
+                "v": "hi",
+              },
+            },
+          ],
+          "name": "echo",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: func call echo('hi') 2`] = `
+Array [
+  "resolve value type string - hi",
+  "resolve FUNCALL echo args:hi - undefined",
+]
+`;
+
+exports[`TLite aot compiler: func call tmp = {a: {b: 'VIETNAM'}}; res = concat(inp, toUpper('hello'), tmp.a.b) 1`] = `
+TLiteAotCompileVisitor {
+  "ctx": CompilerContext {
+    "ops": Array [
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "SVAL",
+            "params": Object {
+              "type": "object",
+              "v": Array [
+                Object {
+                  "key": "a",
+                  "val": Op {
+                    "op": "SVAL",
+                    "params": Object {
+                      "type": "object",
+                      "v": Array [
+                        Object {
+                          "key": "b",
+                          "val": Op {
+                            "op": "SVAL",
+                            "params": Object {
+                              "type": "string",
+                              "v": "VIETNAM",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "path": "tmp",
+          "perform": "=",
+        },
+      },
+      Op {
+        "op": "MSAVE",
+        "params": Object {
+          "nextVal": Op {
+            "op": "FUNCALL",
+            "params": Object {
+              "args": Array [
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "variable",
+                    "v": "inp",
+                  },
+                },
+                Op {
+                  "op": "FUNCALL",
+                  "params": Object {
+                    "args": Array [
+                      Op {
+                        "op": "SVAL",
+                        "params": Object {
+                          "type": "string",
+                          "v": "hello",
+                        },
+                      },
+                    ],
+                    "name": "toUpper",
+                  },
+                },
+                Op {
+                  "op": "SVAL",
+                  "params": Object {
+                    "type": "variable",
+                    "v": "tmp.a.b",
+                  },
+                },
+              ],
+              "name": "concat",
+            },
+          },
+          "path": "res",
+          "perform": "=",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`TLite aot compiler: func call tmp = {a: {b: 'VIETNAM'}}; res = concat(inp, toUpper('hello'), tmp.a.b) 2`] = `
+Array [
+  "resolve value type string - VIETNAM",
+  "resolve value type object - [object Object]",
+  "resolve value type object - [object Object]",
+  "do tmp = [object Object]",
+  "resolve value type variable:inp - TLite",
+  "resolve value type string - hello",
+  "resolve FUNCALL toUpper args:hello - HELLO",
+  "resolve value type variable:tmp.a.b - VIETNAM",
+  "resolve FUNCALL concat args:TLite,HELLO,VIETNAM - TLite HELLO VIETNAM",
+  "do res = TLite HELLO VIETNAM",
+]
+`;

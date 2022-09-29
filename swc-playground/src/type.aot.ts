@@ -12,7 +12,7 @@ export enum EOPS {
   BEXP = "BEXP",
   MEXP = "MEXP",
   BRANCH = "BRANCH",
-  FUNCDECLARE = "FUNCDECLARE",
+  FUNCALL = "FUNCALL",
 }
 export type ParamSVAL_ObjectKV = { key: string; val: Op };
 type ParamSVAL_ArrayElement = Op;
@@ -53,10 +53,9 @@ export type ParamBRANCH = {
   falseBranch: Op[];
 };
 
-export type ParamFUNCDECLARE = {
+export type ParamFUNCALL = {
   name: string;
-  params: string[];
-  body: Op[];
+  args: Op[];
 };
 export type AnyParam =
   | ParamSVAL
@@ -65,7 +64,7 @@ export type AnyParam =
   | ParamMEXP
   | ParamSPOP
   | ParamMSAVE
-  | ParamFUNCDECLARE
+  | ParamFUNCALL
   | ParamBRANCH;
 
 export class Op {
@@ -114,15 +113,9 @@ export class Op {
         } \n\ttrue: ${p.trueBranch} \n\tfalse: ${p.falseBranch}`;
       }
 
-      case EOPS.FUNCDECLARE: {
-        const p = this.params as ParamFUNCDECLARE;
-        return `${this.op} - 
-        name: 
-        \t${p.name} 
-        params: 
-        \t${p.params}
-        body:
-        \t${p.body}`;
+      case EOPS.FUNCALL: {
+        const p = this.params as ParamFUNCALL;
+        return `${this.op} - ${p.name} args:${p.args}`;
       }
 
       default:

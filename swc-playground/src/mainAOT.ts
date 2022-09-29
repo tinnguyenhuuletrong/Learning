@@ -14,13 +14,7 @@ import { Op } from "./type.aot";
 
 // https://astexplorer.net/
 const code = `
-if(inp > 2)
-  res.status = true
-else {
-  res.status = false
-  res.extra = "reason"
-}
-res.tmp = inp > 100 ? '1' : '0'
+tmp = {a: {b: 'VIETNAM'}}; res = concat(inp, toUpper('hello'), tmp.a.b)
 `;
 
 const ops = compile(code);
@@ -48,6 +42,11 @@ function run(ops: Op[]) {
   const runtime = new TLiteAotEngine();
   const ctx = new RuntimeAotContext({ debugTrace: true });
   ctx.mem["inp"] = -999;
+  ctx.func["toUpper"] = function (inp: string) {
+    return String(inp).toUpperCase();
+  };
+  ctx.func["concat"] = (...args) => args.join(" ");
+
   const res = runtime.run(ops, ctx);
 
   console.log(res);
