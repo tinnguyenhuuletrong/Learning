@@ -35,8 +35,8 @@ async function main() {
   const kybInfoEntry = ins.zipEntries.find(
     (itm) => itm.fileName === "kybInfo.json"
   );
-  const dataBuf = await kybInfoEntry.getData(source);
-  console.log("kybInfo.json", dataBuf.toString());
+  const dataBuf = await kybInfoEntry?.getData(source);
+  console.log("kybInfo.json", dataBuf?.toString());
 }
 
 main();

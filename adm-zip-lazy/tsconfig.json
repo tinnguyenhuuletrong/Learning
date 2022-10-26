@@ -12,5 +12,6 @@
     "skipLibCheck": true,
     "isolatedModules": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/_play.ts"]
 }
