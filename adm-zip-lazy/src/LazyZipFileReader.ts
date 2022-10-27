@@ -170,12 +170,14 @@ export class LazyZipEntryReader {
 }
 
 export class LazyZipFileReader {
-  public zipEntries: LazyZipEntryReader[];
+  public readonly zipEntriesMap: Record<string, LazyZipEntryReader> = {};
+  public readonly zipEntries: LazyZipEntryReader[] = [];
+  private _loaded = false;
 
   constructor(readonly header: MainHeader) {}
 
   async fetchEntries(source: IFileSourceReader) {
-    this.zipEntries = [];
+    if (this._loaded) return this.zipEntries;
 
     let beginEntryOffset = this.header.offset;
     const buff = await source.readToBuffer(beginEntryOffset, this.header.size);
@@ -194,9 +196,12 @@ export class LazyZipFileReader {
       const ins = new LazyZipEntryReader(entryHeader);
       ins.loadMetadata(entryHeaderMetadataBuf);
       this.zipEntries.push(ins);
+      this.zipEntriesMap[ins.fileName] = ins;
 
       index += entryHeader.entryHeaderSize;
     }
+
+    this._loaded = true;
     return this.zipEntries;
   }
 

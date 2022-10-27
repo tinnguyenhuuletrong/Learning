@@ -84,8 +84,8 @@ class GCSSource implements IFileSourceReader {
 }
 
 async function main() {
-  await withLocalFile();
-  // await withGCS();
+  // await withLocalFile();
+  await withGCS();
 }
 
 main();
@@ -99,11 +99,11 @@ async function withGCS() {
   console.log(ins.header);
   console.log(ins.zipEntries);
 
-  const kybInfoEntry = ins.zipEntries.find(
-    (itm) => itm.fileName === "kybInfo.json"
-  );
+  const path = "kybInfo.json";
+
+  const kybInfoEntry = ins.zipEntriesMap[path];
   const dataBuf = await kybInfoEntry?.getData(source);
-  console.log("kybInfo.json", dataBuf?.toString());
+  console.log(path, dataBuf?.toString());
 }
 
 async function withLocalFile() {
@@ -116,7 +116,7 @@ async function withLocalFile() {
 
   const path = "kybInfo.json";
 
-  const kybInfoEntry = ins.zipEntries.find((itm) => itm.fileName === path);
+  const kybInfoEntry = ins.zipEntriesMap[path];
   const dataBuf = await kybInfoEntry?.getData(source);
   console.log(path, dataBuf?.toString());
 }
