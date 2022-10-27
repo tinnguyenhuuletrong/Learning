@@ -13,16 +13,16 @@ export class LazyZipEntryReader {
   isDirectory: boolean = false;
   constructor(readonly header: EntryHeader) {}
 
-  async loadMetadata(source: IFileSourceReader, fileOffset: number) {
-    let tmp = fileOffset;
-    tmp = await this._parseFileName(source, tmp);
+  loadMetadata(buff: Buffer) {
+    let tmp = 0;
+    tmp = this._parseFileName(buff, tmp);
 
     if (this.header.extraLength) {
-      tmp = await this._parseExtra(source, tmp);
+      tmp = this._parseExtra(buff, tmp);
     }
 
     if (this.header.commentLength) {
-      tmp = await this._parseComment(source, tmp);
+      tmp = this._parseComment(buff, tmp);
     }
 
     this._loaded = true;
@@ -59,10 +59,10 @@ export class LazyZipEntryReader {
     }
   }
 
-  private async _parseFileName(source: IFileSourceReader, offset: number) {
-    const rawEntryName = await source.readToBuffer(
+  private _parseFileName(buff: Buffer, offset: number) {
+    const rawEntryName = buff.slice(
       offset,
-      this.header.fileNameLength
+      offset + this.header.fileNameLength
     );
     this.fileName = rawEntryName.toString();
 
@@ -74,21 +74,18 @@ export class LazyZipEntryReader {
     return offset;
   }
 
-  private async _parseComment(source: IFileSourceReader, offset: number) {
-    const rawComment = await source.readToBuffer(
-      offset,
-      this.header.commentLength
-    );
+  private _parseComment(buff: Buffer, offset: number) {
+    const rawComment = buff.slice(offset, offset + this.header.commentLength);
     this.comment = rawComment.toString();
 
     offset += this.header.commentLength;
     return offset;
   }
 
-  private async _parseExtra(source: IFileSourceReader, pointerOffset: number) {
-    const data = await source.readToBuffer(
+  private _parseExtra(buff: Buffer, pointerOffset: number) {
+    const data = buff.slice(
       pointerOffset,
-      this.header.extraLength
+      pointerOffset + this.header.extraLength
     );
     var offset = 0;
     let signature, size, part;
@@ -183,14 +180,21 @@ export class LazyZipFileReader {
     let index = this.header.offset;
 
     for (let i = 0; i < this.header.diskEntries; i++) {
+      console.log(i);
       let tmp = index;
       const entryHeader = new EntryHeader();
       let buff = await source.readToBuffer(tmp, Constants.CENHDR);
       tmp += Constants.CENHDR;
       entryHeader.loadFromBinary(buff);
 
+      const entryHeaderMetadataBuf = await source.readToBuffer(
+        tmp,
+        entryHeader.entryHeaderSize - Constants.CENHDR
+      );
+
       const ins = new LazyZipEntryReader(entryHeader);
-      await ins.loadMetadata(source, tmp);
+      ins.loadMetadata(entryHeaderMetadataBuf);
+
       index += entryHeader.entryHeaderSize;
 
       this.zipEntries.push(ins);
