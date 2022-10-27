@@ -5,7 +5,7 @@ import { Storage, File } from "@google-cloud/storage";
 
 const PATH = path.join(__dirname, "../samples/info.zip");
 // const PATH = path.join(__dirname, "../samples/wrong.zip");
-// const PATH = path.join(__dirname, "../samples/hasFolder.zip");
+// const PATH = path.join(__dirname, "../samples/ultra.zip");
 
 class FileSystemSourceSync implements IFileSourceReader {
   constructor(public fileName: string) {}
@@ -84,8 +84,8 @@ class GCSSource implements IFileSourceReader {
 }
 
 async function main() {
-  // await withLocalFile();
-  await withGCS();
+  await withLocalFile();
+  // await withGCS();
 }
 
 main();
@@ -114,9 +114,9 @@ async function withLocalFile() {
   console.log(ins.header);
   console.log(ins.zipEntries);
 
-  const kybInfoEntry = ins.zipEntries.find(
-    (itm) => itm.fileName === "kybInfo.json"
-  );
+  const path = "kybInfo.json";
+
+  const kybInfoEntry = ins.zipEntries.find((itm) => itm.fileName === path);
   const dataBuf = await kybInfoEntry?.getData(source);
-  console.log("kybInfo.json", dataBuf?.toString());
+  console.log(path, dataBuf?.toString());
 }
