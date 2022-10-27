@@ -10,6 +10,7 @@ export class MainHeader {
   _size = 0;
   _offset = 0;
   _commentLength = 0;
+  _headerStartOffset = 0;
 
   get diskEntries() {
     return this._volumeEntries;
@@ -143,7 +144,9 @@ export class MainHeader {
       headerChunk.offset,
       headerChunk.length
     );
-    return MainHeader.fromHeaderBuffer(headerBuffer);
+    const ins = MainHeader.fromHeaderBuffer(headerBuffer);
+    ins._headerStartOffset = headerChunk.offset;
+    return ins;
   }
 
   static fromHeaderBuffer(inBuffer: Buffer) {

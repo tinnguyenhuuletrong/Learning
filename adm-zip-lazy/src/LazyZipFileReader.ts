@@ -177,27 +177,25 @@ export class LazyZipFileReader {
   async fetchEntries(source: IFileSourceReader) {
     this.zipEntries = [];
 
-    let index = this.header.offset;
+    let beginEntryOffset = this.header.offset;
+    const buff = await source.readToBuffer(beginEntryOffset, this.header.size);
 
+    let index = 0;
     for (let i = 0; i < this.header.diskEntries; i++) {
-      console.log(i);
       let tmp = index;
+
       const entryHeader = new EntryHeader();
-      let buff = await source.readToBuffer(tmp, Constants.CENHDR);
+      entryHeader.loadFromBinary(buff.slice(tmp, tmp + Constants.CENHDR));
       tmp += Constants.CENHDR;
-      entryHeader.loadFromBinary(buff);
-
-      const entryHeaderMetadataBuf = await source.readToBuffer(
+      const entryHeaderMetadataBuf = buff.slice(
         tmp,
-        entryHeader.entryHeaderSize - Constants.CENHDR
+        tmp + entryHeader.entryHeaderSize - Constants.CENHDR
       );
-
       const ins = new LazyZipEntryReader(entryHeader);
       ins.loadMetadata(entryHeaderMetadataBuf);
+      this.zipEntries.push(ins);
 
       index += entryHeader.entryHeaderSize;
-
-      this.zipEntries.push(ins);
     }
     return this.zipEntries;
   }

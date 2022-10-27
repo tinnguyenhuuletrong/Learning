@@ -84,21 +84,19 @@ class GCSSource implements IFileSourceReader {
 }
 
 async function main() {
-  await withLocalFile();
-  // await withGCS();
+  // await withLocalFile();
+  await withGCS();
 }
 
 main();
 
 async function withGCS() {
-  const source = new GCSSource(
-    new URL("gs://kycbot-logs/kyb/qa/kybInfo-dev.zip")
-  );
+  const source = new GCSSource(new URL(String(process.env["GCS_URI"])));
 
   const ins = await LazyZipFileReader.fromSource(source);
   await ins.fetchEntries(source);
 
-  console.log(ins.header.toJSON());
+  console.log(ins.header);
   console.log(ins.zipEntries);
 
   const kybInfoEntry = ins.zipEntries.find(
@@ -113,7 +111,7 @@ async function withLocalFile() {
   const ins = await LazyZipFileReader.fromSource(source);
   await ins.fetchEntries(source);
 
-  console.log(ins.header.toJSON());
+  console.log(ins.header);
   console.log(ins.zipEntries);
 
   const kybInfoEntry = ins.zipEntries.find(
