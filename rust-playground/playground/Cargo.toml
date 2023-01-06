@@ -11,4 +11,4 @@ futures = "0.3.16"
 reqwest = {version = "*", features = ["json"]}
 rust-crypto = "0.2.36"
 serde = {version = "*", features = ["derive"]}
-tokio = {version = "1.10.0", features = ["full"]}
+tokio = {version = "1.16.1", features = ["full"]}
