@@ -7,3 +7,6 @@ mediapipe/data/*
 mediapipe/log
 mediapipe/*.h5
 mediapipe/data.zip
+
+binance_api/.env
+binance_api/out/*.pkl
