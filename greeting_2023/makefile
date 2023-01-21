@@ -1,0 +1,4 @@
+.PHONY: run
+
+run:
+	DEBUG=* deno run --allow-run --allow-read --allow-env ./deno_hello_2023_luna.ts
