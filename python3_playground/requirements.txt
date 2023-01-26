@@ -11,12 +11,15 @@ backcall==0.2.0
 cachetools==4.2.4
 certifi==2021.10.8
 charset-normalizer==2.0.9
+cmdstanpy==1.1.0
+convertdate==2.4.0
 cycler==0.11.0
 dateparser==1.1.6
 debugpy==1.5.1
 decorator==5.1.0
 dill==0.3.6
 entrypoints==0.3
+ephem==4.1.4
 flatbuffers==2.0
 fonttools==4.28.3
 frozenlist==1.3.3
@@ -26,6 +29,8 @@ google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 grpcio==1.43.0
 h5py==3.6.0
+hijri-converter==2.2.4
+holidays==0.18
 idna==3.3
 importlib-metadata==4.10.0
 ipykernel==6.6.0
@@ -38,8 +43,10 @@ jupyter-core==4.9.1
 keras==2.7.0
 Keras-Preprocessing==1.1.2
 kiwisolver==1.3.2
+korean-lunar-calendar==0.3.1
 lazy-object-proxy==1.9.0
 libclang==12.0.0
+LunarCalendar==0.0.9
 Markdown==3.3.6
 matplotlib==3.5.1
 matplotlib-inline==0.1.3
@@ -59,7 +66,9 @@ pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==8.4.0
 platformdirs==2.6.2
+plotly==5.13.0
 prompt-toolkit==3.0.24
+prophet==1.1.2
 protobuf==3.19.1
 ptyprocess==0.7.0
 pyasn1==0.4.8
@@ -67,6 +76,7 @@ pyasn1-modules==0.2.8
 pycodestyle==2.10.0
 Pygments==2.10.0
 pylint==2.15.10
+PyMeeus==0.5.12
 pyparsing==3.0.6
 python-binance==1.0.16
 python-dateutil==2.8.2
@@ -82,6 +92,7 @@ scikit-learn==1.0.2
 scipy==1.7.3
 six==1.16.0
 sklearn==0.0
+tenacity==8.1.0
 tensorboard==2.7.0
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.0
@@ -93,6 +104,7 @@ threadpoolctl==3.0.0
 tomli==2.0.1
 tomlkit==0.11.6
 tornado==6.1
+tqdm==4.64.1
 traitlets==5.1.1
 typing-extensions==4.0.1
 tzdata==2022.7
