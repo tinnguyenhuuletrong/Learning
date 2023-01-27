@@ -10,3 +10,4 @@ mediapipe/data.zip
 
 binance_api/.env
 binance_api/out/*.pkl
+binance_api/notebook.html
