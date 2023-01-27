@@ -1,0 +1,1 @@
+jupyter-nbconvert './notebook.ipynb' --execute --to html
