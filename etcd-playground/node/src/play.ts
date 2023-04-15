@@ -7,6 +7,42 @@ const loggerInfo = debug(appId);
 const loggerVerbose = debug(appId + ":verbose");
 const ElectionName = "stateFullApp";
 
+class DistributedState {
+  private leaderPID: string = "";
+  private gen: number = 0;
+  private _updatedAt: number = Date.now();
+
+  setLeaderPID(val: string) {
+    this.leaderPID = val;
+  }
+
+  inc() {
+    this.gen++;
+    this._updatedAt = Date.now();
+  }
+
+  toJSON() {
+    return JSON.stringify({
+      gen: this.gen,
+      _updatedAt: this._updatedAt,
+      leaderPID: this.leaderPID,
+    });
+  }
+
+  fromJSON(v: string) {
+    const val: DistributedState = JSON.parse(v);
+    this.gen = val?.gen;
+    this._updatedAt = val?._updatedAt;
+    this.leaderPID = val?.leaderPID;
+  }
+
+  toString() {
+    return this.toJSON();
+  }
+}
+
+const distributedState = new DistributedState();
+
 async function listAllCampaignMembers(client: Etcd3) {
   const res = await client.getAll().prefix(`election/${ElectionName}`).exec();
   const data = res.kvs.map((itm) => {
@@ -33,11 +69,22 @@ async function monitorAllCampaignMembers(campaign: Campaign, client: Etcd3) {
 }
 
 async function runWorker(campaign: Campaign) {
+  let itTicket: NodeJS.Timer;
   loggerInfo(`campaignKey: ${await campaign.getCampaignKey()}`);
-  campaign.on("elected", () => {
+  campaign.on("elected", async () => {
     // This server is now the leader! Let's start doing work
-    loggerInfo("i am leader now. Rebuild memory state from previous leader");
+    loggerInfo(
+      "i am leader now. Rebuild memory state from previous leader. Broadcast the sync",
+      distributedState
+    );
+    distributedState.setLeaderPID(appId);
+    await campaign.proclaim(distributedState.toString());
     loggerInfo("i am leader now. Start work");
+
+    itTicket = setInterval(async () => {
+      distributedState.inc();
+      await campaign.proclaim(distributedState.toString());
+    }, 5000);
 
     // doSomeWork();
   });
@@ -50,6 +97,8 @@ async function runWorker(campaign: Campaign) {
     loggerInfo("error", error);
 
     loggerInfo("i am leader now. Stop work");
+
+    clearInterval(itTicket);
     // stopDoingWork();
 
     // Restart worker.
@@ -67,8 +116,9 @@ async function observeLeader(
 ) {
   const observer = await election.observe();
 
-  observer.on("change", async (leader) => {
-    loggerVerbose("The new leader is", leader);
+  observer.on("change", async (state) => {
+    if (state) distributedState.fromJSON(state);
+    loggerVerbose("The new leader state", distributedState);
   });
 
   observer.on("error", () => {
@@ -86,17 +136,18 @@ async function main() {
 
   const client = new Etcd3({ hosts: "http://localhost:2380" });
   const election = client.election("stateFullApp");
-  const campaign = election.campaign(appId);
+  const campaign = election.campaign(distributedState.toString());
 
   // Monitor all members in election
-  await monitorAllCampaignMembers(campaign, client);
+  // await monitorAllCampaignMembers(campaign, client);
 
   // Start a election
   await runWorker(campaign);
 
   // Observer for changed
-  const leader = await observeLeader(client, election);
-  loggerVerbose("ready. The current leader is", leader);
+  const leaderState = await observeLeader(client, election);
+  if (leaderState) distributedState.fromJSON(leaderState);
+  loggerVerbose("ready. The current leader state", distributedState);
 
   // Gracefull shutdown
   const doExit = async () => {
