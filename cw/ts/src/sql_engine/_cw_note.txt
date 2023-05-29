@@ -1,0 +1,25 @@
+https://www.codewars.com/kata/545434090294935e7d0010ab/typescript
+
+Ref
+https://towardsdatascience.com/a-look-into-sqls-order-of-execution-d0b81e361c66
+
+{
+  select: ...,
+  from: ...,
+  where: ...,
+  orderBy: ...,
+  groupBy: ...,
+  having: ...,
+  execute: ...
+}
+
+
+exec 
+1. from
+2. where 
+
+3. groupBy -> chunk. Default only 1 bigChunk
+4. having (filter Chunks)
+eachChunk
+5. select
+6. orderBy
