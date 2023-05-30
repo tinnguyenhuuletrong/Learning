@@ -54,7 +54,7 @@ class QueryEngine<S = any> {
 
     let pharse1: Array<S> = this._ctx.fromSource;
     let pharse2: Array<Partial<S>>;
-    let pharse3: Record<any, Array<Partial<S>>> = {};
+    let pharse3: Map<any, any> = new Map();
 
     const { whereFunc, selectFunc, groupByFunc } = this._ctx;
     const hasGroupBy = groupByFunc?.length && groupByFunc?.length > 0;
@@ -67,9 +67,7 @@ class QueryEngine<S = any> {
         this._set(pharse3, groupName, itm);
       }
     } else {
-      pharse3 = {
-        [DEFAULT_KEY]: pharse2,
-      };
+      pharse3.set(DEFAULT_KEY, pharse2);
     }
     // console.log(pharse3);
     let finalRes: Array<Group<S>> = this._entities(pharse3);
@@ -89,24 +87,25 @@ class QueryEngine<S = any> {
     return finalRes;
   }
 
-  private _set(obj: any, path: string[], value: any) {
+  private _set(obj: Map<any, any>, path: string[], value: any) {
     var schema = obj;
     var pList = path;
     var len = pList.length;
     for (var i = 0; i < len - 1; i++) {
       var elem = pList[i];
-      if (!schema[elem]) schema[elem] = {};
-      schema = schema[elem];
+      if (!schema.get(elem)) schema.set(elem, new Map());
+      schema = schema.get(elem);
     }
 
-    if (!Array.isArray(schema[pList[len - 1]])) schema[pList[len - 1]] = [];
-    schema[pList[len - 1]].push(value);
+    const lastKey = pList[len - 1];
+    if (!Array.isArray(schema.get(lastKey))) schema.set(lastKey, []);
+    schema.get(lastKey).push(value);
   }
 
-  private _entities(obj: any) {
+  private _entities(obj: Map<any, any>) {
     const res: any[] = [];
     if (Array.isArray(obj)) return obj;
-    for (const [k, v] of Object.entries(obj)) {
+    for (const [k, v] of obj.entries()) {
       res.push([k, this._entities(v)]);
     }
     return res;
