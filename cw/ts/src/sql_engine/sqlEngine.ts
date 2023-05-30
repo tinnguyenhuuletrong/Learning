@@ -54,7 +54,7 @@ class QueryEngine<S = any> {
 
     let pharse1: Array<S> = this._ctx.fromSource;
     let pharse2: Array<Partial<S>>;
-    let pharse3: Record<any, Array<Partial<S>>>;
+    let pharse3: Record<any, Array<Partial<S>>> = {};
 
     const { whereFunc, selectFunc, groupByFunc } = this._ctx;
     const hasGroupBy = groupByFunc?.length && groupByFunc?.length > 0;
@@ -62,22 +62,17 @@ class QueryEngine<S = any> {
     else pharse2 = pharse1;
 
     if (hasGroupBy) {
-      pharse3 = pharse2.reduce((acc, itm) => {
-        const groupName = groupByFunc.map((fn) => fn(itm)).join(".");
-        const tmp = acc[groupName] || [];
-        acc[groupName] = [...tmp, itm];
-        return acc;
-      }, {});
+      for (const itm of pharse2) {
+        const groupName = groupByFunc.map((fn) => fn(itm));
+        this._set(pharse3, groupName, itm);
+      }
     } else {
       pharse3 = {
         [DEFAULT_KEY]: pharse2,
       };
     }
     // console.log(pharse3);
-    let finalRes: Array<Group<S>> = Object.keys(pharse3).map((k) => [
-      k,
-      pharse3[k],
-    ]);
+    let finalRes: Array<Group<S>> = this._entities(pharse3);
 
     // don't have groupBy -> return default group plain object
     if (!hasGroupBy) {
@@ -92,6 +87,29 @@ class QueryEngine<S = any> {
       finalRes = finalRes.map(selectFunc) as Array<Group<S>>;
     }
     return finalRes;
+  }
+
+  private _set(obj: any, path: string[], value: any) {
+    var schema = obj;
+    var pList = path;
+    var len = pList.length;
+    for (var i = 0; i < len - 1; i++) {
+      var elem = pList[i];
+      if (!schema[elem]) schema[elem] = {};
+      schema = schema[elem];
+    }
+
+    if (!Array.isArray(schema[pList[len - 1]])) schema[pList[len - 1]] = [];
+    schema[pList[len - 1]].push(value);
+  }
+
+  private _entities(obj: any) {
+    const res: any[] = [];
+    if (Array.isArray(obj)) return obj;
+    for (const [k, v] of Object.entries(obj)) {
+      res.push([k, this._entities(v)]);
+    }
+    return res;
   }
 }
 

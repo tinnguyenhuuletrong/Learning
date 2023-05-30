@@ -285,13 +285,13 @@ describe("sql engine", () => {
         .execute()
     ).toStrictEqual(["teacher", "scientific", "politician"]);
 
-    function professionCount(group: any) {
+    function professionCount(group: any): [any, any] {
       return [group[0], group[1].length];
     }
 
     // SELECT profession, count(profession) FROM persons GROUPBY profession
     expect(
-      query()
+      query<typeof persons>()
         .select(professionCount)
         .from(persons)
         .groupBy(profession)
@@ -301,64 +301,18 @@ describe("sql engine", () => {
       ["scientific", 3],
       ["politician", 1],
     ]);
-  });
-
-  test.skip("wip", () => {
-    var persons = [
-      {
-        name: "Peter",
-        profession: "teacher",
-        age: 20,
-        maritalStatus: "married",
-      },
-      {
-        name: "Michael",
-        profession: "teacher",
-        age: 50,
-        maritalStatus: "single",
-      },
-      {
-        name: "Peter",
-        profession: "teacher",
-        age: 20,
-        maritalStatus: "married",
-      },
-      {
-        name: "Anna",
-        profession: "scientific",
-        age: 20,
-        maritalStatus: "married",
-      },
-      {
-        name: "Rose",
-        profession: "scientific",
-        age: 50,
-        maritalStatus: "married",
-      },
-      {
-        name: "Anna",
-        profession: "scientific",
-        age: 20,
-        maritalStatus: "single",
-      },
-      {
-        name: "Anna",
-        profession: "politician",
-        age: 50,
-        maritalStatus: "married",
-      },
-    ];
 
     function name(person: any) {
       return person.name;
     }
-    function profession(person: any) {
-      return person.profession;
-    }
-    // WIP
+
     // SELECT * FROM persons WHERE profession='teacher' GROUPBY profession, name
     expect(
-      query().select().from(persons).groupBy(profession, name).execute()
+      query<typeof persons>()
+        .select()
+        .from(persons)
+        .groupBy(profession, name)
+        .execute()
     ).toStrictEqual([
       [
         "teacher",
@@ -443,65 +397,257 @@ describe("sql engine", () => {
         ],
       ],
     ]);
+
+    function age(person: any) {
+      return person.age;
+    }
+
+    function maritalStatus(person: any) {
+      return person.maritalStatus;
+    }
+
+    expect(
+      query<typeof persons>()
+        .select()
+        .from(persons)
+        .groupBy(profession, name, age, maritalStatus)
+        .execute()
+    ).toStrictEqual([
+      [
+        "teacher",
+        [
+          [
+            "Peter",
+            [
+              [
+                20,
+                [
+                  [
+                    "married",
+                    [
+                      {
+                        name: "Peter",
+                        profession: "teacher",
+                        age: 20,
+                        maritalStatus: "married",
+                      },
+                      {
+                        name: "Peter",
+                        profession: "teacher",
+                        age: 20,
+                        maritalStatus: "married",
+                      },
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+          [
+            "Michael",
+            [
+              [
+                50,
+                [
+                  [
+                    "single",
+                    [
+                      {
+                        name: "Michael",
+                        profession: "teacher",
+                        age: 50,
+                        maritalStatus: "single",
+                      },
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+      [
+        "scientific",
+        [
+          [
+            "Anna",
+            [
+              [
+                20,
+                [
+                  [
+                    "married",
+                    [
+                      {
+                        name: "Anna",
+                        profession: "scientific",
+                        age: 20,
+                        maritalStatus: "married",
+                      },
+                    ],
+                  ],
+                  [
+                    "single",
+                    [
+                      {
+                        name: "Anna",
+                        profession: "scientific",
+                        age: 20,
+                        maritalStatus: "single",
+                      },
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+          [
+            "Rose",
+            [
+              [
+                50,
+                [
+                  [
+                    "married",
+                    [
+                      {
+                        name: "Rose",
+                        profession: "scientific",
+                        age: 50,
+                        maritalStatus: "married",
+                      },
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+      [
+        "politician",
+        [
+          [
+            "Anna",
+            [
+              [
+                50,
+                [
+                  [
+                    "married",
+                    [
+                      {
+                        name: "Anna",
+                        profession: "politician",
+                        age: 50,
+                        maritalStatus: "married",
+                      },
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ]);
   });
 
   test("transform", () => {
-    const inp = {
-      "teacher.Peter": [
-        {
-          name: "Peter",
-          profession: "teacher",
-          age: 20,
-          maritalStatus: "married",
-        },
-        {
-          name: "Peter",
-          profession: "teacher",
-          age: 20,
-          maritalStatus: "married",
-        },
-      ],
-      "teacher.Michael": [
-        {
-          name: "Michael",
-          profession: "teacher",
-          age: 50,
-          maritalStatus: "single",
-        },
-      ],
-      "scientific.Anna": [
-        {
-          name: "Anna",
-          profession: "scientific",
-          age: 20,
-          maritalStatus: "married",
-        },
-        {
-          name: "Anna",
-          profession: "scientific",
-          age: 20,
-          maritalStatus: "single",
-        },
-      ],
-      "scientific.Rose": [
-        {
-          name: "Rose",
-          profession: "scientific",
-          age: 50,
-          maritalStatus: "married",
-        },
-      ],
-      "politician.Anna": [
-        {
-          name: "Anna",
-          profession: "politician",
-          age: 50,
-          maritalStatus: "married",
-        },
-      ],
+    const _set = (obj: any, path: string[], value: any) => {
+      var schema = obj;
+      var pList = path;
+      var len = pList.length;
+      for (var i = 0; i < len - 1; i++) {
+        var elem = pList[i];
+        if (!schema[elem]) schema[elem] = {};
+        schema = schema[elem];
+      }
+
+      if (!Array.isArray(schema[pList[len - 1]])) schema[pList[len - 1]] = [];
+      schema[pList[len - 1]].push(value);
     };
 
-    const out = [
+    const entities = (obj: any) => {
+      const res: any[] = [];
+      if (Array.isArray(obj)) return obj;
+      for (const [k, v] of Object.entries(obj)) {
+        res.push([k, entities(v)]);
+      }
+      return res;
+    };
+
+    // const val = {};
+    // _set(val, ["a", "b"], 1);
+    // _set(val, ["a", "b"], 2);
+    // _set(val, ["a", "c"], 3);
+
+    // console.dir(val, { depth: 100 });
+    // console.dir(entities(val), { depth: 100 });
+
+    const val1 = {
+      teacher: {
+        Peter: [
+          {
+            name: "Peter",
+            profession: "teacher",
+            age: 20,
+            maritalStatus: "married",
+          },
+          {
+            name: "Peter",
+            profession: "teacher",
+            age: 20,
+            maritalStatus: "married",
+          },
+        ],
+        Michael: [
+          {
+            name: "Michael",
+            profession: "teacher",
+            age: 50,
+            maritalStatus: "single",
+          },
+        ],
+      },
+      scientific: {
+        Anna: [
+          {
+            name: "Anna",
+            profession: "scientific",
+            age: 20,
+            maritalStatus: "married",
+          },
+          {
+            name: "Anna",
+            profession: "scientific",
+            age: 20,
+            maritalStatus: "single",
+          },
+        ],
+        Rose: [
+          {
+            name: "Rose",
+            profession: "scientific",
+            age: 50,
+            maritalStatus: "married",
+          },
+        ],
+      },
+      politician: {
+        Anna: [
+          {
+            name: "Anna",
+            profession: "politician",
+            age: 50,
+            maritalStatus: "married",
+          },
+        ],
+      },
+    };
+    const f = entities(val1);
+    console.dir(f, { depth: 100 });
+    expect(f).toEqual([
       [
         "teacher",
         [
@@ -584,6 +730,6 @@ describe("sql engine", () => {
           ],
         ],
       ],
-    ];
+    ]);
   });
 });
