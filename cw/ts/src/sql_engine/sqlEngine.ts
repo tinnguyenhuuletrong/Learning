@@ -3,6 +3,11 @@ export type SelectFunc<S> = (
   arg: Partial<S> | Group<S>
 ) => Partial<S> | Group<S>;
 export type GroupByFunc<S> = (arg: Partial<S>) => any;
+export type OrderByFunc<S> = (
+  arg1: Partial<S> | Group<S>,
+  arg2: Partial<S> | Group<S>
+) => number;
+export type HavingFunc<S> = (arg: Group<S>) => boolean;
 
 export type Group<S> = [any, Array<Partial<S>>];
 export type ExeRes<S> = Array<Partial<S>> | Array<Group<S>>;
@@ -14,6 +19,8 @@ class Context<S = any> {
   public whereFunc?: FilterFunc<S>;
   public selectFunc?: SelectFunc<S>;
   public groupByFunc?: GroupByFunc<S>[];
+  public orderByFunc?: OrderByFunc<S>;
+  public havingFunc?: HavingFunc<S>;
 }
 
 class QueryEngine<S = any> {
@@ -34,7 +41,10 @@ class QueryEngine<S = any> {
     return this;
   }
 
-  orderBy() {
+  orderBy(
+    func: any // OrderByFunc<S>
+  ) {
+    this._ctx.orderByFunc = func;
     return this;
   }
 
@@ -43,7 +53,8 @@ class QueryEngine<S = any> {
     return this;
   }
 
-  having() {
+  having(func: HavingFunc<S>) {
+    this._ctx.havingFunc = func;
     return this;
   }
 
@@ -56,7 +67,8 @@ class QueryEngine<S = any> {
     let pharse2: Array<Partial<S>>;
     let pharse3: Map<any, any> = new Map();
 
-    const { whereFunc, selectFunc, groupByFunc } = this._ctx;
+    const { whereFunc, selectFunc, groupByFunc, orderByFunc, havingFunc } =
+      this._ctx;
     const hasGroupBy = groupByFunc?.length && groupByFunc?.length > 0;
     if (whereFunc) pharse2 = pharse1.filter(whereFunc);
     else pharse2 = pharse1;
@@ -69,20 +81,31 @@ class QueryEngine<S = any> {
     } else {
       pharse3.set(DEFAULT_KEY, pharse2);
     }
-    // console.log(pharse3);
-    let finalRes: Array<Group<S>> = this._entities(pharse3);
+    let finalRes: Array<Group<S>> | Array<Partial<S>> = this._entities(pharse3);
 
     // don't have groupBy -> return default group plain object
     if (!hasGroupBy) {
       if (selectFunc) {
-        return finalRes[0][1].map(selectFunc) as Array<Group<S>>;
+        finalRes = finalRes[0][1].map(selectFunc) as Array<Group<S>>;
       } else {
-        return finalRes[0][1];
+        finalRes = finalRes[0][1];
       }
+
+      if (orderByFunc) {
+        finalRes = finalRes.sort(orderByFunc);
+      }
+      return finalRes;
+    }
+
+    if (havingFunc) {
+      finalRes = (finalRes as Array<Group<S>>).filter(havingFunc);
     }
 
     if (selectFunc) {
       finalRes = finalRes.map(selectFunc) as Array<Group<S>>;
+    }
+    if (orderByFunc) {
+      finalRes = finalRes.sort(orderByFunc);
     }
     return finalRes;
   }

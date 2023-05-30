@@ -551,6 +551,136 @@ describe("sql engine", () => {
         ],
       ],
     ]);
+
+    function naturalCompare(value1: any, value2: any) {
+      if (value1 < value2) {
+        return -1;
+      } else if (value1 > value2) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    // SELECT profession, count(profession) FROM persons GROUPBY profession ORDER BY profession
+    expect(
+      query<typeof persons>()
+        .select(professionCount)
+        .from(persons)
+        .groupBy(profession)
+        .orderBy(naturalCompare)
+        .execute()
+    ).toStrictEqual([
+      ["politician", 1],
+      ["scientific", 3],
+      ["teacher", 3],
+    ]);
+  });
+
+  test("Number tests", () => {
+    function isEven(number: number) {
+      return number % 2 === 0;
+    }
+
+    function parity(number: number) {
+      return isEven(number) ? "even" : "odd";
+    }
+
+    function isPrime(number: number) {
+      if (number < 2) {
+        return false;
+      }
+      var divisor = 2;
+      for (; number % divisor !== 0; divisor++);
+      return divisor === number;
+    }
+
+    function prime(number: number) {
+      return isPrime(number) ? "prime" : "divisible";
+    }
+
+    var numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    // SELECT * FROM numbers
+    expect(
+      query<typeof numbers>().select().from(numbers).execute()
+    ).toStrictEqual(numbers);
+
+    // SELECT * FROM numbers GROUP BY parity
+    expect(
+      query<typeof numbers>().select().from(numbers).groupBy(parity).execute()
+    ).toStrictEqual([
+      ["odd", [1, 3, 5, 7, 9]],
+      ["even", [2, 4, 6, 8]],
+    ]);
+
+    // SELECT * FROM numbers GROUP BY parity, isPrime
+    expect(
+      query<typeof numbers>()
+        .select()
+        .from(numbers)
+        .groupBy(parity, prime)
+        .execute()
+    ).toStrictEqual([
+      [
+        "odd",
+        [
+          ["divisible", [1, 9]],
+          ["prime", [3, 5, 7]],
+        ],
+      ],
+      [
+        "even",
+        [
+          ["prime", [2]],
+          ["divisible", [4, 6, 8]],
+        ],
+      ],
+    ]);
+
+    function odd(group: any) {
+      return group[0] === "odd";
+    }
+
+    // SELECT * FROM numbers GROUP BY parity HAVING
+    expect(
+      query<typeof numbers>()
+        .select()
+        .from(numbers)
+        .groupBy(parity)
+        .having(odd)
+        .execute()
+    ).toStrictEqual([["odd", [1, 3, 5, 7, 9]]]);
+
+    function descendentCompare(number1: number, number2: number) {
+      return number2 - number1;
+    }
+
+    // SELECT * FROM numbers ORDER BY value DESC
+    expect(
+      query<typeof numbers>()
+        .select()
+        .from(numbers)
+        .orderBy(descendentCompare)
+        .execute()
+    ).toStrictEqual([9, 8, 7, 6, 5, 4, 3, 2, 1]);
+
+    function lessThan3(number: number) {
+      return number < 3;
+    }
+
+    function greaterThan4(number: number) {
+      return number > 4;
+    }
+
+    // SELECT * FROM number WHERE number < 3 OR number > 4
+    // expect(
+    //   query<typeof numbers>()
+    //     .select()
+    //     .from(numbers)
+    //     .where(lessThan3, greaterThan4)
+    //     .execute()
+    // ).toStrictEqual([1, 2, 5, 6, 7, 8, 9]);
   });
 
   test("transform", () => {
