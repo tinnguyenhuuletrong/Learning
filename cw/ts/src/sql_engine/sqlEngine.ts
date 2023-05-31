@@ -1,7 +1,7 @@
 export type FilterFunc<S> = (arg: Partial<S>) => boolean;
 export type SelectFunc<S> = (
   arg: Partial<S> | Group<S>
-) => Partial<S> | Group<S>;
+) => Partial<S> | Group<S> | unknown;
 export type GroupByFunc<S> = (arg: Partial<S>) => any;
 export type OrderByFunc<S> = (
   arg1: Partial<S> | Group<S>,
@@ -14,13 +14,15 @@ export type ExeRes<S> = Array<Partial<S>> | Array<Group<S>>;
 
 type GetElementType<T extends any[]> = T extends (infer U)[] ? U : never;
 
+type Conditional<S> = Array<S[]>;
+
 class Context<S = any> {
   public fromSource?: S[];
-  public whereFunc?: FilterFunc<S>;
+  public whereCondition?: Conditional<FilterFunc<S>> = [];
   public selectFunc?: SelectFunc<S>;
   public groupByFunc?: GroupByFunc<S>[];
   public orderByFunc?: OrderByFunc<S>;
-  public havingFunc?: HavingFunc<S>;
+  public havingCondition?: Conditional<HavingFunc<S>> = [];
 }
 
 class QueryEngine<S = any> {
@@ -36,8 +38,8 @@ class QueryEngine<S = any> {
     return this;
   }
 
-  where(func: FilterFunc<S>) {
-    this._ctx.whereFunc = func;
+  where(...func: FilterFunc<S>[]) {
+    this._ctx.whereCondition?.push([...func]);
     return this;
   }
 
@@ -53,8 +55,8 @@ class QueryEngine<S = any> {
     return this;
   }
 
-  having(func: HavingFunc<S>) {
-    this._ctx.havingFunc = func;
+  having(...func: HavingFunc<S>[]) {
+    this._ctx.havingCondition?.push([...func]);
     return this;
   }
 
@@ -67,11 +69,15 @@ class QueryEngine<S = any> {
     let pharse2: Array<Partial<S>>;
     let pharse3: Map<any, any> = new Map();
 
-    const { whereFunc, selectFunc, groupByFunc, orderByFunc, havingFunc } =
-      this._ctx;
+    const {
+      whereCondition = [],
+      selectFunc,
+      groupByFunc,
+      orderByFunc,
+      havingCondition = [],
+    } = this._ctx;
     const hasGroupBy = groupByFunc?.length && groupByFunc?.length > 0;
-    if (whereFunc) pharse2 = pharse1.filter(whereFunc);
-    else pharse2 = pharse1;
+    pharse2 = this._applyCondition(pharse1, whereCondition);
 
     if (hasGroupBy) {
       for (const itm of pharse2) {
@@ -97,9 +103,10 @@ class QueryEngine<S = any> {
       return finalRes;
     }
 
-    if (havingFunc) {
-      finalRes = (finalRes as Array<Group<S>>).filter(havingFunc);
-    }
+    finalRes = this._applyCondition(
+      finalRes as Array<Group<S>>,
+      havingCondition
+    );
 
     if (selectFunc) {
       finalRes = finalRes.map(selectFunc) as Array<Group<S>>;
@@ -132,6 +139,27 @@ class QueryEngine<S = any> {
       res.push([k, this._entities(v)]);
     }
     return res;
+  }
+
+  private _isEmpty(a: any) {
+    if (a === null || a === undefined) return false;
+    if (!Array.isArray(a)) return false;
+    return a.length === 0;
+  }
+
+  private _applyCondition<I, C extends Function>(
+    input: I[],
+    condition: Conditional<C>
+  ): I[] {
+    const out: I[] = [];
+    for (const itm of input) {
+      let res = true;
+      for (const orFuncs of condition) {
+        res = res && orFuncs.some((f) => f(itm));
+      }
+      if (res) out.push(itm);
+    }
+    return out;
   }
 }
 
