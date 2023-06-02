@@ -1,8 +1,8 @@
-export type FilterFunc<S> = (arg: Partial<S>) => boolean;
+export type FilterFunc<S> = (arg: S | Partial<S>) => boolean;
 export type SelectFunc<S> = (
   arg: Partial<S> | Group<S>
 ) => Partial<S> | Group<S> | unknown;
-export type GroupByFunc<S> = (arg: Partial<S>) => any;
+export type GroupByFunc<S> = (arg: S | Partial<S>) => any;
 export type OrderByFunc<S> = (
   arg1: Partial<S> | Group<S>,
   arg2: Partial<S> | Group<S>
@@ -12,7 +12,8 @@ export type HavingFunc<S> = (arg: Group<S>) => boolean;
 export type Group<S> = [any, Array<Partial<S>>];
 export type ExeRes<S> = Array<Partial<S>> | Array<Group<S>>;
 
-type GetElementType<T extends any[]> = T extends (infer U)[] ? U : never;
+export type GetElementType<T extends any[]> = T extends (infer U)[] ? U : never;
+export type JoinType<T extends any[]> = Array<T>;
 
 type Conditional<S> = Array<S[]>;
 
@@ -27,14 +28,51 @@ class Context<S = any> {
 
 class QueryEngine<S = any> {
   private _ctx: Context<S> = new Context<S>();
+  private _hasSelect = false;
+  private _hasForm = false;
+  private _hasOrderBy = false;
+  private _hasGroupBy = false;
+
+  _resetFlags() {
+    this._hasSelect = false;
+    this._hasForm = false;
+    this._hasOrderBy = false;
+    this._hasGroupBy = false;
+  }
 
   select(func?: SelectFunc<S>) {
+    if (this._hasSelect) {
+      throw new Error("Duplicate SELECT");
+    }
+
     this._ctx.selectFunc = func;
+    this._hasSelect = true;
     return this;
   }
 
-  from(data?: S[]) {
-    if (data) this._ctx.fromSource = data;
+  from(...data: any[]) {
+    if (this._hasForm) {
+      throw new Error("Duplicate FROM");
+    }
+    if (data) {
+      if (data.length === 1) {
+        this._ctx.fromSource = data[0];
+      } else {
+        // generate joined source
+        let it = Array(data.length).fill(0);
+        let stop = false;
+        let final: any = [];
+        do {
+          final.push(it.map((itm, idx) => data[idx][itm]));
+          const [hasNext, nextVal] = this._next(data, it);
+          if (nextVal) it = nextVal;
+          stop = !hasNext;
+        } while (!stop);
+
+        this._ctx.fromSource = final as S[];
+      }
+    }
+    this._hasForm = true;
     return this;
   }
 
@@ -46,12 +84,20 @@ class QueryEngine<S = any> {
   orderBy(
     func: any // OrderByFunc<S>
   ) {
+    if (this._hasOrderBy) {
+      throw new Error("Duplicate ORDERBY");
+    }
     this._ctx.orderByFunc = func;
+    this._hasOrderBy = true;
     return this;
   }
 
   groupBy(...func: GroupByFunc<S>[]) {
+    if (this._hasGroupBy) {
+      throw new Error("Duplicate GROUPBY");
+    }
     this._ctx.groupByFunc = func;
+    this._hasGroupBy = true;
     return this;
   }
 
@@ -92,9 +138,9 @@ class QueryEngine<S = any> {
     // don't have groupBy -> return default group plain object
     if (!hasGroupBy) {
       if (selectFunc) {
-        finalRes = finalRes[0][1].map(selectFunc) as Array<Group<S>>;
+        finalRes = (finalRes as any)[0][1].map(selectFunc) as Array<Group<S>>;
       } else {
-        finalRes = finalRes[0][1];
+        finalRes = (finalRes as any)[0][1];
       }
 
       if (orderByFunc) {
@@ -160,6 +206,27 @@ class QueryEngine<S = any> {
       if (res) out.push(itm);
     }
     return out;
+  }
+
+  private _next(A: any[], idx: number[]): [true, number[]] | [false, null] {
+    if (A.length !== idx.length) throw new Error("missmatch length");
+    const nextVal = [...idx];
+
+    let l = nextVal.length - 1;
+    while (l > 0 && nextVal[l] >= A[l].length - 1) {
+      nextVal[l] = 0;
+      l--;
+    }
+
+    // end
+    if (l < 0) {
+      return [false, null];
+    }
+    const canInc = nextVal[l] < A[l].length - 1;
+    if (!canInc) return [false, null];
+
+    nextVal[l] = nextVal[l] + 1;
+    return [true, nextVal];
   }
 }
 

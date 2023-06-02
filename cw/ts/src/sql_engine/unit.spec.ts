@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { query } from "./sqlEngine";
+import { GetElementType, JoinType, query } from "./sqlEngine";
 
 describe("sql engine", () => {
   test("Basic SELECT tests", () => {
@@ -608,7 +608,7 @@ describe("sql engine", () => {
 
     // SELECT * FROM numbers GROUP BY parity
     expect(
-      query<typeof numbers>().select().from(numbers).groupBy(parity).execute()
+      query().select().from(numbers).groupBy(parity).execute()
     ).toStrictEqual([
       ["odd", [1, 3, 5, 7, 9]],
       ["even", [2, 4, 6, 8]],
@@ -818,6 +818,148 @@ describe("sql engine", () => {
     ]);
   });
 
+  test("Join tests", () => {
+    var teachers = [
+      {
+        teacherId: "1",
+        teacherName: "Peter",
+      },
+      {
+        teacherId: "2",
+        teacherName: "Anna",
+      },
+    ];
+
+    var students = [
+      {
+        studentName: "Michael",
+        tutor: "1",
+      },
+      {
+        studentName: "Rose",
+        tutor: "2",
+      },
+    ];
+
+    function teacherJoin(join: any) {
+      return join[0].teacherId === join[1].tutor;
+    }
+
+    function student(join: any) {
+      return {
+        studentName: join[1].studentName,
+        teacherName: join[0].teacherName,
+      };
+    }
+
+    // SELECT studentName, teacherName FROM teachers, students WHERE teachers.teacherId = students.tutor
+    expect(
+      query<
+        JoinType<
+          [GetElementType<typeof students>, GetElementType<typeof teachers>]
+        >
+      >()
+        .select(student)
+        .from(teachers, students)
+        .where(teacherJoin)
+        .execute()
+    ).toStrictEqual([
+      {
+        studentName: "Michael",
+        teacherName: "Peter",
+      },
+      {
+        studentName: "Rose",
+        teacherName: "Anna",
+      },
+    ]);
+
+    var numbers1 = [1, 2];
+    var numbers2 = [4, 5];
+
+    expect(
+      query<JoinType<[number[], number[]]>>()
+        .select()
+        .from(numbers1, numbers2)
+        .execute()
+    ).toStrictEqual([
+      [1, 4],
+      [1, 5],
+      [2, 4],
+      [2, 5],
+    ]);
+
+    function tutor1(join: any) {
+      return join[1].tutor === "1";
+    }
+
+    // SELECT studentName, teacherName FROM teachers, students WHERE teachers.teacherId = students.tutor AND tutor = 1
+    expect(
+      query<
+        JoinType<
+          [GetElementType<typeof students>, GetElementType<typeof teachers>]
+        >
+      >()
+        .select(student)
+        .from(teachers, students)
+        .where(teacherJoin)
+        .where(tutor1)
+        .execute()
+    ).toStrictEqual([
+      {
+        studentName: "Michael",
+        teacherName: "Peter",
+      },
+    ]);
+
+    expect(
+      query()
+        .where(teacherJoin)
+        .select(student)
+        .where(tutor1)
+        .from(teachers, students)
+        .execute()
+    ).toStrictEqual([
+      {
+        studentName: "Michael",
+        teacherName: "Peter",
+      },
+    ]);
+  });
+
+  test("Duplication exception tests", () => {
+    function checkError(fn: any, duplicate: any) {
+      try {
+        fn();
+        console.error("An error should be throw");
+        expect(true).toBe(false);
+      } catch (e) {
+        expect(e instanceof Error).toBe(true);
+        expect(e.message).toBe("Duplicate " + duplicate);
+      }
+    }
+
+    function id(value: any) {
+      return value;
+    }
+
+    checkError(function () {
+      query().select().select().execute();
+    }, "SELECT");
+    checkError(function () {
+      query().select().from([]).select().execute();
+    }, "SELECT");
+    checkError(function () {
+      query().select().from([]).from([]).execute();
+    }, "FROM");
+    checkError(function () {
+      query().select().from([]).orderBy(id).orderBy(id).execute();
+    }, "ORDERBY");
+    checkError(function () {
+      query().select().groupBy(id).from([]).groupBy(id).execute();
+    }, "GROUPBY");
+  });
+
   test("transform", () => {
     const _set = (obj: any, path: string[], value: any) => {
       var schema = obj;
@@ -996,5 +1138,49 @@ describe("sql engine", () => {
         ],
       ],
     ]);
+  });
+
+  test("source join", () => {
+    function next(A: any[], idx: number[]): [boolean, number[] | null] {
+      if (A.length !== idx.length) throw new Error("missmatch length");
+
+      const nextVal = [...idx];
+
+      let l = nextVal.length - 1;
+      while (l > 0 && nextVal[l] >= A[l].length - 1) {
+        nextVal[l] = 0;
+        l--;
+      }
+
+      // end
+      if (l < 0) {
+        return [false, null];
+      }
+      const canInc = nextVal[l] < A[l].length - 1;
+      if (!canInc) return [false, null];
+
+      nextVal[l] = nextVal[l] + 1;
+      return [true, nextVal];
+    }
+
+    const A = [
+      ["a1"], //
+      ["a2", "b2"], //
+      ["a3", "b3", "c3"], //
+    ];
+    let it = Array(A.length).fill(0);
+    let stop = false;
+    let c = 0;
+    let res: string[] = [];
+    console.log(A);
+    do {
+      res.push(`${it} -> ${it.map((itm, idx) => A[idx][itm])}`);
+      c++;
+      const [hasNext, nextVal] = next(A, it);
+      if (nextVal) it = nextVal;
+      stop = !hasNext;
+    } while (!stop);
+    console.log(res);
+    console.log(c);
   });
 });
