@@ -1,0 +1,20 @@
+fn   := _ '\[' _ arg=argList* _ '\]' _ exp=expression _
+
+argList   :=  v=variable _
+
+expression :=  left=expression _ op='\+' _ right=term
+               | left=expression _ op='-' _ right=term
+               | term
+
+term       := left=term _ op='\*' _ right=factor
+              | left=term _ op='\/' _ right=factor
+              | factor
+
+factor     := num
+              | variable
+              | '\(' _ exp=expression _ '\)'
+
+
+variable :='[a-z]+'
+num :='[0-9]+'
+_ :='\s*'

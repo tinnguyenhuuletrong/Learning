@@ -1,0 +1,22 @@
+import { describe, expect, test } from "@jest/globals";
+import { ASTKinds, parse } from "./smallAsmParser";
+
+describe("playground", () => {
+  test("test 3", () => {
+    let res = parse(" [ first second ] (first + second) / 2");
+    console.dir(res, { depth: 10 });
+    expect(res.errs.length).toBe(0);
+  });
+
+  test("test 2", () => {
+    let res = parse("[ a b ] a*a + b*b");
+    console.dir(res, { depth: 10 });
+    expect(res.errs.length).toBe(0);
+  });
+
+  test("test 1", () => {
+    let res = parse("[ a ] 10 + 20");
+    console.dir(res, { depth: 10 });
+    expect(res.errs.length).toBe(0);
+  });
+});
