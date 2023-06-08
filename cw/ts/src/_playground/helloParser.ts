@@ -116,12 +116,6 @@ export class Parser {
                 const mrk = this.mark();
                 reg.lastIndex = mrk.overallPos;
                 const res = this.tryConsume(reg);
-                console.log(
-                            mrk.overallPos, reg, this.input.slice(
-                              mrk.overallPos,
-                              this.input.length
-                            )
-                          );
                 if(cr) {
                     cr.record(mrk, res, {
                         kind: "RegexMatch",

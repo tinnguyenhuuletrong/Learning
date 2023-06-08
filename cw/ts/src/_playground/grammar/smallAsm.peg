@@ -1,6 +1,6 @@
 fn   := _ '\[' _ arg=argList* _ '\]' _ exp=expression _
 
-argList   :=  v=variable _
+argList   :=  name=variable _
 
 expression :=  left=expression _ op='\+' _ right=term
                | left=expression _ op='-' _ right=term
@@ -10,8 +10,8 @@ term       := left=term _ op='\*' _ right=factor
               | left=term _ op='\/' _ right=factor
               | factor
 
-factor     := num
-              | variable
+factor     := imm=num
+              | arg=variable
               | '\(' _ exp=expression _ '\)'
 
 

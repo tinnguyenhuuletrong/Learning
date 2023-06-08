@@ -3,7 +3,7 @@ import { ASTKinds, parse } from "./smallAsmParser";
 
 describe("playground", () => {
   test("test 3", () => {
-    let res = parse(" [ first second ] (first + second) / 2");
+    let res = parse(" [ x y ] ( x + y ) / 2");
     console.dir(res, { depth: 10 });
     expect(res.errs.length).toBe(0);
   });
