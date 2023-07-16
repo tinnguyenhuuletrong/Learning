@@ -13,7 +13,7 @@
     }
   },
   "module": {
-    "type": "es6"
+    "type": "commonjs"
   },
   "minify": false,
   "isModule": true

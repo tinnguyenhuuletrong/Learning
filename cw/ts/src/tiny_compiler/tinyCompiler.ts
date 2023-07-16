@@ -125,7 +125,70 @@ export class Compiler {
 
     return doOptimize(pass1Tree)[1];
   }
-  pass3(program) {}
+  pass3(pass2Tree: AnyNode) {
+    const doAsmGen = (inp: AnyNode): string[] => {
+      switch (inp.op) {
+        case "imm":
+          return [`IM ${inp.n}`];
+
+        case "arg":
+          return [`AR ${inp.n}`];
+
+        case "+": {
+          let res: string[] = [];
+          const a = doAsmGen(inp.a);
+          res = res.concat(a);
+          res.push("PU");
+          const b = doAsmGen(inp.b);
+          res = res.concat(b);
+          res.push("SW");
+          res.push("PO");
+          res.push("AD");
+          return res;
+        }
+        case "-": {
+          let res: string[] = [];
+          const a = doAsmGen(inp.a);
+          res = res.concat(a);
+          res.push("PU");
+          const b = doAsmGen(inp.b);
+          res = res.concat(b);
+          res.push("SW");
+          res.push("PO");
+          res.push("SU");
+          return res;
+        }
+        case "*": {
+          let res: string[] = [];
+          const a = doAsmGen(inp.a);
+          res = res.concat(a);
+          res.push("PU");
+          const b = doAsmGen(inp.b);
+          res = res.concat(b);
+          res.push("SW");
+          res.push("PO");
+          res.push("MU");
+          return res;
+        }
+        case "/": {
+          let res: string[] = [];
+          const a = doAsmGen(inp.a);
+          res = res.concat(a);
+          res.push("PU");
+          const b = doAsmGen(inp.b);
+          res = res.concat(b);
+          res.push("SW");
+          res.push("PO");
+          res.push("DI");
+          return res;
+        }
+
+        default:
+          return [];
+      }
+    };
+    return doAsmGen(pass2Tree);
+  }
 
   compile(program: string) {
     return this.pass3(this.pass2(this.pass1(program)));

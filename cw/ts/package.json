@@ -6,7 +6,8 @@
   "scripts": {
     "build": "swc ./src -d dist",
     "test": "jest",
-    "ts-run": "SWCRC=true node -r @swc-node/register"
+    "ts-run": "SWCRC=true node -r @swc-node/register",
+    "bundle:tiny_compiler": "npx esbuild --format=cjs --platform=node --bundle ./src/tiny_compiler/tinyCompiler.ts > dist/tinyCompilerBundle.js"
   },
   "author": "",
   "license": "ISC",
