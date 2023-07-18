@@ -1,4 +1,5 @@
 {
+  "name": "rs_wasm_bind",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/libs/rs-wasm-bind/src",
@@ -16,11 +17,9 @@
           "mv -f ./pkg/ ../../_artifacts/assets/rs-wasm/"
         ],
         "parallel": false,
-        "cwd": "packages/libs/rs-wasm-bind",
-        "outputPath": [
-          "packages/_artifacts/assets/rs-wasm"
-        ]
-      }
+        "cwd": "packages/libs/rs-wasm-bind"
+      },
+      "outputs": ["{workspaceRoot}/packages/_artifacts/assets/rs-wasm"]
     },
     "lint": {
       "executor": "@nxrs/cargo:clippy",

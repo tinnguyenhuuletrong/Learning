@@ -1,25 +1,21 @@
 {
+  "name": "app-cli-play",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/app/cli-play/src",
   "projectType": "application",
-  "implicitDependencies": [
-    "rs_node_bind",
-    "_artifacts"
-  ],
+  "implicitDependencies": ["rs_node_bind", "_artifacts"],
   "targets": {
     "build": {
-      "executor": "@nrwl/node:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nrwl/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/app/cli-play",
         "main": "packages/app/cli-play/src/main.ts",
         "tsConfig": "packages/app/cli-play/tsconfig.app.json",
-        "assets": [
-          "packages/app/cli-play/src/assets"
-        ],
-        "webpackConfig": "packages/app/cli-play/webpack.config.js"
+        "assets": ["packages/app/cli-play/src/assets"],
+        "webpackConfig": "packages/app/cli-play/webpack.config.js",
+        "compiler": "tsc",
+        "target": "node"
       },
       "configurations": {
         "production": {
@@ -36,30 +32,22 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/node:node",
-      "dependsOn": [
-        "^build"
-      ],
+      "executor": "@nx/js:node",
+      "dependsOn": ["^build"],
       "options": {
         "buildTarget": "app-cli-play:build"
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/app/cli-play/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/app/cli-play/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/app/cli-play"
-      ],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/app/cli-play"],
       "options": {
         "jestConfig": "packages/app/cli-play/jest.config.ts",
         "passWithNoTests": true
