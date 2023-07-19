@@ -1,4 +1,5 @@
 use anyhow::Result;
+use draw::*;
 use rapier2d::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -30,7 +31,7 @@ fn setup_physics_scene(bodies: RigidBodySet, colliders: ColliderSet) -> PhysicsS
     let impulse_joint_set = ImpulseJointSet::new();
     let multibody_joint_set = MultibodyJointSet::new();
     let integration_parameters = IntegrationParameters::default();
-    let gravity = vector![2.0, -9.81];
+    let gravity = vector![5.0, -9.81];
     let query_pipeline = QueryPipeline::new();
 
     PhysicsState {
@@ -135,6 +136,9 @@ fn main() {
     let physics_hooks = ();
     let event_handler: EventLog = EventLog {};
 
+    // create a canvas to draw on
+    let mut canvas = Canvas::new(100, 10);
+
     /* Run the game loop, stepping the simulation once per frame. */
     for it in 0..200 {
         scene = scene.step(&physics_hooks, &event_handler);
@@ -142,10 +146,13 @@ fn main() {
         let ball_body = scene.get_bodies().get(ball_body_handle).unwrap();
         let trans = ball_body.translation();
         println!("It {} : Ball pos: {} - {}", it, trans.x, trans.y);
+
+        do_render(&scene, &mut canvas);
     }
 
-    play_with_collider_shape(&scene, ground_collider_handle, ball_collider_handle);
     play_with_serialize(&scene).unwrap();
+    render::save(&canvas, "tmp/display.svg", SvgRenderer::new()).expect("Failed to save");
+    println!("Screen rendered into tmp/display.svg")
 }
 
 fn play_with_serialize(scene: &PhysicsState) -> Result<()> {
@@ -161,38 +168,45 @@ fn play_with_serialize(scene: &PhysicsState) -> Result<()> {
     );
 
     println!(
-        "\tDeterminism test: sha256(snapshot) == 24c947042ce714bc6d1125114535abbd876b8edf9e5613cf17d5379bb39d9579 : {}",
-        "24c947042ce714bc6d1125114535abbd876b8edf9e5613cf17d5379bb39d9579" == hash
+        "\tDeterminism test: sha256(snapshot) == 27c364d5b8dc962ed24f988b0063c3bf718ca00009f4f7c96e7538dee9843084 : {}",
+        "27c364d5b8dc962ed24f988b0063c3bf718ca00009f4f7c96e7538dee9843084" == hash
     );
 
     Ok(())
 }
 
-fn play_with_collider_shape(
-    scene: &PhysicsState,
-    ground_collider_handle: ColliderHandle,
-    ball_collider_handle: ColliderHandle,
-) {
-    // // Shape -> 2D points
-    let tmp = &scene
-        .get_colliders()
-        .get(ground_collider_handle)
-        .unwrap()
-        .shape()
-        .as_cuboid()
-        .unwrap()
-        .to_polyline();
+fn do_render(scene: &PhysicsState, canvas: &mut Canvas) {
+    let colliders = scene.get_colliders();
 
-    println!("Ground Poly: {:#?}", tmp);
+    for it in colliders.iter() {
+        let shape_type = it.1.shape().shape_type();
 
-    let tmp = &scene
-        .get_colliders()
-        .get(ball_collider_handle)
-        .unwrap()
-        .shape()
-        .as_ball()
-        .unwrap()
-        .to_polyline(10);
+        match shape_type {
+            ShapeType::Ball => {
+                let ball = it.1.shape().as_ball().unwrap();
+                let pos = it.1.position().translation;
+                let draw_shape = Drawing::new()
+                    .with_shape(draw::Shape::Circle {
+                        radius: ball.radius.ceil() as u32,
+                    })
+                    .with_xy(pos.x, -pos.y)
+                    .with_style(Style::filled(Color::black()));
+                canvas.display_list.add(draw_shape);
+            }
+            ShapeType::Cuboid => {
+                let cuboid = it.1.shape().as_cuboid().unwrap();
+                let pos = it.1.position().translation;
+                let draw_shape = Drawing::new()
+                    .with_shape(draw::Shape::Rectangle {
+                        width: (cuboid.half_extents.x * 2.0).ceil() as u32,
+                        height: (cuboid.half_extents.y * 2.0).ceil() as u32,
+                    })
+                    .with_xy(pos.x, -pos.y)
+                    .with_style(Style::filled(Color::black()));
 
-    println!("Ball Poly: {:#?}", tmp);
+                canvas.display_list.add(draw_shape);
+            }
+            _ => {}
+        };
+    }
 }

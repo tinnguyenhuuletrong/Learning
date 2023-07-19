@@ -8,6 +8,7 @@ version = "0.1.0"
 [dependencies]
 anyhow = {version = "*"}
 bincode = {version = "*"}
+draw = {version = "*"}
 rapier2d = {version = "*", features = ["enhanced-determinism", "serde-serialize"]}
 serde = {version = "*"}
 sha256 = {version = "*"}
