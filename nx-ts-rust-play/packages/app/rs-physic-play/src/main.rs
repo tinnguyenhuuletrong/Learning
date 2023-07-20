@@ -137,7 +137,6 @@ fn main() {
     let event_handler: EventLog = EventLog {};
 
     // create a canvas to draw on
-    let mut canvas = Canvas::new(100, 10);
 
     /* Run the game loop, stepping the simulation once per frame. */
     for it in 0..200 {
@@ -147,11 +146,18 @@ fn main() {
         let trans = ball_body.translation();
         println!("It {} : Ball pos: {} - {}", it, trans.x, trans.y);
 
+        let mut canvas = Canvas::new(100, 10);
         do_render(&scene, &mut canvas);
+        render::save(
+            &canvas,
+            format!("tmp/frame/frame_{:04}.svg", it).as_str(),
+            SvgRenderer::new(),
+        )
+        .expect("Failed to save");
     }
 
     play_with_serialize(&scene).unwrap();
-    render::save(&canvas, "tmp/display.svg", SvgRenderer::new()).expect("Failed to save");
+
     println!("Screen rendered into tmp/display.svg")
 }
 
