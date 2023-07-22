@@ -1,0 +1,18 @@
+[package]
+edition = "2021"
+name = "nannou_play"
+resover = "2"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+nannou = {version = "*"}
+
+[[example]]
+name = "simple_sketch"
+path = "src/simple_sketch/main.rs"
+
+[[example]]
+name = "particle"
+path = "src/particle/main.rs"
