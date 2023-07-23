@@ -1,11 +1,15 @@
 use nannou::noise::NoiseFn;
 use nannou::prelude::*;
-use nannou::rand::*;
 
 const CAPTURE: bool = false;
+const NUM_PARTICLES: u32 = 2000;
 
 fn main() {
-    nannou::app(model).update(update).run();
+    nannou::app(new_model)
+        .update(update)
+        // .backends(wgpu::Backends::METAL)
+        .loop_mode(LoopMode::RefreshSync)
+        .run();
 }
 
 struct Particle {
@@ -32,8 +36,8 @@ struct Model {
     particles: Vec<Particle>,
 }
 
-fn model(app: &App) -> Model {
-    app.new_window().size(600, 600).view(view).build().unwrap();
+fn new_model(app: &App) -> Model {
+    app.new_window().size(600, 600).view(draw).build().unwrap();
 
     let r = app.window_rect().right() as f32;
     let l = app.window_rect().left() as f32;
@@ -45,7 +49,7 @@ fn model(app: &App) -> Model {
     let h = t - b;
 
     let mut p = vec![];
-    for _i in 0..2000 {
+    for _i in 0..NUM_PARTICLES {
         let x = random_f32() * w + r;
         let y = random_f32() * h + b;
         p.push(Particle::new(x, y));
@@ -56,7 +60,7 @@ fn model(app: &App) -> Model {
 
 fn update(app: &App, model: &mut Model, _update: Update) {
     let noise = nannou::noise::Perlin::new();
-    let t = app.elapsed_frames() as f64 / 100.;
+    let t: f64 = app.elapsed_frames() as f64 / 100.;
     for i in 0..model.particles.len() {
         let p = &mut model.particles[i];
         let x = noise.get([
@@ -75,7 +79,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
     }
 }
 
-fn view(app: &App, model: &Model, frame: Frame) {
+fn draw(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
     let fps = 1.0 / app.duration.since_prev_update.as_secs_f32();
     let t = (app.elapsed_frames() as f32) * 0.02;
