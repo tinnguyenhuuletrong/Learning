@@ -53,3 +53,11 @@ var ascNames = names.sorted() {s1,s2 in
   s1 < s2
 }
 print("ascNames:", ascNames)
+
+
+// Closure expression
+let toUpperFunc = {(s: String) -> String in 
+  return s.uppercased()
+}
+var transformUpper = names.map(toUpperFunc)
+print("names transformUpper:", transformUpper)
