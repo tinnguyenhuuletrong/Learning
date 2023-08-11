@@ -49,7 +49,7 @@ print("descNames:", descNames)
 
 
 // Closure expression syntax - trailing
-var ascNames = names.sorted() {s1,s2 in 
+var ascNames = names.sorted {s1,s2 in 
   s1 < s2
 }
 print("ascNames:", ascNames)

@@ -77,8 +77,8 @@ for thing in things {
     switch thing {
     case 999 as Int:
         print("Int === 999")
-    case 0 as Double:
-        print("Double === 0")
+    case let x as Double where x < 10:
+        print("Double and < 10")
     case let someInt as Int:
         print("an integer value of \(someInt)")
     case let someDouble as Double where someDouble > 0:
