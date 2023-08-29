@@ -2,6 +2,10 @@
   "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
   "python.pythonPath": "/usr/local/bin/python3",
-  "python.linting.pylintArgs": ["--extension-pkg-whitelist=cv2"],
-  "jupyter.jupyterServerType": "local"
+  "python.linting.pylintArgs": ["--generate-members"],
+  "jupyter.jupyterServerType": "local",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8"
+  },
+  "python.formatting.provider": "none"
 }
