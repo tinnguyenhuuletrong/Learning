@@ -34,7 +34,6 @@ google-pasta==0.2.0
 grpcio==1.43.0
 h5py==3.6.0
 hijri-converter==2.2.4
-holidays==0.18
 idna==3.3
 importlib-metadata==4.10.0
 ipykernel==6.6.0
@@ -80,6 +79,7 @@ plotly==5.13.0
 plumbum==1.8.1
 ply==3.11
 prompt-toolkit==3.0.24
+holidays==0.24
 prophet==1.1.2
 protobuf==3.19.1
 ptyprocess==0.7.0
