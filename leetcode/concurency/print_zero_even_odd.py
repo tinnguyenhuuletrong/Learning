@@ -14,50 +14,53 @@ class ZeroEvenOdd:
 	# printNumber(x) outputs "x", where x is an integer.
     def zero(self, printNumber: 'Callable[[int], None]') -> None:
         while True:
-            with self.con:                
-                self.con.wait_for(lambda : self.step == 0)
-                if self.i > self.n:
-                    break
-                printNumber(0)
-                if self.i %2 == 0:
-                    self.step = 2
-                else:
-                    self.step = 1
-                self.con.notify_all()
-                
-        
+            with self.con:       
+                try:         
+                    self.con.wait_for(lambda : self.step == 0)
+                    if self.i > self.n:
+                        break
+                    printNumber(0)
+                    if self.i %2 == 0:
+                        self.step = 2
+                    else:
+                        self.step = 1
+                finally:
+                    self.con.notify_all()
         
         
     def odd(self, printNumber: 'Callable[[int], None]') -> None:
         while True:
             with self.con:
-                self.con.wait_for(lambda : (self.step == 1 or self.i > self.n))
-                if self.i > self.n:
+                try:
+                    self.con.wait_for(lambda : (self.step == 1 or self.i > self.n))
+                    if self.i > self.n:
+                        self.step = 0
+                        break
+                    printNumber(self.i)
                     self.step = 0
+                    self.i+=1
+                finally:
                     self.con.notify_all()
-                    break
-                printNumber(self.i)
-                self.step = 0
-                self.i+=1
-                self.con.notify_all()
+                
 
          
     def even(self, printNumber: 'Callable[[int], None]') -> None:
         while True:
             with self.con:
-                self.con.wait_for(lambda : (self.step == 2 or self.i > self.n))
-                if self.i > self.n:
+                try:
+                    self.con.wait_for(lambda : (self.step == 2 or self.i > self.n))
+                    if self.i > self.n:
+                        self.step = 0
+                        break
+                    printNumber(self.i)
                     self.step = 0
+                    self.i+=1
+                finally:
                     self.con.notify_all()
-                    break
-                printNumber(self.i)
-                self.step = 0
-                self.i+=1
-                self.con.notify_all()
             
 
 
-n = 5
+n = 50
 ins = ZeroEvenOdd(n)
 
 
