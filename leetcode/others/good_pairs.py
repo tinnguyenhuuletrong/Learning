@@ -1,6 +1,6 @@
 # https://leetcode.com/problems/number-of-good-pairs/
 
-# nCr = n! / (r! * (n-r)! 
+# nCr = n! / (r! * (n-r)!
 
 from typing import List
 import itertools
@@ -12,7 +12,7 @@ class Solution:
         if val <=0:
             return 1
         return functools.reduce(lambda a,b: a*b, range(1, val+1))
-    
+
     def nC2(self, val: int) -> int:
         tmp1 = self.factorial(val)
         return round (tmp1 / (2 * self.factorial(val - 2)))
@@ -27,7 +27,7 @@ class Solution:
                 total += val
 
         return total
-    
+
 a = Solution()
 nums = [1,2,3,1,1,3]
 print(nums, a.numIdenticalPairs(nums))
