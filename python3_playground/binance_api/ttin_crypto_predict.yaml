@@ -1,0 +1,15 @@
+---
+name: TTin Bot - Run Crypto market report
+command: sh {{script_base_path}}/export_html.sh && open {{script_base_path}}/notebook.html
+tags:
+  - ttin_playground
+  - ttin_bot
+description: Run notebook pull & predict price
+arguments:
+  - name: script_base_path
+    description: path to script
+    default_value: /Users/admin/Documents/projects/_research/Learning/python3_playground/binance_api
+source_url: ""
+author: ttin
+author_url: ""
+shells: []
