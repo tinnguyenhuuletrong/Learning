@@ -1,0 +1,31 @@
+---
+model: vertexai/gemini-1.5-pro-preview
+config:
+  temperature: 0
+  topP: 0.4
+  topK: 32
+  maxOutputTokens: 1024
+  safetySettings:
+    - category: HARM_CATEGORY_HATE_SPEECH
+      threshold: BLOCK_NONE
+    - category: HARM_CATEGORY_DANGEROUS_CONTENT
+      threshold: BLOCK_NONE
+    - category: HARM_CATEGORY_SEXUALLY_EXPLICIT
+      threshold: BLOCK_NONE
+    - category: HARM_CATEGORY_HARASSMENT
+      threshold: BLOCK_NONE
+input:
+  schema:
+    photoUrl: string
+    objectName: string
+output:
+  format: json
+  schema:
+    des: string, short description. maximum 30 characters
+    hasObject: boolean
+---
+
+- Describe this image in a detailed paragraph:
+- is picture contain text '{{objectName}}'. Answer into 'hasObject'
+
+{{media url=photoUrl contentType='image/jpeg'}}
