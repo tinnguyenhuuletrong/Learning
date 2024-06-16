@@ -335,6 +335,7 @@ dependencies = [
  "deno_ast",
  "deno_core",
  "neon",
+ "once_cell",
  "tokio",
 ]
 
