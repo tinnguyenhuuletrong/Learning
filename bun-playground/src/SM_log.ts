@@ -1,6 +1,22 @@
 import "reflect-metadata";
 
 const SymbolAllSteps = Symbol("state:allSteps");
+const SymbolActiveAction = Symbol("state:runtime:activeAction");
+
+const attachProxy = (
+  target: any,
+  doTrackChange: (ins: any, prop: string | Symbol, value: any) => void,
+  ins?: any
+) => {
+  return new Proxy(target, {
+    set: function set(obj, prop, value) {
+      doTrackChange(ins, prop, value);
+      return Reflect.set(obj, prop, value);
+    },
+  });
+};
+
+const JSONClone = (v: any) => JSON.parse(JSON.stringify(v));
 
 function Action() {
   return function (
@@ -14,32 +30,65 @@ function Action() {
 
     const originalFunc: Function = descriptor.value;
     descriptor.value = async function () {
-      const logs = (this as any).logs ?? [];
-      const state = (this as any).state ?? {};
+      const logs = Reflect.get(this, "logs") ?? [];
       const logItm = {
         _t: new Date(),
-        action: "call",
+        action: "action_call",
         method: propertyKey,
-        prevState: structuredClone(state),
-        newState: undefined,
+        children: [],
       };
       logs.push(logItm);
+
+      // set call context
+      Reflect.set(this, SymbolActiveAction, logItm);
       const res = originalFunc.apply(this, arguments);
-      logItm.newState = structuredClone((this as any).state ?? {});
+
+      // reset it to undefined
+      Reflect.set(this, SymbolActiveAction, undefined);
       return res;
     };
   };
 }
 
-class StateMachine {
-  state = {
-    step: "",
-    count: 0,
-  };
-  logs = [];
+function State() {
+  return function (target: any, propertyKey: string) {
+    let val: any;
+    const doTrackChange = (ins: any, prop: string | Symbol, value: any) => {
+      // get parent call context
+      const _currentAction = Reflect.get(ins, SymbolActiveAction);
+      const logs = _currentAction?.children ?? [];
+      logs.push({
+        _t: new Date(),
+        action: "state_change",
+        prop,
+        value,
+      });
+    };
 
-  constructor(initVal: number) {
-    this.state.count = initVal;
+    Object.defineProperty(target, propertyKey, {
+      get() {
+        return val;
+      },
+      set(v) {
+        if (val !== undefined) throw new Error("Readonly property");
+        val = attachProxy(v, doTrackChange, this);
+      },
+    });
+  };
+}
+
+type StateData = {
+  step: string;
+  count: number;
+};
+
+class StateMachine {
+  @State()
+  private readonly state: StateData;
+  private readonly logs = [];
+
+  constructor(initVal: StateData) {
+    this.state = initVal;
   }
 
   @Action()
@@ -55,10 +104,18 @@ class StateMachine {
     this.state.count -= decWith;
     return true;
   }
+
+  toJSON() {
+    const { state, logs } = this;
+    return { state: JSONClone(state), logs: structuredClone(logs) };
+  }
 }
 
 async function main() {
-  const ins = new StateMachine(0);
+  const ins = new StateMachine({
+    step: "",
+    count: 0,
+  });
 
   console.log("metadata:");
   const allSteps = Reflect.getMetadata(SymbolAllSteps, ins);
@@ -68,37 +125,53 @@ async function main() {
   await ins.step1(5);
   await ins.step2(3);
 
-  console.log(ins.logs);
+  console.dir(ins.toJSON(), { depth: 10 });
 }
 main();
 
 // metadata:
 //          allSteps: [ "step1", "step2" ]
 // start
-// [
-//   {
-//     _t: 2024-06-15T06:06:47.800Z,
-//     action: "call",
-//     method: "step1",
-//     prevState: {
-//       step: "",
-//       count: 0,
-//     },
-//     newState: {
-//       step: "step_1",
-//       count: 5,
-//     },
-//   }, {
-//     _t: 2024-06-15T06:06:47.800Z,
-//     action: "call",
-//     method: "step2",
-//     prevState: {
-//       step: "step_1",
-//       count: 5,
-//     },
-//     newState: {
-//       step: "step_2",
-//       count: 2,
-//     },
-//   }
-// ]
+// {
+//   state: {
+//     step: "step_2",
+//     count: 2,
+//   },
+//   logs: [
+//     {
+//       _t: 2024-06-16T03:03:52.014Z,
+//       action: "action_call",
+//       method: "step1",
+//       children: [
+//         {
+//           _t: 2024-06-16T03:03:52.014Z,
+//           action: "state_change",
+//           prop: "step",
+//           value: "step_1",
+//         }, {
+//           _t: 2024-06-16T03:03:52.014Z,
+//           action: "state_change",
+//           prop: "count",
+//           value: 5,
+//         }
+//       ],
+//     }, {
+//       _t: 2024-06-16T03:03:52.014Z,
+//       action: "action_call",
+//       method: "step2",
+//       children: [
+//         {
+//           _t: 2024-06-16T03:03:52.014Z,
+//           action: "state_change",
+//           prop: "step",
+//           value: "step_2",
+//         }, {
+//           _t: 2024-06-16T03:03:52.014Z,
+//           action: "state_change",
+//           prop: "count",
+//           value: 2,
+//         }
+//       ],
+//     }
+//   ],
+// }
