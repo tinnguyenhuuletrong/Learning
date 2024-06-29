@@ -1,3 +1,4 @@
+// https://www.codewars.com/kata/56dbf59b0a10feb08c000227
 package kata
 
 import (
