@@ -1,0 +1,1 @@
+duckdb -cmd 'create table employee_attendance as select * from "data_1.csv"'
