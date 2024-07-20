@@ -33,7 +33,7 @@ type DurableStateSystemEntry =
   | {
       type: "timer";
       resumeId: string;
-      at: number;
+      resumeAfter: number;
     }
   | {
       type: "event";
@@ -43,10 +43,16 @@ type DurableStateSystemEntry =
     };
 
 class DurableState {
-  step!: EStep;
+  private step!: EStep;
   private state: Record<string, any> = {};
   private cache: Record<string, any> = {};
   private system: Record<string, DurableStateSystemEntry> = {};
+
+  constructor(defaultStep?: EStep) {
+    if (defaultStep) {
+      this.step = defaultStep;
+    }
+  }
 
   getResume(resumeId: string) {
     const tmp = Object.values(this.system).find(
@@ -179,7 +185,7 @@ class DurableState {
     const tmp = this.system[cacheKey];
     if (shouldUseCache && tmp) {
       if (tmp?.type !== "timer") throw new Error("invalid system record");
-      if (Date.now() >= tmp.at) {
+      if (Date.now() >= tmp.resumeAfter) {
         return { canContinue: true, needSave: false, activeStep: this.step };
       }
     }
@@ -187,8 +193,8 @@ class DurableState {
     const resumeAt = Date.now() + timeoutMs;
     this.system[cacheKey] = {
       type: "timer",
-      resumeId: this._genResumeId(key),
-      at: resumeAt,
+      resumeId: this.genResumeId(key),
+      resumeAfter: resumeAt,
     };
     return {
       canContinue: false,
@@ -209,7 +215,7 @@ class DurableState {
     responsePayload: any;
   } {
     const cacheKey = `${this.step}:event:${key}`;
-    const resumeId = this._genResumeId(key);
+    const resumeId = this.genResumeId(key);
 
     const tmp = this.system[cacheKey];
     if (tmp) {
@@ -243,7 +249,7 @@ class DurableState {
     };
   }
 
-  _genResumeId(key: string) {
+  private genResumeId(key: string) {
     return `${key}-${Date.now().toString(32)}`;
   }
 
@@ -252,17 +258,18 @@ class DurableState {
     return { step, state, cache, system };
   }
 
-  fromJSON(data: any) {
-    this.step = data.step;
-    this.state = data.state;
-    this.cache = data.cache;
-    this.system = data.system;
+  static fromJSON(data: any) {
+    const ins = new DurableState();
+    ins.step = data.step;
+    ins.state = data.state;
+    ins.cache = data.cache;
+    ins.system = data.system;
+    return ins;
   }
 }
 
 async function main() {
-  let ins = new DurableState();
-  ins.step = EStep.step_begin;
+  let ins = new DurableState(EStep.step_begin);
 
   let preData: any = null;
   let finalValue: any = null;
@@ -276,8 +283,7 @@ async function main() {
     {
       if (preData) {
         // force re-construct
-        ins = new DurableState();
-        ins.fromJSON(preData);
+        ins = DurableState.fromJSON(preData);
       }
       const res = await runtimeRun(ins, maxIter);
 
@@ -290,6 +296,7 @@ async function main() {
         await runtimeHandleContinueTrigger(ins, res.resumeTrigger);
     }
   }
+  console.log("finalData:", ins.toJSON());
   console.log("finalValue:", finalValue);
 }
 main();
@@ -314,7 +321,7 @@ async function runtimeRun(ins: DurableState, maxIter: number) {
     console.log("not done");
     console.log("resumeTrigger:", resumeTrigger);
     saveData = ins.toJSON();
-    console.log("saved data:", saveData);
+    // console.log("saved data:", saveData);
   } else {
     finalValue = it.value;
   }
