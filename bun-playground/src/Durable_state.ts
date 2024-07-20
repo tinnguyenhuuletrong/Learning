@@ -3,12 +3,18 @@ enum EStep {
   step_begin = "step_begin",
   step_1 = "step_1",
   step_2 = "step_2",
+  step_3 = "step_3",
   step_end = "step_end",
 }
-type ContinueTrigger = {
-  type: "time";
-  resumeAt: number;
-};
+type ContinueTrigger =
+  | {
+      type: "time";
+      resumeAt: number;
+    }
+  | {
+      type: "event";
+      resumeId: string;
+    };
 type DurableStateIterator = {
   canContinue: boolean;
   needSave: boolean;
@@ -23,11 +29,45 @@ type DurableStateReturn = {
 type ExeOpt = {
   ignoreCache: boolean;
 };
+type DurableStateSystemEntry =
+  | {
+      type: "timer";
+      resumeId: string;
+      at: number;
+    }
+  | {
+      type: "event";
+      resumeId: string;
+      requestPayload?: any;
+      responsePayload?: any;
+    };
 
 class DurableState {
   step!: EStep;
   private state: Record<string, any> = {};
   private cache: Record<string, any> = {};
+  private system: Record<string, DurableStateSystemEntry> = {};
+
+  getResume(resumeId: string) {
+    const tmp = Object.values(this.system).find(
+      (itm) => itm.resumeId === resumeId
+    );
+    if (!tmp) return null;
+    return {
+      ...tmp,
+    } as DurableStateSystemEntry;
+  }
+
+  resolveResume(resumeId: string, payload: any) {
+    const tmp = Object.values(this.system).find(
+      (itm) => itm.resumeId === resumeId
+    );
+
+    if (!tmp) throw new Error("resumeId not exists. Something wrong ?");
+    if (tmp.type !== "event")
+      throw new Error("resumeId entry missmatched. exptected type event");
+    tmp.responsePayload = payload;
+  }
 
   async *exec(
     opt?: ExeOpt
@@ -81,8 +121,22 @@ class DurableState {
             };
           }
           console.log("\t", "work done");
-          this.step = EStep.step_end;
+          this.step = EStep.step_3;
           yield { canContinue: true, needSave: true, activeStep: this.step };
+          break;
+        }
+        case EStep.step_3: {
+          // Waiting for event
+
+          const { it, responsePayload } = this.pasueAndResumeOnEvent(
+            "ask_for_confirm",
+            `count=${this.state["count"]} is it ok  y / n ?`
+          );
+          yield it;
+          console.log("after event. got data", responsePayload);
+          this.state["isApproved"] = responsePayload === "y";
+
+          this.step = EStep.step_end;
           break;
         }
         default: {
@@ -122,15 +176,20 @@ class DurableState {
     const shouldUseCache = opt ? !opt.ignoreCache : true;
     const cacheKey = `${this.step}:scheduler:${key}`;
 
-    if (shouldUseCache) {
-      const tmp = this.cache[cacheKey];
-      if (Date.now() >= tmp) {
+    const tmp = this.system[cacheKey];
+    if (shouldUseCache && tmp) {
+      if (tmp?.type !== "timer") throw new Error("invalid system record");
+      if (Date.now() >= tmp.at) {
         return { canContinue: true, needSave: false, activeStep: this.step };
       }
     }
 
     const resumeAt = Date.now() + timeoutMs;
-    this.cache[cacheKey] = resumeAt;
+    this.system[cacheKey] = {
+      type: "timer",
+      resumeId: this._genResumeId(key),
+      at: resumeAt,
+    };
     return {
       canContinue: false,
       needSave: false,
@@ -142,14 +201,62 @@ class DurableState {
     };
   }
 
+  private pasueAndResumeOnEvent(
+    key: string,
+    requestPayload: any
+  ): {
+    it: DurableStateIterator;
+    responsePayload: any;
+  } {
+    const cacheKey = `${this.step}:event:${key}`;
+    const resumeId = this._genResumeId(key);
+
+    const tmp = this.system[cacheKey];
+    if (tmp) {
+      if (tmp?.type !== "event") throw new Error("invalid system record");
+      if (tmp?.responsePayload) {
+        return {
+          it: { canContinue: true, needSave: false, activeStep: this.step },
+          responsePayload: tmp.responsePayload,
+        };
+      }
+    }
+
+    this.system[cacheKey] = {
+      type: "event",
+      resumeId,
+      requestPayload,
+      responsePayload: null,
+    };
+
+    return {
+      it: {
+        canContinue: false,
+        needSave: false,
+        activeStep: this.step,
+        resumeTrigger: {
+          type: "event",
+          resumeId,
+        },
+      },
+      responsePayload: null,
+    };
+  }
+
+  _genResumeId(key: string) {
+    return `${key}-${Date.now().toString(32)}`;
+  }
+
   toJSON() {
-    return { step: this.step, state: this.state, cache: this.cache };
+    const { step, state, cache, system } = this;
+    return { step, state, cache, system };
   }
 
   fromJSON(data: any) {
     this.step = data.step;
     this.state = data.state;
     this.cache = data.cache;
+    this.system = data.system;
   }
 }
 
@@ -180,7 +287,7 @@ async function main() {
 
       // handle resume
       if (res.resumeTrigger)
-        await runtimeHandleContinueTrigger(res.resumeTrigger);
+        await runtimeHandleContinueTrigger(ins, res.resumeTrigger);
     }
   }
   console.log("finalValue:", finalValue);
@@ -215,13 +322,26 @@ async function runtimeRun(ins: DurableState, maxIter: number) {
   return { saveData, finalValue, resumeTrigger };
 }
 
-async function runtimeHandleContinueTrigger(resumeTrigger: ContinueTrigger) {
+async function runtimeHandleContinueTrigger(
+  ins: DurableState,
+  resumeTrigger: ContinueTrigger
+) {
   if (resumeTrigger.type === "time") {
     const needToSleep = resumeTrigger.resumeAt - Date.now();
     console.log(`Handle resumeTrigger -> sleep ${needToSleep} `);
     await setTimeout(needToSleep);
     return;
-  }
+  } else if (resumeTrigger.type === "event") {
+    // Simulate event waiting by asking input
 
-  throw new Error(`unknown resume trigger ${resumeTrigger.type}`);
+    const entry = ins.getResume(resumeTrigger.resumeId);
+    if (entry?.type !== "event") throw new Error(`invalid type ${entry?.type}`);
+    const ans = prompt(
+      `Question for - "${resumeTrigger.resumeId} - data "${entry.requestPayload}"`
+    );
+    ins.resolveResume(resumeTrigger.resumeId, ans);
+    return;
+  } else {
+    throw new Error(`unknown resume trigger ${resumeTrigger}`);
+  }
 }
