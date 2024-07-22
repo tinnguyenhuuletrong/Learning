@@ -2,6 +2,7 @@ import { setTimeout } from "timers/promises";
 import {
   DurableState,
   type ContinueTrigger,
+  type DurableStateOpt,
   type ExeOpt,
   type StepHandler,
   type StepIt,
@@ -17,8 +18,13 @@ type StateShape = Partial<{
   count: number;
   isApproved: boolean;
 }>;
+type ExtAuditLogType = "custom_msg_1" | "custom_msg_2";
 
-class DurableStateDemo extends DurableState<EStep, StateShape> {
+class DurableStateDemo extends DurableState<
+  EStep,
+  StateShape,
+  ExtAuditLogType
+> {
   // Type Safeguard & Auto register
   private _static(key: EStep): StepHandler<EStep> {
     return this[key];
@@ -29,16 +35,22 @@ class DurableStateDemo extends DurableState<EStep, StateShape> {
     );
   }
 
-  constructor(defaultStep: EStep) {
-    super(defaultStep);
+  constructor(defaultStep: EStep, opt?: DurableStateOpt) {
+    super(defaultStep, opt);
     this._collectAndRegisterSteps();
   }
 
-  async *step_begin(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_begin(opt?: ExeOpt): StepIt<EStep> {
+    this.addLog({
+      type: "custom_msg_1",
+      values: {
+        customVal: 1,
+      },
+    });
     return { nextStep: EStep.step_1 };
   }
 
-  async *step_1(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_1(opt?: ExeOpt): StepIt<EStep> {
     // wait for 500ms
     yield this.pauseAndResumeAfterMs("wait_for_500ms", 500);
     console.log("after 500ms since start");
@@ -52,7 +64,7 @@ class DurableStateDemo extends DurableState<EStep, StateShape> {
     return { nextStep: EStep.step_2 };
   }
 
-  async *step_2(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_2(opt?: ExeOpt): StepIt<EStep> {
     // Do something
     // Move to step end
 
@@ -81,7 +93,7 @@ class DurableStateDemo extends DurableState<EStep, StateShape> {
     return { nextStep: EStep.step_3 };
   }
 
-  async *step_3(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_3(opt?: ExeOpt): StepIt<EStep> {
     const { it, responsePayload } = this.pasueAndResumeOnEvent(
       "ask_for_confirm",
       `count=${this.state["count"]} is it ok  y / n ?`
@@ -93,14 +105,21 @@ class DurableStateDemo extends DurableState<EStep, StateShape> {
     return { nextStep: EStep.step_end };
   }
 
-  async *step_end(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_end(opt?: ExeOpt): StepIt<EStep> {
     // nothing to do
+    this.addLog({
+      type: "custom_msg_2",
+      values: {
+        customVal: 2,
+      },
+    });
     return { nextStep: null };
   }
 }
 
 async function main() {
-  let ins = new DurableStateDemo(EStep.step_begin);
+  const opt: DurableStateOpt = { withAuditLog: true };
+  let ins = new DurableStateDemo(EStep.step_begin, opt);
 
   let preData: any = null;
   let finalValue: any = null;
@@ -114,10 +133,12 @@ async function main() {
     {
       if (preData) {
         // force re-construct
-        ins = DurableStateDemo.fromJSON<EStep, DurableStateDemo>(
-          DurableStateDemo,
-          preData
-        );
+        ins = DurableState.fromJSON<
+          EStep,
+          StateShape,
+          ExtAuditLogType,
+          DurableStateDemo
+        >(DurableStateDemo, preData, opt);
       }
       const res = await runtimeRun(ins, maxIter);
 
@@ -135,7 +156,7 @@ async function main() {
 }
 main();
 
-async function runtimeRun(ins: DurableState<EStep>, maxIter: number) {
+async function runtimeRun(ins: DurableStateDemo, maxIter: number) {
   let it;
   let resumeTrigger;
   let saveData = null;
@@ -169,13 +190,17 @@ async function runtimeRun(ins: DurableState<EStep>, maxIter: number) {
 }
 
 async function runtimeHandleContinueTrigger(
-  ins: DurableState<EStep>,
+  ins: DurableStateDemo,
   resumeTrigger: ContinueTrigger
 ) {
   if (resumeTrigger.type === "time") {
+    const entry = ins.getResume(resumeTrigger.resumeId);
+    if (entry?.type !== "timer") throw new Error(`invalid type ${entry?.type}`);
     const needToSleep = resumeTrigger.resumeAt - Date.now();
     console.log(`Handle resumeTrigger -> sleep ${needToSleep} `);
     await setTimeout(needToSleep);
+
+    ins.resolveResume(resumeTrigger.resumeId);
     return;
   } else if (resumeTrigger.type === "event") {
     // Simulate event waiting by asking input
