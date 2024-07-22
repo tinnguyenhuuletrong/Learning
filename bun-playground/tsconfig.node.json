@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/src",
+    "lib": ["es2020", "DOM"],
+    "module": "commonjs",
+    "target": "es2019",
+    "declaration": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}

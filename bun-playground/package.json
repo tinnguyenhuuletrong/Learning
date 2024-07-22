@@ -2,6 +2,9 @@
   "name": "bun-playground",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "build": "bunx tsc -p tsconfig.node.json"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "reflect-metadata": "^0.2.2"
