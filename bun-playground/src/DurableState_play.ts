@@ -137,28 +137,29 @@ async function main() {
 main();
 
 async function runtimeRun(ins: DurableState<EStep>, maxIter: number) {
-  let work = ins.exec();
-  let it = await work.next();
+  let it;
   let resumeTrigger;
   let saveData = null;
   let finalValue = null;
-  while (!it.done) {
+  const work = ins.exec();
+  while (maxIter > 0) {
     it = await work.next();
     console.log("it:", --maxIter, "->", it);
     if (!it.done && it.value.canContinue === false) {
       // pause and register resume
       resumeTrigger = it.value.resumeTrigger;
       break;
+    } else if (it.done) {
+      finalValue = it.value;
+      break;
     }
-    if (maxIter <= 0) break;
   }
+  if (!it) throw new Error("OoO");
   if (!it.done) {
     console.log("not done");
     console.log("resumeTrigger:", resumeTrigger);
     saveData = ins.toJSON();
     console.log("saved data:", saveData);
-  } else {
-    finalValue = it.value;
   }
 
   return { saveData, finalValue, resumeTrigger };
