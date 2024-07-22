@@ -1,6 +1,6 @@
-export class DurableState<EStep> {
-  protected step!: EStep;
-  protected state: Record<string, any> = {};
+export class DurableState<EStep, StateShape = Record<string, any>> {
+  private step!: EStep;
+  protected state: StateShape = {} as StateShape;
   private cache: Record<string, any> = {};
   private system: Record<string, DurableStateSystemEntry> = {};
   protected stepHandler = new Map<EStep, StepHandler<EStep>>();
@@ -9,6 +9,10 @@ export class DurableState<EStep> {
     if (defaultStep) {
       this.step = defaultStep;
     }
+  }
+
+  get currentStep() {
+    return this.step;
   }
 
   getResume(resumeId: string) {
@@ -34,23 +38,30 @@ export class DurableState<EStep> {
 
   async *exec(
     opt?: ExeOpt
-  ): AsyncIterator<DurableStateIterator<EStep>, DurableStateReturn> {
+  ): AsyncGenerator<
+    DurableStateIterator<EStep>,
+    DurableStateReturn<StateShape> | null
+  > {
     let hasNext = true;
     const step = this.step;
     const handler = this.stepHandler.get(step);
     if (!handler) throw new Error(`missing stepHandler for ${step}`);
-    let res = handler(this, opt);
+    let res = handler(opt);
 
     while (hasNext) {
       const it = await res.next();
       if (it.done) {
         if (it.value.nextStep === null) break;
+
+        // move to next step
+        // TODO: add log
         const step = it.value.nextStep;
+        this.step = step;
         const handler = this.stepHandler.get(step);
         if (!handler) throw new Error(`missing stepHandler for ${step}`);
-        res = handler(this, opt);
+        res = handler(opt);
       } else {
-        yield it.value;
+        yield it.value as DurableStateIterator<EStep>;
       }
     }
 
@@ -188,9 +199,9 @@ export type DurableStateIterator<T> = {
   activeStep: T;
   resumeTrigger?: ContinueTrigger;
 };
-export type DurableStateReturn = {
+export type DurableStateReturn<StateShape> = {
   isEnd: boolean;
-  finalState: Record<string, any>;
+  finalState: StateShape;
 };
 export type ExeOpt = {
   ignoreCache: boolean;
@@ -212,7 +223,4 @@ export type StepIt<EStep> = AsyncIterator<
   DurableStateIterator<EStep>,
   { nextStep: EStep | null }
 >;
-export type StepHandler<EStep> = (
-  ins: DurableState<EStep>,
-  opt?: ExeOpt
-) => StepIt<EStep>;
+export type StepHandler<EStep> = (opt?: ExeOpt) => StepIt<EStep>;

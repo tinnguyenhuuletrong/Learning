@@ -13,8 +13,12 @@ enum EStep {
   step_3 = "step_3",
   step_end = "step_end",
 }
+type StateShape = Partial<{
+  count: number;
+  isApproved: boolean;
+}>;
 
-class DurableStateDemo extends DurableState<EStep> {
+class DurableStateDemo extends DurableState<EStep, StateShape> {
   // Type Safeguard & Auto register
   private _static(key: EStep): StepHandler<EStep> {
     return this[key];
@@ -30,13 +34,11 @@ class DurableStateDemo extends DurableState<EStep> {
     this._collectAndRegisterSteps();
   }
 
-  async *step_begin(ins: DurableState<EStep>, opt?: ExeOpt): StepIt<EStep> {
-    this.step = EStep.step_1;
-    yield { canContinue: true, needSave: true, activeStep: this.step };
-    return { nextStep: this.step };
+  async *step_begin(opt?: ExeOpt): StepIt<EStep> {
+    return { nextStep: EStep.step_1 };
   }
 
-  async *step_1(ins: DurableState<EStep>, opt?: ExeOpt): StepIt<EStep> {
+  async *step_1(opt?: ExeOpt): StepIt<EStep> {
     // wait for 500ms
     yield this.pauseAndResumeAfterMs("wait_for_500ms", 500);
     console.log("after 500ms since start");
@@ -45,13 +47,12 @@ class DurableStateDemo extends DurableState<EStep> {
     console.log("after 1500ms since start. move next");
 
     // Move to step 2
-    this.step = EStep.step_2;
-    yield { canContinue: true, needSave: true, activeStep: this.step };
+    yield { canContinue: true, needSave: true, activeStep: this.currentStep };
 
-    return { nextStep: this.step };
+    return { nextStep: EStep.step_2 };
   }
 
-  async *step_2(ins: DurableState<EStep>, opt?: ExeOpt): StepIt<EStep> {
+  async *step_2(opt?: ExeOpt): StepIt<EStep> {
     // Do something
     // Move to step end
 
@@ -67,34 +68,32 @@ class DurableStateDemo extends DurableState<EStep> {
         opt
       );
 
-      this.state["count"] = count;
+      this.state.count = count;
       yield {
         canContinue: true,
         needSave: false,
-        activeStep: this.step,
+        activeStep: this.currentStep,
       };
     }
     console.log("\t", "work done");
-    this.step = EStep.step_3;
-    yield { canContinue: true, needSave: true, activeStep: this.step };
+    yield { canContinue: true, needSave: true, activeStep: this.currentStep };
 
-    return { nextStep: this.step };
+    return { nextStep: EStep.step_3 };
   }
 
-  async *step_3(ins: DurableState<EStep>, opt?: ExeOpt): StepIt<EStep> {
+  async *step_3(opt?: ExeOpt): StepIt<EStep> {
     const { it, responsePayload } = this.pasueAndResumeOnEvent(
       "ask_for_confirm",
       `count=${this.state["count"]} is it ok  y / n ?`
     );
     yield it;
     console.log("after event. got data", responsePayload);
-    this.state["isApproved"] = responsePayload === "y";
+    this.state.isApproved = responsePayload === "y";
 
-    this.step = EStep.step_end;
-    return { nextStep: this.step };
+    return { nextStep: EStep.step_end };
   }
 
-  async *step_end(ins: DurableState<EStep>, opt?: ExeOpt): StepIt<EStep> {
+  async *step_end(opt?: ExeOpt): StepIt<EStep> {
     // nothing to do
     return { nextStep: null };
   }
@@ -154,12 +153,16 @@ async function runtimeRun(ins: DurableState<EStep>, maxIter: number) {
       break;
     }
   }
-  if (!it) throw new Error("OoO");
+  if (!it) throw new Error("something wrong here. it should not be reached");
   if (!it.done) {
     console.log("not done");
     console.log("resumeTrigger:", resumeTrigger);
     saveData = ins.toJSON();
-    console.log("saved data:", saveData);
+    // console.log("saved data:", saveData);
+
+    // terminate not done work
+    // prevent memory leak
+    work.return(null);
   }
 
   return { saveData, finalValue, resumeTrigger };
