@@ -4,11 +4,11 @@ export class DurableState<
   ExtAuditLogType = "others"
 > {
   private step!: EStep;
-  protected state: StateShape = {} as StateShape;
   private cache: Record<string, any> = {};
   private system: Record<string, DurableStateSystemEntry> = {};
-  protected stepHandler = new Map<EStep, StepHandler<EStep>>();
   private logs: AuditLogEntry<ExtAuditLogType>[] = [];
+  protected state: StateShape = {} as StateShape;
+  protected stepHandler = new Map<EStep, StepHandler<EStep>>();
 
   constructor(defaultStep?: EStep, private opt?: DurableStateOpt) {
     if (defaultStep) {
@@ -95,11 +95,7 @@ export class DurableState<
     return { isEnd: true, finalState: this.state };
   }
 
-  protected async withDurableAction(
-    key: string,
-    action: () => any,
-    opt?: ExeOpt
-  ) {
+  protected async withAction(key: string, action: () => any, opt?: ExeOpt) {
     const shouldUseCache = opt ? !opt.ignoreCache : true;
     const cacheKey = `${this.step}:${key}`;
     if (shouldUseCache) {
@@ -120,7 +116,7 @@ export class DurableState<
     return newVal;
   }
 
-  protected pauseAndResumeAfterMs(
+  protected waitForMs(
     key: string,
     timeoutMs: number,
     opt?: ExeOpt
@@ -131,7 +127,7 @@ export class DurableState<
     if (tmp) {
       if (tmp?.type !== "timer") throw new Error("invalid system record");
       if (tmp.isDone) {
-        return { canContinue: true, needSave: false, activeStep: this.step };
+        return { canContinue: true, activeStep: this.step };
       }
     }
 
@@ -152,7 +148,6 @@ export class DurableState<
     });
     return {
       canContinue: false,
-      needSave: false,
       activeStep: this.step,
       resumeTrigger: {
         resumeId,
@@ -162,7 +157,7 @@ export class DurableState<
     };
   }
 
-  protected pasueAndResumeOnEvent(
+  protected waitForEvent(
     key: string,
     requestPayload: any
   ): {
@@ -177,7 +172,7 @@ export class DurableState<
       if (tmp.type !== "event") throw new Error("invalid system record");
       if (tmp.isDone) {
         return {
-          it: { canContinue: true, needSave: false, activeStep: this.step },
+          it: { canContinue: true, activeStep: this.step },
           responsePayload: tmp.responsePayload,
         };
       }
@@ -200,7 +195,6 @@ export class DurableState<
     return {
       it: {
         canContinue: false,
-        needSave: false,
         activeStep: this.step,
         resumeTrigger: {
           type: "event",
@@ -232,7 +226,7 @@ export class DurableState<
     ShapeState,
     ExtAuditLogType,
     T extends DurableState<EStep, ShapeState, ExtAuditLogType>
-  >(type: { new (...args: any): T }, data: any, opt?: DurableStateOpt): T {
+  >(type: Constructor<T>, data: any, opt?: DurableStateOpt): T {
     const ins = new type(undefined, opt);
     ins.step = data.step;
     ins.state = data.state;
@@ -255,7 +249,6 @@ export type ContinueTrigger =
     };
 export type DurableStateIterator<T> = {
   canContinue: boolean;
-  needSave: boolean;
   activeStep: T;
   resumeTrigger?: ContinueTrigger;
 };
@@ -302,3 +295,5 @@ type AuditLogEntry<S> = {
 export type DurableStateOpt = {
   withAuditLog: boolean;
 };
+
+type Constructor<T> = new (...args: any[]) => T;

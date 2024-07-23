@@ -52,14 +52,14 @@ class DurableStateDemo extends DurableState<
 
   private async *step_1(opt?: ExeOpt): StepIt<EStep> {
     // wait for 500ms
-    yield this.pauseAndResumeAfterMs("wait_for_500ms", 500);
+    yield this.waitForMs("wait_for_500ms", 500);
     console.log("after 500ms since start");
 
-    yield this.pauseAndResumeAfterMs("wait_for_1000ms", 1000);
+    yield this.waitForMs("wait_for_1000ms", 1000);
     console.log("after 1500ms since start. move next");
 
     // Move to step 2
-    yield { canContinue: true, needSave: true, activeStep: this.currentStep };
+    yield { canContinue: true, activeStep: this.currentStep };
 
     return { nextStep: EStep.step_2 };
   }
@@ -70,7 +70,7 @@ class DurableStateDemo extends DurableState<
 
     let count = 1;
     for (let i = 0; i < 3; i++) {
-      count += await this.withDurableAction(
+      count += await this.withAction(
         `${i}`,
         () => {
           const res = (100 + i) ** (2 + i);
@@ -83,19 +83,18 @@ class DurableStateDemo extends DurableState<
       this.state.count = count;
       yield {
         canContinue: true,
-        needSave: false,
         activeStep: this.currentStep,
       };
     }
     console.log("\t", "work done");
-    yield { canContinue: true, needSave: true, activeStep: this.currentStep };
+    yield { canContinue: true, activeStep: this.currentStep };
 
     return { nextStep: EStep.step_3 };
   }
 
   private async *step_3(opt?: ExeOpt): StepIt<EStep> {
-    const { it, responsePayload } = this.pasueAndResumeOnEvent(
-      "ask_for_confirm",
+    const { it, responsePayload } = this.waitForEvent(
+      "ask_confirm",
       `count=${this.state["count"]} is it ok  y / n ?`
     );
     yield it;
@@ -165,10 +164,12 @@ async function runtimeRun(ins: DurableStateDemo, maxIter: number) {
   while (maxIter > 0) {
     it = await work.next();
     console.log("it:", --maxIter, "->", it);
-    if (!it.done && it.value.canContinue === false) {
-      // pause and register resume
-      resumeTrigger = it.value.resumeTrigger;
-      break;
+    if (!it.done) {
+      if (it.value.canContinue === false) {
+        // pause and register resume
+        resumeTrigger = it.value.resumeTrigger;
+        break;
+      }
     } else if (it.done) {
       finalValue = it.value;
       break;
@@ -180,7 +181,6 @@ async function runtimeRun(ins: DurableStateDemo, maxIter: number) {
     console.log("resumeTrigger:", resumeTrigger);
     saveData = ins.toJSON();
     // console.log("saved data:", saveData);
-
     // terminate not done work
     // prevent memory leak
     work.return(null);
