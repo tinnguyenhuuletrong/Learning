@@ -6,7 +6,7 @@ export class DurableState<
   private step!: EStep;
   private cache: Record<string, any> = {};
   private system: Record<string, DurableStateSystemEntry> = {};
-  private logs: AuditLogEntry<ExtAuditLogType>[] = [];
+  private logs: AuditLogEntry<ExtAuditLogType, EStep>[] = [];
   protected state: StateShape = {} as StateShape;
   protected stepHandler = new Map<EStep, StepHandler<EStep>>();
 
@@ -56,9 +56,7 @@ export class DurableState<
     });
   }
 
-  async *exec(
-    opt?: ExeOpt
-  ): AsyncGenerator<
+  async *exec(): AsyncGenerator<
     DurableStateIterator<EStep>,
     DurableStateReturn<StateShape> | null
   > {
@@ -66,7 +64,7 @@ export class DurableState<
     const step = this.step;
     const handler = this.stepHandler.get(step);
     if (!handler) throw new Error(`missing stepHandler for ${step}`);
-    let res = handler(opt);
+    let res = handler();
 
     while (hasNext) {
       const it = await res.next();
@@ -86,7 +84,7 @@ export class DurableState<
         this.step = step;
         const handler = this.stepHandler.get(step);
         if (!handler) throw new Error(`missing stepHandler for ${step}`);
-        res = handler(opt);
+        res = handler();
       } else {
         yield it.value as DurableStateIterator<EStep>;
       }
@@ -95,17 +93,51 @@ export class DurableState<
     return { isEnd: true, finalState: this.state };
   }
 
-  protected async withAction(key: string, action: () => any, opt?: ExeOpt) {
+  protected async withAction<TRes = any>(
+    key: string,
+    action: () => Promise<any>,
+    opt?: ExeOpt
+  ): Promise<{
+    it?: DurableStateIterator<EStep>;
+    value: TRes | undefined;
+  }> {
     const shouldUseCache = opt ? !opt.ignoreCache : true;
+    const maxRetry = opt?.maxRetry ? opt.maxRetry : 0;
     const cacheKey = `${this.step}:${key}`;
     if (shouldUseCache) {
       const tmp = this.cache[cacheKey];
       if (tmp) {
-        return tmp;
+        return {
+          it: undefined,
+          value: tmp,
+        };
       }
     }
 
-    const newVal = action();
+    let newVal;
+    try {
+      newVal = await action();
+    } catch (error: any) {
+      const res = this.canRetry(key, maxRetry);
+      if (res.counter > 0) {
+        this.addLog({
+          type: "action_error",
+          values: {
+            key,
+            errorMessage: error?.message,
+            counter: res.counter,
+            maxRetry,
+          },
+        });
+        return {
+          it: this.waitForMs(res.retryKey, 1000).it,
+          value: undefined,
+        };
+      }
+
+      throw error;
+    }
+
     this.cache[cacheKey] = newVal;
     this.addLog({
       type: "cache",
@@ -113,21 +145,29 @@ export class DurableState<
         key: cacheKey,
       },
     });
-    return newVal;
+    return {
+      it: { canContinue: true, activeStep: this.step },
+      value: newVal,
+    };
   }
 
   protected waitForMs(
     key: string,
-    timeoutMs: number,
-    opt?: ExeOpt
-  ): DurableStateIterator<EStep> {
-    const cacheKey = `${this.step}:scheduler:${key}`;
+    timeoutMs: number
+  ): {
+    it?: DurableStateIterator<EStep>;
+    value: number;
+  } {
+    const cacheKey = `${this.step}:timer:${key}`;
 
     const tmp = this.system[cacheKey];
     if (tmp) {
       if (tmp?.type !== "timer") throw new Error("invalid system record");
       if (tmp.isDone) {
-        return { canContinue: true, activeStep: this.step };
+        return {
+          it: undefined,
+          value: tmp.resumeAfter,
+        };
       }
     }
 
@@ -147,22 +187,25 @@ export class DurableState<
       },
     });
     return {
-      canContinue: false,
-      activeStep: this.step,
-      resumeTrigger: {
-        resumeId,
-        type: "time",
-        resumeAt,
+      it: {
+        canContinue: false,
+        activeStep: this.step,
+        resumeTrigger: {
+          resumeId,
+          type: "time",
+          resumeAt,
+        },
       },
+      value: resumeAt,
     };
   }
 
-  protected waitForEvent(
+  protected waitForEvent<TRes = any>(
     key: string,
     requestPayload: any
   ): {
-    it: DurableStateIterator<EStep>;
-    responsePayload: any;
+    it?: DurableStateIterator<EStep>;
+    value: TRes | undefined;
   } {
     const cacheKey = `${this.step}:event:${key}`;
     const resumeId = this.genResumeId(key);
@@ -172,8 +215,8 @@ export class DurableState<
       if (tmp.type !== "event") throw new Error("invalid system record");
       if (tmp.isDone) {
         return {
-          it: { canContinue: true, activeStep: this.step },
-          responsePayload: tmp.responsePayload,
+          it: undefined,
+          value: tmp.responsePayload,
         };
       }
     }
@@ -201,7 +244,7 @@ export class DurableState<
           resumeId,
         },
       },
-      responsePayload: null,
+      value: undefined,
     };
   }
 
@@ -209,11 +252,28 @@ export class DurableState<
     return `${key}-${Date.now().toString(32)}`;
   }
 
-  protected addLog(itm: AuditLogEntry<ExtAuditLogType>) {
+  protected addLog(itm: AuditLogEntry<ExtAuditLogType, EStep>) {
     if (this.opt?.withAuditLog) {
-      itm.at = Date.now();
+      itm._at = Date.now();
+      itm._step = this.step;
       this.logs.push(itm);
     }
+  }
+
+  private canRetry(
+    key: string,
+    maxRetry: number
+  ): {
+    counter: number;
+    retryKey: string;
+  } {
+    const cacheKey = `${this.step}:__retry__:${key}`;
+    const val = this.cache[cacheKey] ?? maxRetry;
+    this.cache[cacheKey] = val - 1;
+    return {
+      counter: this.cache[cacheKey],
+      retryKey: cacheKey,
+    };
   }
 
   toJSON() {
@@ -257,7 +317,8 @@ export type DurableStateReturn<StateShape> = {
   finalState: StateShape;
 };
 export type ExeOpt = {
-  ignoreCache: boolean;
+  ignoreCache?: boolean;
+  maxRetry?: number;
 };
 export type TimerSystemEntry = {
   type: "timer";
@@ -279,18 +340,20 @@ export type StepIt<EStep> = AsyncIterator<
   DurableStateIterator<EStep>,
   { nextStep: EStep | null }
 >;
-export type StepHandler<EStep> = (opt?: ExeOpt) => StepIt<EStep>;
+export type StepHandler<EStep> = () => StepIt<EStep>;
 
-type AuditLogEntry<S> = {
+type AuditLogEntry<S, EStep> = {
   type:
     | "init"
     | "cache"
     | "transition"
     | "interrupt_begin"
     | "interrupt_end"
+    | "action_error"
     | S;
   values: Record<string, any>;
-  at?: number;
+  _at?: number;
+  _step?: EStep;
 };
 export type DurableStateOpt = {
   withAuditLog: boolean;

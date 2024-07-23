@@ -3,7 +3,6 @@ import {
   DurableState,
   type ContinueTrigger,
   type DurableStateOpt,
-  type ExeOpt,
   type StepHandler,
   type StepIt,
 } from "./DurableState";
@@ -12,6 +11,7 @@ enum EStep {
   step_1 = "step_1",
   step_2 = "step_2",
   step_3 = "step_3",
+  step_4 = "step_4",
   step_end = "step_end",
 }
 type StateShape = Partial<{
@@ -19,6 +19,8 @@ type StateShape = Partial<{
   isApproved: boolean;
 }>;
 type ExtAuditLogType = "custom_msg_1" | "custom_msg_2";
+
+let simulate_failed = true;
 
 class DurableStateDemo extends DurableState<
   EStep,
@@ -40,7 +42,7 @@ class DurableStateDemo extends DurableState<
     this._collectAndRegisterSteps();
   }
 
-  private async *step_begin(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_begin(): StepIt<EStep> {
     this.addLog({
       type: "custom_msg_1",
       values: {
@@ -50,12 +52,14 @@ class DurableStateDemo extends DurableState<
     return { nextStep: EStep.step_1 };
   }
 
-  private async *step_1(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_1(): StepIt<EStep> {
     // wait for 500ms
-    yield this.waitForMs("wait_for_500ms", 500);
+    let it = this.waitForMs("wait_for_500ms", 500).it;
+    if (it) yield it;
     console.log("after 500ms since start");
 
-    yield this.waitForMs("wait_for_1000ms", 1000);
+    it = this.waitForMs("wait_for_1000ms", 1000).it;
+    if (it) yield it;
     console.log("after 1500ms since start. move next");
 
     // Move to step 2
@@ -64,47 +68,66 @@ class DurableStateDemo extends DurableState<
     return { nextStep: EStep.step_2 };
   }
 
-  private async *step_2(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_2(): StepIt<EStep> {
     // Do something
     // Move to step end
 
     let count = 1;
-    for (let i = 0; i < 3; i++) {
-      count += await this.withAction(
-        `${i}`,
-        () => {
-          const res = (100 + i) ** (2 + i);
-          console.log("\t", "Do heavy calculation", i, "->", res);
-          return res;
-        },
-        opt
-      );
+    for (let i = 0; i < 10; i++) {
+      const { it, value } = await this.withAction(`${i}`, async () => {
+        const res = (100 + i) ** (2 + i);
+        console.log("\t", "Do heavy calculation", i, "->", res);
+        return res;
+      });
+      if (it) yield it;
 
-      this.state.count = count;
-      yield {
-        canContinue: true,
-        activeStep: this.currentStep,
-      };
+      count += value;
     }
+
+    this.state.count = count;
+    yield {
+      canContinue: true,
+      activeStep: this.currentStep,
+    };
     console.log("\t", "work done");
     yield { canContinue: true, activeStep: this.currentStep };
 
     return { nextStep: EStep.step_3 };
   }
 
-  private async *step_3(opt?: ExeOpt): StepIt<EStep> {
-    const { it, responsePayload } = this.waitForEvent(
+  private async *step_3(): StepIt<EStep> {
+    const { it, value } = this.waitForEvent(
       "ask_confirm",
       `count=${this.state["count"]} is it ok  y / n ?`
     );
-    yield it;
-    console.log("after event. got data", responsePayload);
-    this.state.isApproved = responsePayload === "y";
+    if (it) yield it;
+    console.log("after event. got data", value);
+    this.state.isApproved = value === "y";
+
+    return { nextStep: EStep.step_4 };
+  }
+
+  private async *step_4(): StepIt<EStep> {
+    const res = await this.withAction(
+      "with_retry",
+      async () => {
+        if (simulate_failed) {
+          simulate_failed = false;
+          throw new Error("Some thing wrong");
+        }
+        return "ok";
+      },
+      {
+        ignoreCache: false,
+        maxRetry: 5,
+      }
+    );
+    if (res.it) yield res.it;
 
     return { nextStep: EStep.step_end };
   }
 
-  private async *step_end(opt?: ExeOpt): StepIt<EStep> {
+  private async *step_end(): StepIt<EStep> {
     // nothing to do
     this.addLog({
       type: "custom_msg_2",
@@ -139,7 +162,14 @@ async function main() {
           DurableStateDemo
         >(DurableStateDemo, preData, opt);
       }
-      const res = await runtimeRun(ins, maxIter);
+      let res;
+      try {
+        res = await runtimeRun(ins, maxIter);
+      } catch (error) {
+        console.error("RuntimeError:", error);
+        console.log("bye!");
+        process.exit(1);
+      }
 
       // save to db somehow
       preData = res.saveData;
@@ -148,6 +178,8 @@ async function main() {
       // handle resume
       if (res.resumeTrigger)
         await runtimeHandleContinueTrigger(ins, res.resumeTrigger);
+
+      if (count >= 10) break;
     }
   }
   console.log("finalData:", ins.toJSON());
