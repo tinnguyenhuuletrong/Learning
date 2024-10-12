@@ -1,16 +1,18 @@
+import { parseArgs } from "util";
 import path from "path";
 import fs from "fs";
 import * as automerge from "@automerge/automerge/next";
 
-const DIR = path.join(__dirname, "../tmp/git_like_repo");
-
 type StorageIndex = {
   docPath: string;
   sizeInBytes: number;
+  heads: automerge.Heads;
 };
 
 type Ctx = {
+  storageRootPath: string;
   doc?: DocumentEntity;
+  _lastStorageIndex?: StorageIndex;
 };
 
 type DocShape = { value: string };
@@ -52,9 +54,26 @@ class DocumentEntity {
 }
 
 async function startup() {
+  const { values } = parseArgs({
+    allowPositionals: true,
+    args: Bun.argv,
+    options: {
+      peerName: {
+        type: "string",
+        default: "peer_1",
+      },
+    },
+  });
+
+  console.info("Context:", { values });
+  const { peerName = "default" } = values;
+
+  const DIR = path.join(__dirname, "../tmp/", peerName);
   await _ensureDir(DIR);
 
-  let ctx: Ctx = {};
+  let ctx: Ctx = {
+    storageRootPath: DIR,
+  };
   await _loadFromDir(ctx);
   if (!ctx.doc) {
     ctx.doc = new DocumentEntity();
@@ -130,20 +149,32 @@ async function cliFrontEnd(ctx: Ctx) {
       case "/save":
       case "/sync": {
         await _syncToDir(ctx);
-        console.log("Dump and Flush to dir:", DIR);
+        console.log("Dump and Flush to dir:", ctx.storageRootPath);
         break;
       }
 
+      case "/test":
+        {
+          if (!ctx._lastStorageIndex) throw new Error("OoO");
+          const tmp = automerge.diff(
+            ctx.doc.amDoc,
+            ctx._lastStorageIndex?.heads,
+            ctx.doc.heads
+          );
+          console.dir(tmp, { depth: 10 });
+        }
+        break;
+
       case "/load": {
         await _loadFromDir(ctx);
-        console.log("loaded from dir:", DIR);
+        console.log("loaded from dir:", ctx.storageRootPath);
         break;
       }
 
       case "/snapshot": {
         ctx.doc.snapshot();
         await _syncToDir(ctx);
-        console.log("Snapshot and Flush to dir:", DIR);
+        console.log("Snapshot and Flush to dir:", ctx.storageRootPath);
         break;
       }
       default: {
@@ -167,23 +198,26 @@ async function _saveDoc(doc: DocumentEntity) {
 
 async function _syncToDir(ctx: Ctx) {
   if (!ctx.doc) return;
-  const dbPath = path.join(DIR, "db.json");
+  const dbPath = path.join(ctx.storageRootPath, "db.json");
 
   const docName = "data";
-  const docSavePath = path.join(DIR, `${docName}.bin`);
+  const docSavePath = path.join(ctx.storageRootPath, `${docName}.bin`);
 
   const data = await _saveDoc(ctx.doc);
 
   const indexObj: StorageIndex = {
     docPath: docSavePath,
     sizeInBytes: data.length,
+    heads: ctx.doc.heads,
   };
   fs.writeFileSync(docSavePath, data);
   fs.writeFileSync(dbPath, JSON.stringify(indexObj, null, " "));
+
+  ctx._lastStorageIndex = indexObj;
 }
 
 async function _loadFromDir(ctx: Ctx) {
-  const dbPath = path.join(DIR, "db.json");
+  const dbPath = path.join(ctx.storageRootPath, "db.json");
 
   if (!fs.existsSync(dbPath)) return false;
 
@@ -193,6 +227,7 @@ async function _loadFromDir(ctx: Ctx) {
     );
     const data = fs.readFileSync(indexObj.docPath);
     ctx.doc = new DocumentEntity(new Uint8Array(data));
+    ctx._lastStorageIndex = indexObj;
     return true;
   } catch (error) {
     console.error(error);
