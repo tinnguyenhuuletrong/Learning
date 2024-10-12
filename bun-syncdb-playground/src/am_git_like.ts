@@ -93,7 +93,7 @@ async function cliFrontEnd(ctx: Ctx) {
   /set <val>           set document value to <val>
   /snapshot            sync to storage. Truncate all histories
   /load                load from storage
-  /test                test
+  /diff                diff with last saved
   `;
   console.log(`🤟 Wellcome to git-like document. powered by automerge 🤟`);
   console.log(usage);
@@ -105,7 +105,7 @@ async function cliFrontEnd(ctx: Ctx) {
     | "/sync"
     | "/save"
     | "/load"
-    | "/test"
+    | "/diff"
     | "/snapshot";
 
   for await (const line of console) {
@@ -153,9 +153,12 @@ async function cliFrontEnd(ctx: Ctx) {
         break;
       }
 
-      case "/test":
+      case "/diff":
         {
-          if (!ctx._lastStorageIndex) throw new Error("OoO");
+          if (!ctx._lastStorageIndex) {
+            console.error(`_lastStorageIndex not exists`);
+            break;
+          }
           const tmp = automerge.diff(
             ctx.doc.amDoc,
             ctx._lastStorageIndex?.heads,
