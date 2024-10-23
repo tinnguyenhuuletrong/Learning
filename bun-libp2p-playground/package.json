@@ -1,0 +1,20 @@
+{
+  "name": "bun-libp2p",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@chainsafe/libp2p-noise": "^16.0.0",
+    "@chainsafe/libp2p-yamux": "^7.0.1",
+    "@libp2p/identify": "^3.0.8",
+    "@libp2p/mdns": "^11.0.8",
+    "@libp2p/tcp": "^10.0.9",
+    "@libp2p/websockets": "^9.0.8",
+    "libp2p": "^2.1.9"
+  }
+}
