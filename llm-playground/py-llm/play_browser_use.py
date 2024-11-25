@@ -1,3 +1,5 @@
+# https://github.com/gregpr07/browser-use
+
 from langchain_openai import ChatOpenAI
 from browser_use import Agent
 from browser_use.browser.service import Browser
